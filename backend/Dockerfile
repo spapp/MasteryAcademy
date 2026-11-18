@@ -8,4 +8,4 @@ WORKDIR /srv/backend
 ENV CONTENT_DIR=/srv/content/build
 EXPOSE 8000
 # Migrate, load course content, then serve. Hosts such as Render set PORT.
-CMD ["sh", "-c", "alembic upgrade head && python -m app.seed && uvicorn app.main:app --host 0.0.0.0 --port ${PORT:-8000}"]
+CMD ["sh", "-c", "python -m alembic upgrade head && python -m app.seed && uvicorn app.main:app --host 0.0.0.0 --port ${PORT:-8000}"]
