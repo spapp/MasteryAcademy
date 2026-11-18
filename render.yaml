@@ -1,12 +1,15 @@
 # Render blueprint: one web service built from backend/Dockerfile and one PostgreSQL database.
 # In Render: New > Blueprint, pick this repository. Plans and region can be changed in the dashboard.
+# Both plans are free: the web service sleeps after 15 idle minutes (the first request then takes about a minute),
+# and a free Render Postgres database expires 30 days after creation. Courses are reloaded from the image on every start,
+# so an expired database loses only the AI usage counts. Move both to paid plans for an always-on server.
 services:
   - type: web
     name: mastery-academy-api
     runtime: docker
     dockerfilePath: ./backend/Dockerfile
     dockerContext: .
-    plan: starter
+    plan: free
     region: singapore
     healthCheckPath: /v1/health
     envVars:
@@ -30,6 +33,6 @@ services:
 
 databases:
   - name: mastery-academy-db
-    plan: basic-256mb
+    plan: free
     region: singapore
     postgresMajorVersion: "16"
