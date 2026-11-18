@@ -1,0 +1,1758 @@
+<!doctype html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"></head><body>
+<title>Redis, Kafka and RabbitMQ Field Guide</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;600&family=Space+Grotesk:wght@500;700&display=swap">
+<style>
+/* Layout: one reading column per tab; each tab climbs three levels (hours, days, weeks) with one live model to play with. */
+:root{
+  --bg:#F2F5F8; --surface:#FFFFFF; --ink:#15202B; --muted:#586574; --line:#D3DAE2; --code-bg:#E9EEF3;
+  --redis:#B8322A; --kafka:#17688A; --rabbit:#8A2C78; --docker:#3B52B4; --zk:#4A7318; --good:#1E7B4C; --warn:#9A6200;
+  --accent:var(--redis);
+  --display:"Space Grotesk","Avenir Next","Segoe UI",sans-serif;
+  --body:"Inter","Helvetica Neue",Arial,sans-serif;
+  --mono:"JetBrains Mono",ui-monospace,Menlo,Consolas,monospace;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    color-scheme:dark;
+    --bg:#0F151C; --surface:#18212B; --ink:#E5EBF1; --muted:#95A3B2; --line:#2B3745; --code-bg:#111A23;
+    --redis:#FF8474; --kafka:#62C3E2; --rabbit:#EBA0DA; --docker:#A3B3FF; --zk:#A8D468; --good:#5CD494; --warn:#E8B04A;
+  }
+}
+:root[data-theme="dark"]{
+  color-scheme:dark;
+  --bg:#0F151C; --surface:#18212B; --ink:#E5EBF1; --muted:#95A3B2; --line:#2B3745; --code-bg:#111A23;
+  --redis:#FF8474; --kafka:#62C3E2; --rabbit:#EBA0DA; --docker:#A3B3FF; --zk:#A8D468; --good:#5CD494; --warn:#E8B04A;
+}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font-family:var(--body);font-size:16px;line-height:1.6;margin:0}
+body[data-tab="kafka"]{--accent:var(--kafka)}
+body[data-tab="rabbitmq"]{--accent:var(--rabbit)}
+body[data-tab="docker"]{--accent:var(--docker)}
+.lab select{font:400 .9rem var(--body);color:var(--ink);background:var(--bg);border:1px solid var(--line);border-radius:6px;padding:8px 10px}
+body[data-tab="zookeeper"]{--accent:var(--zk)}
+.tabs{overflow-x:auto}
+.tabs button{white-space:nowrap;flex:0 0 auto}
+.opts{display:flex;flex-direction:column;gap:6px}
+.opts label{display:flex;gap:8px;align-items:baseline;font-size:.9rem;cursor:pointer}
+.opts input{flex:0 0 auto;accent-color:var(--accent)}
+.outc{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:6px;font-size:.9rem}
+.outc b{font-weight:600}
+.yes{color:var(--good);font-weight:600}
+.no{color:var(--warn);font-weight:600}
+#zktree{min-height:150px}
+.wrap{max-width:860px;margin:0 auto;padding-block:28px 64px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));display:flex;flex-direction:column;gap:28px}
+h1,h2,h3{font-family:var(--display);text-wrap:balance;margin:0;line-height:1.2}
+h1{font-size:2.1rem;font-weight:700}
+h2{font-size:1.5rem;font-weight:700}
+h3{font-size:1.1rem;font-weight:500}
+p{margin:0;max-width:66ch}
+a{color:var(--accent)}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.top{display:flex;flex-direction:column;gap:10px}
+.lede{color:var(--muted)}
+.note{font-size:.9rem;color:var(--muted);border-left:3px solid var(--line);padding-left:12px}
+.tabs{position:sticky;top:env(safe-area-inset-top,0px);z-index:5;background:var(--bg);display:flex;gap:8px;padding-block:10px;border-bottom:1px solid var(--line)}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:10;background:var(--bg)}
+.tabs button{font:600 1rem var(--display);color:var(--muted);background:transparent;border:1px solid var(--line);border-radius:6px;padding:8px 18px;cursor:pointer}
+.tabs button[aria-selected="true"]{color:var(--surface);background:var(--accent);border-color:var(--accent)}
+.panel{display:flex;flex-direction:column;gap:36px}
+.ladder{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:repeat(3,1fr);gap:0;border:1px solid var(--line);border-radius:8px;background:var(--surface)}
+.ladder li{padding:14px 16px;display:flex;flex-direction:column;gap:4px;border-left:1px solid var(--line)}
+.ladder li:first-child{border-left:0}
+.ladder .t{font:700 1.15rem var(--display);color:var(--accent);font-variant-numeric:tabular-nums}
+.ladder .w{font-weight:600}
+.ladder .d{font-size:.88rem;color:var(--muted)}
+.ladder a{font-size:.88rem}
+.level{display:flex;flex-direction:column;gap:22px;scroll-margin-top:70px}
+.level>header{display:flex;flex-direction:column;gap:4px;border-top:3px solid var(--accent);padding-top:12px}
+.eyebrow{font:600 .75rem var(--body);letter-spacing:.09em;text-transform:uppercase;color:var(--accent)}
+.lesson{display:flex;flex-direction:column;gap:10px}
+.lesson ul{margin:0;padding-left:20px;max-width:66ch;display:flex;flex-direction:column;gap:4px}
+pre{margin:0;background:var(--code-bg);border:1px solid var(--line);border-radius:6px;padding:12px 14px;overflow-x:auto;font:400 .84rem/1.55 var(--mono);color:var(--ink)}
+code{font-family:var(--mono);font-size:.88em;background:var(--code-bg);padding:1px 5px;border-radius:4px}
+pre code{background:none;padding:0;font-size:1em}
+.c{color:var(--muted)}
+.trap{font-size:.92rem;max-width:66ch}
+.trap b{color:var(--warn)}
+.tbl{overflow-x:auto}
+table{border-collapse:collapse;width:100%;font-size:.9rem;min-width:520px}
+th,td{text-align:left;padding:8px 10px;border-bottom:1px solid var(--line);vertical-align:top}
+th{font:600 .75rem var(--body);letter-spacing:.07em;text-transform:uppercase;color:var(--muted)}
+.lab{background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:16px;display:flex;flex-direction:column;gap:12px}
+.lab .cap{font-size:.85rem;color:var(--muted)}
+.row{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.lab input{font:400 .9rem var(--mono);color:var(--ink);background:var(--bg);border:1px solid var(--line);border-radius:6px;padding:8px 10px;flex:1 1 180px;min-width:0}
+.btn{font:600 .85rem var(--body);color:var(--surface);background:var(--accent);border:1px solid var(--accent);border-radius:6px;padding:8px 14px;cursor:pointer}
+.btn.q{color:var(--ink);background:transparent;border-color:var(--line)}
+.chip{font:400 .78rem var(--mono);color:var(--ink);background:var(--code-bg);border:1px solid var(--line);border-radius:999px;padding:4px 10px;cursor:pointer}
+#rout{height:230px;overflow-y:auto;white-space:pre-wrap;word-break:break-word}
+#rout .in{color:var(--accent);font-weight:600}
+.part{display:grid;grid-template-columns:auto 1fr;gap:6px 12px;align-items:center}
+.plabel{font:600 .8rem var(--mono);white-space:nowrap}
+.pmeta{grid-column:2;font-size:.8rem;color:var(--muted);font-variant-numeric:tabular-nums}
+.cells{display:flex;gap:3px;overflow-x:auto;padding-bottom:2px}
+.cell{flex:0 0 auto;min-width:46px;border:1px solid var(--line);border-radius:4px;padding:3px 5px;font:400 .68rem/1.3 var(--mono);background:var(--bg);text-align:center}
+.cell.done{color:var(--muted);border-style:dashed}
+.cell.lag{border-color:var(--accent);color:var(--ink)}
+.cell b{display:block;font-variant-numeric:tabular-nums}
+.pill{font:600 .75rem var(--body);border:1px solid var(--line);border-radius:999px;padding:2px 9px}
+.pill.idle{color:var(--warn);border-color:var(--warn)}
+details{border-bottom:1px solid var(--line);padding-block:10px}
+details:first-of-type{border-top:1px solid var(--line)}
+summary{cursor:pointer;font-weight:600}
+details p{margin-top:8px;color:var(--muted)}
+.qa{display:flex;flex-direction:column}
+footer{font-size:.85rem;color:var(--muted);border-top:1px solid var(--line);padding-top:16px;display:flex;flex-direction:column;gap:6px}
+@media (max-width:640px){
+  h1{font-size:1.7rem}
+  .tabs button{padding:8px 12px;font-size:.92rem}
+  .ladder{grid-template-columns:1fr}
+  .ladder li{border-left:0;border-top:1px solid var(--line)}
+  .ladder li:first-child{border-top:0}
+}
+@media (prefers-reduced-motion:no-preference){.tabs button{transition:background .15s,color .15s}}
+</style>
+
+<div class="wrap">
+  <div class="top">
+    <h1>Redis, Kafka and RabbitMQ Field Guide</h1>
+    <p class="lede">Redis keeps small pieces of data in memory so they come back in under a millisecond. Kafka keeps an ordered record of everything that happened so many systems can read it at their own pace. RabbitMQ hands each job to a worker and forgets it once the work is done. Docker is how you run all three on your laptop. ZooKeeper is the coordinator Kafka depended on until version 4. Each tab goes from the first command to production patterns.</p>
+    <p class="note">How they connect: Docker starts the servers. Redis, Kafka and RabbitMQ do the work. ZooKeeper explains how older Kafka clusters chose a controller. The Docker tab stays close to these servers. The DevOps Mastery Academy has the wider Docker course.</p>
+  </div>
+
+  <div class="tabs" role="tablist" aria-label="Subject">
+    <button role="tab" id="tab-redis" aria-controls="p-redis" aria-selected="true" data-tab="redis">Redis</button>
+    <button role="tab" id="tab-kafka" aria-controls="p-kafka" aria-selected="false" data-tab="kafka">Kafka</button>
+    <button role="tab" id="tab-rabbitmq" aria-controls="p-rabbitmq" aria-selected="false" data-tab="rabbitmq">RabbitMQ</button>
+    <button role="tab" id="tab-docker" aria-controls="p-docker" aria-selected="false" data-tab="docker">Docker</button>
+    <button role="tab" id="tab-zookeeper" aria-controls="p-zookeeper" aria-selected="false" data-tab="zookeeper">ZooKeeper</button>
+  </div>
+
+  <!-- ================= REDIS ================= -->
+  <div class="panel" id="p-redis" role="tabpanel" aria-labelledby="tab-redis">
+    <ol class="ladder">
+      <li><span class="t">1 to 3 hours</span><span class="w">Basics and core commands</span><span class="d">What Redis is, strings, keys, expiry, counters.</span><a href="#r1">Level 1</a></li>
+      <li><span class="t">1 to 3 days</span><span class="w">Data structures in an app</span><span class="d">Hashes, lists, sets, sorted sets, caching from Node or Python.</span><a href="#r2">Level 2</a></li>
+      <li><span class="t">1 to 2 weeks</span><span class="w">Production patterns</span><span class="d">Invalidation, rate limits, streams, persistence, replication, Cluster.</span><a href="#r3">Level 3</a></li>
+    </ol>
+
+    <section class="level" id="r1">
+      <header><span class="eyebrow">Level 1 · 1 to 3 hours</span><h2>Basics and core commands</h2></header>
+
+      <div class="lesson">
+        <h3>What Redis is</h3>
+        <p>Redis is a server that holds data in RAM and answers by key. You give it a name, it gives you the value. Because nothing is read from disk on the request path, a lookup usually takes well under a millisecond.</p>
+        <p>Think of it as a shared dictionary that every instance of your app can reach over the network. The values are not only strings. Redis also has lists, sets, hashes and sorted sets built in, and each one has commands that run on the server.</p>
+        <p>Commands run one at a time on a single thread. That is why <code>INCR</code> is safe when a hundred clients call it at once: no two commands ever interleave.</p>
+      </div>
+
+      <div class="lesson">
+        <h3>Start a server and connect</h3>
+<pre><code>docker run -d --name redis -p 6379:6379 redis:8
+docker exec -it redis redis-cli
+127.0.0.1:6379> PING
+PONG</code></pre>
+      </div>
+
+      <div class="lesson">
+        <h3>Strings, keys and expiry</h3>
+<pre><code>SET user:42:name "Asha"        <span class="c"># OK</span>
+GET user:42:name               <span class="c"># "Asha"</span>
+EXISTS user:42:name            <span class="c"># (integer) 1</span>
+DEL user:42:name               <span class="c"># (integer) 1</span>
+GET user:42:name               <span class="c"># (nil)</span>
+
+SET otp:42 "918273" EX 300     <span class="c"># expires after 300 seconds</span>
+TTL otp:42                     <span class="c"># (integer) 300, counts down</span>
+TTL user:42:name               <span class="c"># -2 = key does not exist, -1 = no expiry</span>
+
+INCR page:home:views           <span class="c"># (integer) 1, atomic counter</span>
+INCRBY page:home:views 10      <span class="c"># (integer) 11</span></code></pre>
+        <ul>
+          <li>Name keys with colons, from general to specific: <code>user:42:cart</code>. Redis does not care, but people and tools do.</li>
+          <li>Give cache keys an expiry. A cache with no TTL grows until memory runs out.</li>
+        </ul>
+        <p class="trap"><b>Trap.</b> <code>KEYS *</code> walks every key and blocks the server while it does. It is fine on your laptop and an outage in production. Use <code>SCAN 0 MATCH user:* COUNT 100</code>, which returns a page and a cursor.</p>
+      </div>
+
+      <div class="lesson">
+        <h3>Try it here</h3>
+        <div class="lab">
+          <p class="cap">A small Redis look-alike written in this page. It understands about 25 commands (strings, expiry, hashes, lists, sets, sorted sets). It is not a real server, so use it to build intuition and check anything important against real Redis.</p>
+          <pre id="rout" aria-live="polite"></pre>
+          <div class="row">
+            <input id="rin" aria-label="Redis command" placeholder="Type a command, for example ZADD board 50 asha" autocomplete="off" spellcheck="false">
+            <button class="btn" id="rrun">Run</button>
+          </div>
+          <div class="row" id="rchips"></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="level" id="r2">
+      <header><span class="eyebrow">Level 2 · 1 to 3 days</span><h2>Data structures in a real app</h2></header>
+
+      <div class="lesson">
+        <h3>Pick the structure that matches the question</h3>
+        <div class="tbl"><table>
+          <tr><th>Type</th><th>Shape</th><th>Core commands</th><th>Use it for</th></tr>
+          <tr><td>String</td><td>One value</td><td><code>SET GET INCR</code></td><td>Cached JSON, counters, flags, OTPs</td></tr>
+          <tr><td>Hash</td><td>Field to value</td><td><code>HSET HGET HGETALL HINCRBY</code></td><td>One object, updated field by field</td></tr>
+          <tr><td>List</td><td>Ordered, both ends open</td><td><code>LPUSH RPUSH LPOP BRPOP LRANGE</code></td><td>Simple job queue, recent items</td></tr>
+          <tr><td>Set</td><td>Unique members</td><td><code>SADD SISMEMBER SINTER SCARD</code></td><td>Tags, "has this user seen it", common friends</td></tr>
+          <tr><td>Sorted set</td><td>Members ranked by score</td><td><code>ZADD ZRANGE ZINCRBY ZRANK</code></td><td>Leaderboards, time-ordered feeds, sliding windows</td></tr>
+          <tr><td>Stream</td><td>Append-only log</td><td><code>XADD XREADGROUP XACK</code></td><td>Events that workers must not lose</td></tr>
+        </table></div>
+<pre><code>HSET user:42 name "Asha" city "Bengaluru"   <span class="c"># (integer) 2</span>
+HGET user:42 city                            <span class="c"># "Bengaluru"</span>
+
+RPUSH jobs "resize:1" "resize:2"             <span class="c"># (integer) 2</span>
+LPOP jobs                                    <span class="c"># "resize:1"</span>
+
+SADD post:9:tags redis cache redis           <span class="c"># (integer) 2, duplicate ignored</span>
+
+ZADD board 120 asha 95 ravi 140 meera        <span class="c"># (integer) 3</span>
+ZRANGE board 0 2 REV WITHSCORES              <span class="c"># meera 140, asha 120, ravi 95</span></code></pre>
+      </div>
+
+      <div class="lesson">
+        <h3>Caching from your app (cache-aside)</h3>
+        <p>The most common pattern. Ask Redis first. On a miss, read the database, store the answer with a TTL, return it. On a write, update the database and delete the key.</p>
+<pre><code><span class="c">// Node.js, package "redis"</span>
+import { createClient } from 'redis';
+const redis = createClient({ url: 'redis://localhost:6379' });
+await redis.connect();
+
+async function getProduct(id) {
+  const key = `product:${id}`;
+  const hit = await redis.get(key);
+  if (hit) return JSON.parse(hit);
+  const row = await db.products.findById(id);
+  if (row) await redis.set(key, JSON.stringify(row), { EX: 300 });
+  return row;
+}
+async function updateProduct(id, patch) {
+  await db.products.update(id, patch);
+  await redis.del(`product:${id}`);
+}</code></pre>
+<pre><code><span class="c"># Python, package "redis"</span>
+import json, redis
+r = redis.Redis(host="localhost", port=6379, decode_responses=True)
+
+def get_product(pid):
+    key = f"product:{pid}"
+    hit = r.get(key)
+    if hit:
+        return json.loads(hit)
+    row = db.find_product(pid)
+    if row:
+        r.set(key, json.dumps(row), ex=300)
+    return row</code></pre>
+        <p class="trap"><b>Trap.</b> Treat Redis as optional in this pattern. If it is down, the code should fall through to the database, not return an error.</p>
+      </div>
+
+      <div class="lesson">
+        <h3>Pipelines, transactions and Lua</h3>
+        <ul>
+          <li><b>Pipeline.</b> Send many commands in one network round trip. It saves time and gives no atomicity.</li>
+          <li><b>MULTI / EXEC.</b> Queue commands and run them as one uninterrupted block. There is no rollback: if one command fails, the others still apply.</li>
+          <li><b>WATCH.</b> Optimistic lock. <code>EXEC</code> returns nil if a watched key changed, and you retry.</li>
+          <li><b>Lua script.</b> Runs on the server as one atomic step. Use it for "read, decide, write".</li>
+        </ul>
+<pre><code>MULTI
+DECRBY stock:sku9 1
+RPUSH orders "sku9:user42"
+EXEC                           <span class="c"># 1) (integer) 4   2) (integer) 1</span></code></pre>
+      </div>
+    </section>
+
+    <section class="level" id="r3">
+      <header><span class="eyebrow">Level 3 · 1 to 2 weeks</span><h2>Production patterns</h2></header>
+
+      <div class="lesson">
+        <h3>Invalidation and the stampede</h3>
+        <p>When a popular key expires, every request misses at once and they all hit the database together. Three fixes, usually combined:</p>
+        <ul>
+          <li>Add random jitter to TTLs (300 seconds plus 0 to 60) so keys do not expire together.</li>
+          <li>Let one request rebuild the value behind a short lock while the others wait or serve the old value.</li>
+          <li>Refresh hot keys in the background before they expire.</li>
+        </ul>
+        <p>Also cache "not found" for a short time. Otherwise a request for an id that does not exist reaches the database every time.</p>
+      </div>
+
+      <div class="lesson">
+        <h3>Memory limit and eviction</h3>
+<pre><code>maxmemory 2gb
+maxmemory-policy allkeys-lru</code></pre>
+        <ul>
+          <li><code>noeviction</code> (default): writes fail when memory is full. Right when Redis is your source of truth.</li>
+          <li><code>allkeys-lru</code> / <code>allkeys-lfu</code>: drop the least recently or least frequently used key. Right for a pure cache.</li>
+          <li><code>volatile-ttl</code>, <code>volatile-lru</code>: only evict keys that have an expiry.</li>
+        </ul>
+      </div>
+
+      <div class="lesson">
+        <h3>Rate limiting</h3>
+        <p>Fixed window: count requests per user per minute. The script keeps the increment and the expiry in one atomic step, so a crash between them cannot leave a counter that never expires.</p>
+<pre><code><span class="c">-- KEYS[1] = rate:user42:202611131045   ARGV[1] = window seconds</span>
+local n = redis.call('INCR', KEYS[1])
+if n == 1 then redis.call('EXPIRE', KEYS[1], ARGV[1]) end
+return n                       <span class="c">-- caller rejects when n > limit</span></code></pre>
+        <p>A fixed window allows a burst of twice the limit across the boundary. For a smoother limit, keep request timestamps in a sorted set, remove the ones older than the window with <code>ZREMRANGEBYSCORE</code>, and count the rest with <code>ZCARD</code>.</p>
+      </div>
+
+      <div class="lesson">
+        <h3>Pub/Sub, Streams and locks</h3>
+        <ul>
+          <li><b>Pub/Sub</b> delivers to whoever is connected right now. A subscriber that is offline misses the message. Good for live notifications, wrong for work that must happen.</li>
+          <li><b>Streams</b> store the messages. A consumer group gives each message to one worker, and the worker confirms with <code>XACK</code>. Unconfirmed messages can be claimed by another worker.</li>
+        </ul>
+<pre><code>XADD orders * user 42 sku 9                       <span class="c"># "1731490000000-0"</span>
+XGROUP CREATE orders billing $ MKSTREAM
+XREADGROUP GROUP billing w1 COUNT 10 BLOCK 5000 STREAMS orders >
+XACK orders billing 1731490000000-0</code></pre>
+        <p>A lock is one command: <code>SET lock:report 7f3a NX PX 30000</code>. The random value is your token. Release only if the token is still yours, in a script, so you never delete a lock someone else took after yours expired.</p>
+<pre><code>if redis.call('GET', KEYS[1]) == ARGV[1] then
+  return redis.call('DEL', KEYS[1])
+else return 0 end</code></pre>
+        <p class="trap"><b>Trap.</b> A Redis lock can expire while its holder is paused. It prevents duplicate work most of the time. Where a double run would corrupt data, also check a version number in the database.</p>
+      </div>
+
+      <div class="lesson">
+        <h3>Persistence</h3>
+        <div class="tbl"><table>
+          <tr><th>Mode</th><th>How it works</th><th>You can lose</th><th>Choose when</th></tr>
+          <tr><td>RDB snapshot</td><td>Full copy of memory written to disk on a schedule</td><td>Everything since the last snapshot</td><td>Cache, backups, fast restart</td></tr>
+          <tr><td>AOF</td><td>Every write appended to a log; <code>appendfsync everysec</code></td><td>About one second</td><td>Data you cannot rebuild</td></tr>
+          <tr><td>Both</td><td>AOF for safety, RDB for backups</td><td>About one second</td><td>Most production setups</td></tr>
+        </table></div>
+      </div>
+
+      <div class="lesson">
+        <h3>Replication, Sentinel and Cluster</h3>
+        <ul>
+          <li><b>Replication.</b> Replicas copy the primary asynchronously. A write acknowledged by the primary can be lost if it dies before the replica receives it.</li>
+          <li><b>Sentinel.</b> Separate processes that watch the primary and promote a replica when it fails. One dataset, automatic failover.</li>
+          <li><b>Cluster.</b> Splits keys across primaries using 16,384 hash slots. The slot is CRC16 of the key, modulo 16384. Use it when the data or the write load no longer fits one machine.</li>
+        </ul>
+        <p>In Cluster, a multi-key command only works when all keys are in the same slot. Force that with a hash tag: only the part in braces is hashed, so <code>{user:42}:cart</code> and <code>{user:42}:profile</code> land together.</p>
+      </div>
+
+      <div class="lesson">
+        <h3>Operating it</h3>
+        <ul>
+          <li>Find slow commands with <code>SLOWLOG GET 10</code>, memory with <code>INFO memory</code> and <code>MEMORY USAGE key</code>.</li>
+          <li>A big key (a list with millions of items) makes one command slow, and one slow command delays everyone. Delete big keys with <code>UNLINK</code>, which frees memory in the background.</li>
+          <li>Watch the hit rate: <code>keyspace_hits / (keyspace_hits + keyspace_misses)</code> from <code>INFO stats</code>.</li>
+          <li>Never expose port 6379 to the internet. Set a password or ACL users, bind to private addresses, use TLS between networks.</li>
+          <li>Redis 8 folded JSON, search, time series and probabilistic types into the main server. Valkey is the open-source fork many cloud providers now run; the commands in this guide work on both.</li>
+        </ul>
+      </div>
+
+      <div class="lesson">
+        <h3>Practice projects</h3>
+        <ul>
+          <li>Level 1: an OTP store. Six digits, 5 minute expiry, at most 3 attempts using <code>INCR</code>.</li>
+          <li>Level 2: put cache-aside in front of one slow endpoint and measure latency before and after.</li>
+          <li>Level 3: a leaderboard API with a sorted set, a rate limiter in Lua, and a worker reading a Stream with a consumer group.</li>
+        </ul>
+      </div>
+
+      <div class="lesson">
+        <h3>Check yourself</h3>
+        <div class="qa">
+          <details><summary>Why is Redis fast?</summary><p>Data lives in memory, the structures are simple and purpose-built, and commands run on one thread so there is no locking. Network I/O is multiplexed, so one thread serves thousands of connections.</p></details>
+          <details><summary>What happens when memory is full?</summary><p>It depends on <code>maxmemory-policy</code>. With <code>noeviction</code> writes return an error. With an LRU or LFU policy Redis removes keys to make room.</p></details>
+          <details><summary>MULTI/EXEC or Lua?</summary><p>MULTI runs a fixed list of commands together. Lua can read a value and decide what to write based on it, all in one atomic step. Use Lua when the logic branches.</p></details>
+          <details><summary>Pub/Sub or Streams?</summary><p>Pub/Sub does not store anything, so offline subscribers miss messages. Streams store entries, support consumer groups and acknowledgements, and can be replayed.</p></details>
+          <details><summary>How do you keep cache and database consistent?</summary><p>Write the database first, then delete the cache key, and keep a TTL as a safety net. Accept a short stale window, or use change data capture to invalidate when you cannot.</p></details>
+          <details><summary>Why can Redis lose an acknowledged write?</summary><p>Replication is asynchronous and AOF usually syncs once a second. A crash in that gap loses the latest writes. <code>WAIT</code> reduces the risk and does not remove it.</p></details>
+          <details><summary>What is a hash tag?</summary><p>The part of a key inside braces. In Cluster only that part decides the slot, which lets related keys share a slot so multi-key commands and scripts work.</p></details>
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <!-- ================= KAFKA ================= -->
+  <div class="panel" id="p-kafka" role="tabpanel" aria-labelledby="tab-kafka" hidden>
+    <ol class="ladder">
+      <li><span class="t">3 to 5 hours</span><span class="w">The log and the CLI</span><span class="d">Topics, partitions, offsets, producing and consuming from a terminal.</span><a href="#k1">Level 1</a></li>
+      <li><span class="t">3 to 5 days</span><span class="w">Reliable apps</span><span class="d">Keys, consumer groups, commits, acks, replication, retention.</span><a href="#k2">Level 2</a></li>
+      <li><span class="t">2 to 4 weeks</span><span class="w">Production patterns</span><span class="d">Retries, exactly-once, schemas, Connect, streams, tuning, security.</span><a href="#k3">Level 3</a></li>
+    </ol>
+
+    <section class="level" id="k1">
+      <header><span class="eyebrow">Level 1 · 3 to 5 hours</span><h2>The log and the CLI</h2></header>
+
+      <div class="lesson">
+        <h3>What Kafka is</h3>
+        <p>Kafka is a set of servers that store events in the order they arrived. An event is a small record such as "order 17 was placed". Producers add events to the end. Consumers read forward from wherever they stopped.</p>
+        <p>The difference from a normal queue is that reading does not remove anything. Events stay for a set time, seven days by default, so several teams can read the same events independently and a new service can replay history.</p>
+        <p>Use it when many systems need to react to the same facts, or when traffic arrives faster than the receiver can process it and you need a buffer that does not lose data.</p>
+      </div>
+
+      <div class="lesson">
+        <h3>The seven words</h3>
+        <div class="tbl"><table>
+          <tr><th>Word</th><th>Meaning</th></tr>
+          <tr><td>Broker</td><td>One Kafka server. A cluster is several brokers.</td></tr>
+          <tr><td>Topic</td><td>A named stream of events, like <code>orders</code>.</td></tr>
+          <tr><td>Partition</td><td>A topic is split into partitions. Each one is its own ordered log, stored on a broker.</td></tr>
+          <tr><td>Offset</td><td>The position of an event inside a partition: 0, 1, 2 and so on.</td></tr>
+          <tr><td>Producer</td><td>A program that writes events.</td></tr>
+          <tr><td>Consumer</td><td>A program that reads events.</td></tr>
+          <tr><td>Consumer group</td><td>Consumers sharing one name. Kafka gives each partition to exactly one of them, so the group shares the work.</td></tr>
+        </table></div>
+      </div>
+
+      <div class="lesson">
+        <h3>Start a broker and use the CLI</h3>
+<pre><code>docker run -d --name kafka -p 9092:9092 apache/kafka:latest
+docker exec -it kafka bash
+cd /opt/kafka/bin
+
+<span class="c"># create a topic with 3 partitions</span>
+./kafka-topics.sh --bootstrap-server localhost:9092 --create \
+  --topic orders --partitions 3 --replication-factor 1
+
+<span class="c"># produce: type key:value, one per line</span>
+./kafka-console-producer.sh --bootstrap-server localhost:9092 --topic orders \
+  --reader-property parse.key=true --reader-property key.separator=:
+> order-1:placed
+> order-2:placed
+> order-1:paid
+> order-3:placed
+
+<span class="c"># consume in a second terminal, as group "billing"</span>
+./kafka-console-consumer.sh --bootstrap-server localhost:9092 --topic orders \
+  --group billing --from-beginning \
+  --formatter-property print.key=true --formatter-property print.partition=true \
+  --formatter-property print.offset=true
+Partition:0  Offset:0  order-2  placed
+Partition:0  Offset:1  order-3  placed
+Partition:1  Offset:0  order-1  placed
+Partition:1  Offset:1  order-1  paid
+
+<span class="c"># where is the group, and how far behind?</span>
+./kafka-consumer-groups.sh --bootstrap-server localhost:9092 --describe --group billing
+GROUP    TOPIC   PARTITION  CURRENT-OFFSET  LOG-END-OFFSET  LAG
+billing  orders  0          2               2               0
+billing  orders  1          2               2               0
+billing  orders  2          0               0               0</code></pre>
+        <p>Both <code>order-1</code> events are in partition 1, in the order they were sent. The output above is from a real run on Kafka 4.3.1. On Kafka 3.x write <code>--property</code> in place of <code>--reader-property</code> and <code>--formatter-property</code>; version 4 still accepts the old name with a deprecation warning.</p>
+        <p>The last command prints, per partition, <code>CURRENT-OFFSET</code>, <code>LOG-END-OFFSET</code> and <code>LAG</code>. Lag is how many events are waiting. It is the first number to check when something looks slow.</p>
+      </div>
+
+      <div class="lesson">
+        <h3>See it move</h3>
+        <div class="lab">
+          <p class="cap">A simplified model of one topic, <code>orders</code>, with 3 partitions and one consumer group. The same key always lands in the same partition. Real Kafka picks the partition with a murmur2 hash and assigns partitions with a configurable strategy; the idea is the same.</p>
+          <div id="kparts" class="part" aria-live="polite"></div>
+          <div class="row" id="kcons"></div>
+          <div class="row">
+            <input id="kkey" aria-label="Message key" value="order-7" autocomplete="off" spellcheck="false">
+            <button class="btn" id="ksend">Send with this key</button>
+            <button class="btn q" id="kmany">Send 5 orders</button>
+          </div>
+          <div class="row">
+            <button class="btn q" id="kpoll">Consumers poll</button>
+            <button class="btn q" id="kplus">Add consumer</button>
+            <button class="btn q" id="kminus">Remove consumer</button>
+            <button class="btn q" id="kreset">Reset</button>
+          </div>
+        </div>
+        <p>Things to notice. Order is kept inside a partition, not across the topic. Removing a consumer moves its partitions to the others. A fourth consumer gets nothing, because there are only three partitions.</p>
+      </div>
+    </section>
+
+    <section class="level" id="k2">
+      <header><span class="eyebrow">Level 2 · 3 to 5 days</span><h2>Reliable producers and consumers</h2></header>
+
+      <div class="lesson">
+        <h3>Keys decide ordering</h3>
+        <p>Kafka guarantees order only within one partition. Events with the same key go to the same partition, so choose the key by asking "which events must stay in order?". For orders that is the order id. For a wallet it is the user id.</p>
+        <p class="trap"><b>Trap.</b> Adding partitions later changes which partition a key maps to, and old and new events for the same key may be read out of order. Pick the partition count with room to grow.</p>
+      </div>
+
+      <div class="lesson">
+        <h3>Offsets, commits and delivery guarantees</h3>
+        <p>A consumer saves its position by committing an offset. When it restarts, or its partition moves to another consumer, reading resumes from the last commit. When you commit decides what happens on a crash.</p>
+        <div class="tbl"><table>
+          <tr><th>Guarantee</th><th>How</th><th>On a crash</th></tr>
+          <tr><td>At most once</td><td>Commit first, then process</td><td>The event is lost</td></tr>
+          <tr><td>At least once</td><td>Process first, then commit</td><td>The event is processed again</td></tr>
+          <tr><td>Exactly once</td><td>Transactions, or at least once plus an idempotent handler</td><td>The effect appears once</td></tr>
+        </table></div>
+        <p>Most systems run at least once and make the handler safe to repeat: keep the event id in the database with a unique constraint, or use an upsert.</p>
+      </div>
+
+      <div class="lesson">
+        <h3>Code: Node and Python</h3>
+<pre><code><span class="c">// Node.js, package "kafkajs"</span>
+import { Kafka } from 'kafkajs';
+const kafka = new Kafka({ clientId: 'shop', brokers: ['localhost:9092'] });
+
+const producer = kafka.producer({ idempotent: true });
+await producer.connect();
+await producer.send({
+  topic: 'orders',
+  messages: [{ key: 'order-17', value: JSON.stringify({ total: 499 }) }],
+});
+
+const consumer = kafka.consumer({ groupId: 'billing' });
+await consumer.connect();
+await consumer.subscribe({ topic: 'orders', fromBeginning: true });
+await consumer.run({
+  eachMessage: async ({ partition, message }) => {
+    await charge(JSON.parse(message.value.toString()));  <span class="c">// offset commits after this resolves</span>
+  },
+});</code></pre>
+<pre><code><span class="c"># Python, package "confluent-kafka"</span>
+import json
+from confluent_kafka import Producer, Consumer
+
+p = Producer({"bootstrap.servers": "localhost:9092", "enable.idempotence": True})
+p.produce("orders", key="order-17", value=json.dumps({"total": 499}))
+p.flush()
+
+c = Consumer({
+    "bootstrap.servers": "localhost:9092",
+    "group.id": "billing",
+    "auto.offset.reset": "earliest",
+    "enable.auto.commit": False,
+})
+c.subscribe(["orders"])
+while True:
+    msg = c.poll(1.0)
+    if msg is None or msg.error():
+        continue
+    charge(json.loads(msg.value()))
+    c.commit(message=msg)          <span class="c"># process first, then commit = at least once</span></code></pre>
+        <p class="note">For new Node projects also look at Confluent's own client, <code>@confluentinc/kafka-javascript</code>. It offers an API close to kafkajs and is the one that gets active releases. On a broker that has just started, kafkajs may log "coordinator is loading" once or twice and then continue; it retries by itself.</p>
+      </div>
+
+      <div class="lesson">
+        <h3>Producer settings that matter</h3>
+        <ul>
+          <li><code>acks=all</code>: the write is confirmed only after the in-sync replicas have it. <code>acks=1</code> is faster and can lose data when a leader dies.</li>
+          <li><code>enable.idempotence=true</code>: retries cannot create duplicates or reorder events. It is the default in current clients.</li>
+          <li><code>linger.ms</code> and <code>batch.size</code>: wait a few milliseconds to send events in batches. Much higher throughput for a small delay.</li>
+          <li><code>compression.type=lz4</code> or <code>zstd</code>: smaller batches on the wire and on disk.</li>
+        </ul>
+      </div>
+
+      <div class="lesson">
+        <h3>Replication</h3>
+        <p>Each partition has one leader and several followers on other brokers. Producers and consumers talk to the leader. Followers that are caught up form the in-sync replica set (ISR). If the leader dies, a member of the ISR takes over.</p>
+        <p>The standard safe setup is replication factor 3, <code>min.insync.replicas=2</code> and <code>acks=all</code>. You can lose one broker with no data loss and no downtime. With two brokers gone, writes are refused instead of being accepted unsafely.</p>
+      </div>
+
+      <div class="lesson">
+        <h3>Retention and compaction</h3>
+        <ul>
+          <li><b>Delete</b> (default): events older than <code>retention.ms</code>, or beyond <code>retention.bytes</code>, are removed. Right for event history.</li>
+          <li><b>Compact</b>: Kafka keeps at least the latest event for every key and removes older ones. Right for "current state" topics such as user settings. An event with a null value deletes the key.</li>
+        </ul>
+      </div>
+    </section>
+
+    <section class="level" id="k3">
+      <header><span class="eyebrow">Level 3 · 2 to 4 weeks</span><h2>Production patterns</h2></header>
+
+      <div class="lesson">
+        <h3>Failures: retry topics and a dead letter topic</h3>
+        <p>One bad event must not block a partition forever. After a few attempts, publish it to a retry topic that is consumed with a delay, and after the last attempt to a dead letter topic, for example <code>orders.dlq</code>, with the error in a header. Then commit and move on. Alert on the dead letter topic and build a way to replay it.</p>
+        <p class="trap"><b>Trap.</b> Moving an event to a retry topic breaks ordering for its key. If order matters, park all later events for that key too, or stop the partition and page someone.</p>
+      </div>
+
+      <div class="lesson">
+        <h3>Exactly once and the outbox</h3>
+        <p>Kafka transactions let a consumer read from one topic, write to another and commit its offset as a single atomic step. Consumers with <code>isolation.level=read_committed</code> never see the aborted writes. This covers Kafka-to-Kafka pipelines only.</p>
+        <p>The moment a database is involved, use the outbox pattern. In the same database transaction that changes the order, insert a row into an <code>outbox</code> table. A separate process, often Debezium reading the database log, publishes those rows to Kafka. The database change and the event can no longer disagree.</p>
+      </div>
+
+      <div class="lesson">
+        <h3>Schemas</h3>
+        <p>Producers and consumers are deployed at different times, so the event format is a contract. A schema registry stores Avro, Protobuf or JSON Schema definitions and rejects a change that would break readers. The everyday rule for backward compatibility: you may add a field with a default and you may not remove or rename a field that readers use.</p>
+      </div>
+
+      <div class="lesson">
+        <h3>Connect and stream processing</h3>
+        <ul>
+          <li><b>Kafka Connect</b> moves data in and out without custom code. Source connectors read from systems such as Postgres (change data capture); sink connectors write to systems such as Elasticsearch or S3.</li>
+          <li><b>Kafka Streams</b> is a Java library for transforming streams: filter, join, count per time window. It keeps state locally and backs it up to Kafka.</li>
+          <li><b>Flink</b> and <b>ksqlDB</b> do the same job as separate systems, Flink with more power and ksqlDB with SQL.</li>
+        </ul>
+      </div>
+
+      <div class="lesson">
+        <h3>Rebalances and lag</h3>
+        <p>When a consumer joins, leaves or stops polling, the group reassigns partitions. That is a rebalance, and frequent ones stall processing. The usual causes and fixes:</p>
+        <ul>
+          <li>A handler slower than <code>max.poll.interval.ms</code> (5 minutes by default) gets the consumer removed. Lower <code>max.poll.records</code> or move slow work off the polling loop.</li>
+          <li>Rolling deploys shuffle everything. Use the cooperative sticky assignor, or the newer consumer group protocol in Kafka 4, so only the affected partitions move. Static membership (<code>group.instance.id</code>) lets a restarted pod keep its partitions.</li>
+          <li>Lag that grows steadily means consumers are too slow. Add consumers up to the partition count, speed up the handler, or add partitions.</li>
+        </ul>
+      </div>
+
+      <div class="lesson">
+        <h3>Sizing, cluster and security</h3>
+        <ul>
+          <li>Partition count sets the maximum number of consumers working in parallel. Start from target throughput divided by what one consumer handles, then add headroom. Thousands of tiny partitions cost memory and slow recovery.</li>
+          <li>Since Kafka 4.0 there is no ZooKeeper. A group of controller nodes runs the metadata using KRaft, Kafka's own Raft implementation.</li>
+          <li>Turn on TLS for traffic, SASL for identity and ACLs so each service can touch only its own topics and groups.</li>
+          <li>Watch under-replicated partitions, consumer lag, request latency and disk usage. Mirror topics to another region with MirrorMaker 2 when you need disaster recovery.</li>
+        </ul>
+      </div>
+
+      <div class="lesson">
+        <h3>Kafka or Redis Streams?</h3>
+        <div class="tbl"><table>
+          <tr><th>Question</th><th>Redis Streams</th><th>Kafka</th></tr>
+          <tr><td>Where does data live</td><td>Memory, optional disk persistence</td><td>Disk, replicated across brokers</td></tr>
+          <tr><td>How much history</td><td>What fits in RAM; trim with <code>MAXLEN</code></td><td>Days to forever, terabytes</td></tr>
+          <tr><td>Scaling one stream</td><td>One key lives on one node</td><td>Partitions spread over brokers</td></tr>
+          <tr><td>Running cost</td><td>You probably already have Redis</td><td>A cluster to operate, or a managed service</td></tr>
+          <tr><td>Pick it for</td><td>Background jobs and modest event flow inside one product</td><td>A company-wide event backbone, analytics pipelines, replay</td></tr>
+        </table></div>
+        <p>Do not reach for Kafka for request and reply between two services, for a small task queue, or when a few hundred events a minute would be served by a database table.</p>
+      </div>
+
+      <div class="lesson">
+        <h3>Practice projects</h3>
+        <ul>
+          <li>Level 1: produce 20 keyed events from the CLI and explain the partition and offset of each line the consumer prints.</li>
+          <li>Level 2: an order service that publishes and a billing consumer with manual commits. Kill the consumer mid-batch and prove nothing is charged twice.</li>
+          <li>Level 3: add a retry topic and a dead letter topic, an outbox table, and a dashboard panel for consumer lag.</li>
+        </ul>
+      </div>
+
+      <div class="lesson">
+        <h3>Check yourself</h3>
+        <div class="qa">
+          <details><summary>How is Kafka different from a queue like RabbitMQ?</summary><p>A queue hands each message to one worker and deletes it. Kafka keeps an ordered log; each consumer group tracks its own position, so many groups read the same events and can replay them.</p></details>
+          <details><summary>Where is ordering guaranteed?</summary><p>Within a single partition only. Use the same key for events that must stay in order.</p></details>
+          <details><summary>Two consumers in one group, one partition. What happens?</summary><p>One consumer gets the partition and the other sits idle as a standby. Parallelism is capped by the partition count.</p></details>
+          <details><summary>What does acks=all with min.insync.replicas=2 give you?</summary><p>A write succeeds only when at least two replicas have it, so losing one broker loses no acknowledged data. If fewer than two replicas are in sync, the producer gets an error.</p></details>
+          <details><summary>Why can a consumer see the same event twice?</summary><p>It processed the event and crashed, or lost its partition in a rebalance, before committing the offset. The next owner starts from the last commit.</p></details>
+          <details><summary>What is consumer lag?</summary><p>The log end offset minus the group's committed offset, per partition. It is the number of events waiting to be processed.</p></details>
+          <details><summary>When do you use a compacted topic?</summary><p>When consumers need the latest value per key, not the full history: configuration, profiles, a changelog used to rebuild state.</p></details>
+          <details><summary>What problem does the outbox pattern solve?</summary><p>Writing to a database and publishing to Kafka are two systems, and one can fail after the other succeeded. Writing the event to an outbox table in the same transaction makes them succeed or fail together.</p></details>
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <!-- ================= RABBITMQ ================= -->
+  <div class="panel" id="p-rabbitmq" role="tabpanel" aria-labelledby="tab-rabbitmq" hidden>
+    <ol class="ladder">
+      <li><span class="t">2 to 4 hours</span><span class="w">Queues and first messages</span><span class="d">What a broker does, the six words, publish and receive from the terminal.</span><a href="#q1">Level 1</a></li>
+      <li><span class="t">2 to 4 days</span><span class="w">Routing and reliable workers</span><span class="d">Exchanges, bindings, acknowledgements, prefetch, Node and Python code.</span><a href="#q2">Level 2</a></li>
+      <li><span class="t">1 to 2 weeks</span><span class="w">Production patterns</span><span class="d">Failed messages, queue types, clusters, limits, security, monitoring.</span><a href="#q3">Level 3</a></li>
+    </ol>
+
+    <section class="level" id="q1">
+      <header><span class="eyebrow">Level 1 · 2 to 4 hours</span><h2>Queues and first messages</h2></header>
+
+      <div class="lesson">
+        <h3>What RabbitMQ is</h3>
+        <p>RabbitMQ is a message broker. Think of a post office. One program hands it a message. RabbitMQ keeps the message in a queue, delivers it to a program that is ready for it, and deletes it once that program says the work is done.</p>
+        <p>The sender does not wait and does not need to know who will do the work. That is the point. A web request can say "send this email" and return at once, while a worker sends the email a moment later.</p>
+        <p>Use it for background jobs, for spreading work across several workers, and for letting one service tell others that something happened without calling each of them.</p>
+      </div>
+
+      <div class="lesson">
+        <h3>The six words</h3>
+        <div class="tbl"><table>
+          <tr><th>Word</th><th>Meaning</th></tr>
+          <tr><td>Producer</td><td>A program that sends messages.</td></tr>
+          <tr><td>Exchange</td><td>The sorting desk. Producers send to an exchange, never straight to a queue.</td></tr>
+          <tr><td>Queue</td><td>A line of messages waiting for a consumer.</td></tr>
+          <tr><td>Binding</td><td>A rule that connects an exchange to a queue.</td></tr>
+          <tr><td>Routing key</td><td>A label on each message that the exchange compares with the bindings.</td></tr>
+          <tr><td>Consumer</td><td>A program that receives messages and acknowledges them.</td></tr>
+        </table></div>
+      </div>
+
+      <div class="lesson">
+        <h3>Start a broker</h3>
+<pre><code>docker run -d --name rabbit --hostname rabbit --user rabbitmq \
+  -p 5672:5672 -p 15672:15672 rabbitmq:4-management
+
+docker exec rabbit rabbitmq-diagnostics -q ping
+Ping succeeded</code></pre>
+        <p>Port 5672 is for your programs. Port 15672 is the management screen at <code>http://localhost:15672</code>, where the built-in user is <code>guest</code> with password <code>guest</code>. That user works only from the same machine.</p>
+        <p class="trap"><b>Trap.</b> On this Mac the 4.4.0 image exited at once without <code>--user rabbitmq</code>, with "Error when reading /var/lib/rabbitmq/.erlang.cookie: eacces" in <code>docker logs rabbit</code>. Running the container as the <code>rabbitmq</code> user fixed it. <code>--hostname</code> matters too: RabbitMQ stores data under its host name, so keep it stable.</p>
+      </div>
+
+      <div class="lesson">
+        <h3>First messages from the terminal</h3>
+<pre><code>docker exec -it rabbit bash
+
+rabbitmqadmin declare queue --name tasks --durable true
+rabbitmqadmin publish message -k tasks -m "resize photo 1"
+Message published and routed successfully
+rabbitmqadmin publish message -k tasks -m "resize photo 2"
+
+rabbitmqctl list_queues name messages
+tasks   2
+
+rabbitmqadmin get messages -q tasks       <span class="c"># takes one message off the queue</span>
+tasks   resize photo 1
+
+rabbitmqctl list_queues name messages
+tasks   1
+
+rabbitmqadmin publish message -k nowhere -m "lost?"
+Message published but NOT routed</code></pre>
+        <ul>
+          <li>These first messages name no exchange, so they go to the default exchange. It delivers to the queue whose name equals the routing key.</li>
+          <li>The last line is the first lesson in reliability. A message that matches no queue is dropped. RabbitMQ does not keep it for later.</li>
+          <li>The image ships <code>rabbitmqadmin</code> version 2. Older guides show version 1 syntax such as <code>rabbitmqadmin declare queue name=tasks</code>, which no longer works.</li>
+        </ul>
+      </div>
+    </section>
+
+    <section class="level" id="q2">
+      <header><span class="eyebrow">Level 2 · 2 to 4 days</span><h2>Routing and reliable workers</h2></header>
+
+      <div class="lesson">
+        <h3>Exchange types</h3>
+        <div class="tbl"><table>
+          <tr><th>Type</th><th>Delivers to</th><th>Use it for</th></tr>
+          <tr><td>Direct</td><td>Queues whose binding key equals the routing key exactly</td><td>Sending each kind of job to its own queue</td></tr>
+          <tr><td>Fanout</td><td>Every bound queue, ignoring the routing key</td><td>Telling everyone: cache clear, config changed</td></tr>
+          <tr><td>Topic</td><td>Queues whose binding pattern matches. <code>*</code> is exactly one word, <code>#</code> is zero or more words</td><td>Events with structured names such as <code>order.paid</code></td></tr>
+          <tr><td>Headers</td><td>Queues whose binding matches message headers</td><td>Rare; routing on several attributes</td></tr>
+        </table></div>
+<pre><code>rabbitmqadmin declare exchange --name orders --type topic --durable true
+rabbitmqadmin declare queue --name billing --durable true
+rabbitmqadmin declare queue --name emails  --durable true
+rabbitmqadmin declare queue --name audit   --durable true
+
+rabbitmqadmin declare binding --source orders --destination-type queue \
+  --destination billing --routing-key order.paid
+rabbitmqadmin declare binding --source orders --destination-type queue \
+  --destination emails --routing-key "order.*"
+rabbitmqadmin declare binding --source orders --destination-type queue \
+  --destination audit --routing-key "#"
+
+rabbitmqadmin publish message -e orders -k order.paid      -m '{"id":17}'
+rabbitmqadmin publish message -e orders -k order.placed    -m '{"id":18}'
+rabbitmqadmin publish message -e orders -k user.signup.web -m '{"id":5}'
+
+rabbitmqctl list_queues name messages
+billing 1       <span class="c"># order.paid only</span>
+emails  2       <span class="c"># order.paid and order.placed</span>
+audit   3       <span class="c"># everything</span></code></pre>
+        <p>One message became three copies, one per matching queue. Each queue is then read independently. This is how one event feeds several services.</p>
+      </div>
+
+      <div class="lesson">
+        <h3>Try the routing</h3>
+        <div class="lab">
+          <p class="cap">A model of the three bindings above. Change the exchange type and the routing key, then send. It follows the documented matching rules and is not a real broker.</p>
+          <div class="row">
+            <select id="rbtype" aria-label="Exchange type"><option value="topic">topic exchange</option><option value="direct">direct exchange</option><option value="fanout">fanout exchange</option></select>
+            <input id="rbkey" aria-label="Routing key" value="order.paid" autocomplete="off" spellcheck="false">
+            <button class="btn" id="rbsend">Send</button>
+            <button class="btn q" id="rbreset">Reset</button>
+          </div>
+          <div class="row" id="rbchips"></div>
+          <div class="tbl"><table id="rbtable"></table></div>
+          <p class="cap" id="rblog" aria-live="polite"></p>
+        </div>
+      </div>
+
+      <div class="lesson">
+        <h3>Not losing messages</h3>
+        <p>Four settings work together. Leave one out and a restart or a crash can lose work.</p>
+        <ul>
+          <li><b>Durable queue.</b> The queue itself survives a broker restart.</li>
+          <li><b>Persistent message.</b> The message is written to disk, not held only in memory.</li>
+          <li><b>Publisher confirm.</b> The producer waits until the broker says "stored".</li>
+          <li><b>Manual acknowledgement.</b> The consumer says "done" only after the work has finished. If it crashes first, the broker gives the message to another consumer.</li>
+        </ul>
+        <p><b>Prefetch</b> limits how many unacknowledged messages one consumer may hold. With no limit, the broker pushes everything to the first worker that connects and the others sit idle.</p>
+      </div>
+
+      <div class="lesson">
+        <h3>Code: Node</h3>
+<pre><code><span class="c">// setup.mjs, package "amqplib". Producer and worker both call this.</span>
+export async function setup(ch) {
+  await ch.assertExchange('jobs.dlx', 'fanout', { durable: true });
+  await ch.assertQueue('jobs.failed', { durable: true });
+  await ch.bindQueue('jobs.failed', 'jobs.dlx', '');
+  await ch.assertQueue('jobs', { durable: true, deadLetterExchange: 'jobs.dlx' });
+}</code></pre>
+<pre><code><span class="c">// producer.mjs</span>
+import amqp from 'amqplib';
+import { setup } from './setup.mjs';
+
+const conn = await amqp.connect('amqp://guest:guest@localhost:5672');
+const ch = await conn.createConfirmChannel();
+await setup(ch);
+
+for (const photo of [1, 2, 3]) {
+  ch.sendToQueue('jobs', Buffer.from(JSON.stringify({ photo })), { persistent: true });
+}
+await ch.waitForConfirms();          <span class="c">// the broker has stored all three</span>
+await conn.close();</code></pre>
+<pre><code><span class="c">// worker.mjs</span>
+import amqp from 'amqplib';
+import { setup } from './setup.mjs';
+
+const conn = await amqp.connect('amqp://guest:guest@localhost:5672');
+const ch = await conn.createChannel();
+await setup(ch);
+await ch.prefetch(1);                <span class="c">// one unfinished job at a time per worker</span>
+
+await ch.consume('jobs', async (msg) => {
+  const job = JSON.parse(msg.content.toString());
+  try {
+    await resize(job);
+    ch.ack(msg);                     <span class="c">// done: the broker deletes it</span>
+  } catch (err) {
+    ch.nack(msg, false, false);      <span class="c">// failed, do not requeue: goes to jobs.dlx</span>
+  }
+});</code></pre>
+        <p>A real run where <code>resize</code> fails on photo 2:</p>
+<pre><code>done   { photo: 1 }
+failed { photo: 2 } bad file
+done   { photo: 3 }
+
+rabbitmqctl list_queues name messages
+jobs         0
+jobs.failed  1      <span class="c"># photo 2, with an x-death header: reason "rejected", queue "jobs"</span></code></pre>
+        <p class="trap"><b>Trap.</b> Declaring a queue that already exists with different settings fails: "PRECONDITION_FAILED - inequivalent arg 'x-dead-letter-exchange' for queue 'jobs'". Keep the declaration in one shared place, as <code>setup</code> does here. To change a queue's settings you delete it and create it again.</p>
+      </div>
+
+      <div class="lesson">
+        <h3>Code: Python</h3>
+<pre><code><span class="c"># package "pika" 1.5 or newer</span>
+import json, threading, pika
+
+conn = pika.Connection(pika.ConnectionParameters("localhost"))
+ch = conn.channel()
+ch.queue_declare(queue="emails_out", durable=True)
+
+ch.basic_publish(
+    exchange="",
+    routing_key="emails_out",
+    body=json.dumps({"to": "asha@example.com"}),
+    properties=pika.BasicProperties(delivery_mode=2),   <span class="c"># 2 = persistent</span>
+)
+
+done = threading.Event()
+
+def handle(ch, method, properties, body):
+    send(json.loads(body))
+    ch.basic_ack(delivery_tag=method.delivery_tag)
+    done.set()
+
+ch.basic_qos(prefetch_count=1)
+ch.basic_consume(queue="emails_out", on_message_callback=handle)
+done.wait(timeout=15)                <span class="c"># a real worker waits forever</span>
+conn.close()</code></pre>
+        <p class="note">Most older examples use <code>pika.BlockingConnection</code> with <code>ch.start_consuming()</code>. It still runs on pika 1.5 and prints a warning that it will be removed in pika 2.0.</p>
+      </div>
+
+      <div class="lesson">
+        <h3>What "delivered" means</h3>
+        <p>With manual acknowledgements you get at-least-once delivery. A worker can finish the job and crash before it acknowledges, and the message is delivered again. Make handlers safe to repeat: record the message id in your database with a unique constraint, or write the result as an upsert.</p>
+        <p>Order is kept for one queue with one consumer. Several consumers, or a message put back on the queue, break that order. If order matters for a customer, send all of that customer's messages to the same queue and read it with one consumer.</p>
+      </div>
+    </section>
+
+    <section class="level" id="q3">
+      <header><span class="eyebrow">Level 3 · 1 to 2 weeks</span><h2>Production patterns</h2></header>
+
+      <div class="lesson">
+        <h3>Failed messages and retries</h3>
+        <p>A message is <b>dead-lettered</b> when a consumer rejects it without requeue, when it sits longer than its time-to-live, or when the queue is full. If the queue names a dead letter exchange, the message is sent there instead of being deleted. You saw that with photo 2.</p>
+        <p>For a delayed retry, dead-letter into a wait queue that has no consumers and a time-to-live of, say, 30 seconds, and make that queue dead-letter back to the work queue. The message returns by itself after the delay. Count the attempts from the <code>x-death</code> header and park the message in a failed queue after a few tries.</p>
+        <p class="trap"><b>Trap.</b> <code>nack</code> with requeue set to true puts the message straight back at the front. A message that always fails then loops at full speed. In a test for this guide, a quorum queue on RabbitMQ 4.4 delivered one always-requeued message 4,432 times in four seconds and never gave up. Reject without requeue and let a dead letter exchange handle the retry.</p>
+      </div>
+
+      <div class="lesson">
+        <h3>Queue types</h3>
+        <div class="tbl"><table>
+          <tr><th>Type</th><th>Where the data lives</th><th>Choose it for</th></tr>
+          <tr><td>Classic</td><td>One node. If that node is down, the queue is unavailable</td><td>Data you can afford to lose or rebuild; temporary queues</td></tr>
+          <tr><td>Quorum</td><td>Copied to several nodes, agreed by majority</td><td>Anything that matters: orders, payments</td></tr>
+          <tr><td>Stream</td><td>An append-only log on disk; reading does not remove messages</td><td>Replay and many independent readers, in the style of Kafka</td></tr>
+        </table></div>
+        <p>RabbitMQ 4 removed the old mirrored classic queues. Replication now means quorum queues or streams.</p>
+      </div>
+
+      <div class="lesson">
+        <h3>A three-node cluster</h3>
+<pre><code>x-rabbit: &amp;rabbit
+  image: rabbitmq:4-management
+  user: rabbitmq
+  environment:
+    RABBITMQ_ERLANG_COOKIE: local-dev-cookie-not-a-secret
+
+services:
+  rabbit1:
+    &lt;&lt;: *rabbit
+    hostname: rabbit1
+    ports: ["5672:5672", "15672:15672"]
+  rabbit2:
+    &lt;&lt;: *rabbit
+    hostname: rabbit2
+  rabbit3:
+    &lt;&lt;: *rabbit
+    hostname: rabbit3</code></pre>
+<pre><code>docker compose up -d
+<span class="c"># on rabbit2, then on rabbit3:</span>
+rabbitmqctl stop_app
+rabbitmqctl join_cluster rabbit@rabbit1
+rabbitmqctl start_app
+
+rabbitmqctl cluster_status              <span class="c"># Running Nodes: rabbit@rabbit1, rabbit@rabbit2, rabbit@rabbit3</span>
+
+rabbitmqadmin declare queue --name payments --type quorum --durable true
+rabbitmqadmin publish message -k payments -m "pay order 17"
+rabbitmq-queues quorum_status payments  <span class="c"># rabbit1 leader, rabbit2 and rabbit3 followers</span>
+
+docker compose stop rabbit1             <span class="c"># stop the node that leads the queue</span>
+rabbitmqctl list_queues name type leader messages
+payments  quorum  rabbit@rabbit3  1     <span class="c"># new leader, message still there</span></code></pre>
+        <p>Nodes trust each other only when they share the same Erlang cookie, so treat it as a secret in real deployments. The environment variable used here is a shortcut for a laptop; the broker logs a warning when it is set. As with ZooKeeper, use an odd number of nodes: a quorum queue needs a majority of its copies to accept a write.</p>
+      </div>
+
+      <div class="lesson">
+        <h3>When RabbitMQ pushes back</h3>
+        <p>RabbitMQ is fastest when queues are short. A queue that only grows means consumers are too slow or absent. Two alarms protect the broker:</p>
+<pre><code>rabbitmq-diagnostics status
+Memory high watermark setting: 0.6 of available memory
+Low free disk space watermark: 0.05 gb
+
+rabbitmq-diagnostics check_local_alarms
+Node rabbit@rabbit reported no local alarms</code></pre>
+        <p>When memory passes the watermark or free disk falls below the limit, the broker stops accepting messages from producers until it recovers. Publishing appears to hang. Give queues a maximum length or a time-to-live so that a stuck consumer cannot fill the disk.</p>
+      </div>
+
+      <div class="lesson">
+        <h3>Users, virtual hosts and permissions</h3>
+<pre><code>rabbitmqctl add_vhost shop
+rabbitmqctl add_user shopapp 'a-long-random-password'
+rabbitmqctl set_permissions -p shop shopapp "^shop\..*" "^shop\..*" "^shop\..*"
+
+rabbitmqctl list_permissions -p shop
+user     configure   write       read
+shopapp  ^shop\..*   ^shop\..*   ^shop\..*</code></pre>
+        <ul>
+          <li>A virtual host is a separate space with its own exchanges and queues. Give each application or environment its own.</li>
+          <li>The three patterns say which names the user may create, publish to and read from.</li>
+          <li>Create your own users and remove <code>guest</code>. Use TLS on port 5671 between networks. Keep the management port off the public internet.</li>
+        </ul>
+      </div>
+
+      <div class="lesson">
+        <h3>Connections and monitoring</h3>
+        <ul>
+          <li>Open one connection per process and keep it open. Use a channel per thread or per task. Opening a connection for every message is the most common cause of a slow, overloaded broker.</li>
+          <li>Reconnect with a delay when the connection drops, and declare queues again on reconnect.</li>
+          <li>Watch per queue: messages ready, messages unacknowledged, consumer count, publish and acknowledge rates. Ready growing means too few consumers. Unacknowledged growing means stuck consumers.</li>
+          <li>The broker serves metrics for Prometheus on port 15692. <code>rabbitmq-diagnostics check_running</code> exits with 0 when the node is healthy, which suits a container health check.</li>
+        </ul>
+      </div>
+
+      <div class="lesson">
+        <h3>RabbitMQ or Kafka?</h3>
+        <div class="tbl"><table>
+          <tr><th>Question</th><th>RabbitMQ</th><th>Kafka</th></tr>
+          <tr><td>Basic idea</td><td>A queue: deliver each message to a worker, then delete it</td><td>A log: keep every event, readers track their own position</td></tr>
+          <tr><td>Routing</td><td>Rich: exchanges, patterns, per-message rules</td><td>Simple: a topic and a key that picks the partition</td></tr>
+          <tr><td>After a message is read</td><td>Gone, unless you use a stream</td><td>Still there until retention removes it; can be replayed</td></tr>
+          <tr><td>Per-message control</td><td>Acknowledge, reject, retry, delay, priority, time-to-live</td><td>Commit an offset; retries need extra topics</td></tr>
+          <tr><td>Throughput</td><td>Tens of thousands of messages a second on a node</td><td>Hundreds of thousands and more, with batching</td></tr>
+          <tr><td>Pick it for</td><td>Background jobs, task distribution, request and reply, complex routing</td><td>Event history, analytics pipelines, many teams reading the same stream</td></tr>
+        </table></div>
+        <p>Many systems use both: RabbitMQ for "do this job", Kafka for "this happened". Throughput figures are typical ranges, not something measured for this guide.</p>
+      </div>
+
+      <div class="lesson">
+        <h3>Practice projects</h3>
+        <ul>
+          <li>Level 1: publish five messages from the terminal, read two, and explain every number <code>list_queues</code> prints.</li>
+          <li>Level 2: run the producer and two workers. Kill one worker mid-job and watch the other receive its message.</li>
+          <li>Level 3: add a 30 second retry queue in front of the failed queue, then build the three-node cluster and stop the leader of a quorum queue.</li>
+        </ul>
+      </div>
+
+      <div class="lesson">
+        <h3>Check yourself</h3>
+        <div class="qa">
+          <details><summary>Exchange or queue: where does a producer send?</summary><p>Always to an exchange. The exchange uses bindings and the routing key to decide which queues get a copy. Sending "to a queue" uses the default exchange behind the scenes.</p></details>
+          <details><summary>What is the difference between * and # in a topic binding?</summary><p><code>*</code> matches exactly one word. <code>#</code> matches zero or more words. <code>order.*</code> matches <code>order.paid</code> and not <code>order.paid.eu</code>; <code>order.#</code> matches both.</p></details>
+          <details><summary>What happens to a message that matches no queue?</summary><p>It is dropped. To catch these, set an alternate exchange or publish with the mandatory flag so the broker returns it.</p></details>
+          <details><summary>Why set prefetch?</summary><p>It caps unacknowledged messages per consumer, so work is shared fairly and a slow worker does not hoard messages in memory.</p></details>
+          <details><summary>What do you need so a broker restart loses nothing?</summary><p>A durable queue, persistent messages, publisher confirms, and manual acknowledgements after the work is done. For a node failure, also a quorum queue.</p></details>
+          <details><summary>What is a dead letter exchange?</summary><p>An exchange that receives messages a queue gives up on: rejected without requeue, expired, or pushed out by a length limit. It is how failed messages are kept and retried.</p></details>
+          <details><summary>Classic or quorum queue?</summary><p>Quorum for data that matters, because it is copied to several nodes and survives a node failure. Classic for temporary or rebuildable data on one node.</p></details>
+          <details><summary>When would you choose Kafka over RabbitMQ?</summary><p>When events must be kept and replayed, when many independent readers need the same stream, or when the volume is very high.</p></details>
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <!-- ================= DOCKER ================= -->
+  <div class="panel" id="p-docker" role="tabpanel" aria-labelledby="tab-docker" hidden>
+    <ol class="ladder">
+      <li><span class="t">2 to 3 hours</span><span class="w">Containers and core commands</span><span class="d">Image, container, run, logs, exec, ports.</span><a href="#d1">Level 1</a></li>
+      <li><span class="t">2 to 3 days</span><span class="w">A real local stack</span><span class="d">Volumes, networks, a Dockerfile, Compose with Redis and Kafka.</span><a href="#d2">Level 2</a></li>
+      <li><span class="t">1 to 2 weeks</span><span class="w">Production habits</span><span class="d">Health checks, limits, image size, security, cleanup.</span><a href="#d3">Level 3</a></li>
+    </ol>
+
+    <section class="level" id="d1">
+      <header><span class="eyebrow">Level 1 · 2 to 3 hours</span><h2>Containers and core commands</h2></header>
+
+      <div class="lesson">
+        <h3>What Docker is</h3>
+        <p>Docker packs a program together with everything it needs to run, then runs that package the same way on any machine. You did not install Redis or Kafka for this guide. You ran a package someone else built.</p>
+        <p>Two words carry most of it. An <b>image</b> is the package: files plus the command to start. It never changes. A <b>container</b> is one running copy of an image, with its own files, its own network address and its own process list.</p>
+        <p>A container is not a virtual machine. It is a normal process that the operating system keeps separated from the others, so it starts in about a second. On a Mac, Docker Desktop runs one small Linux machine in the background and all containers live inside it.</p>
+      </div>
+
+      <div class="lesson">
+        <h3>The life of one container</h3>
+<pre><code>docker run -d --name redis -p 6379:6379 redis:8   <span class="c"># download the image if needed, start a container</span>
+docker ps                                          <span class="c"># what is running</span>
+NAMES   IMAGE     STATUS         PORTS
+redis   redis:8   Up 2 seconds   0.0.0.0:6379->6379/tcp
+
+docker logs redis                                  <span class="c"># what the program printed</span>
+docker exec redis redis-cli PING                   <span class="c"># run a command inside it</span>
+PONG
+docker exec -it redis redis-cli                    <span class="c"># same, as an interactive shell</span>
+
+docker stop redis                                  <span class="c"># stop the process, keep the container</span>
+docker ps -a                                       <span class="c"># redis   Exited (0)</span>
+docker start redis                                 <span class="c"># run it again</span>
+docker rm -f redis                                 <span class="c"># stop and delete it</span></code></pre>
+      </div>
+
+      <div class="lesson">
+        <h3>Reading a run command</h3>
+        <div class="tbl"><table>
+          <tr><th>Part</th><th>Meaning</th></tr>
+          <tr><td><code>-d</code></td><td>Run in the background and give the terminal back.</td></tr>
+          <tr><td><code>--name redis</code></td><td>A name you choose, used by every later command.</td></tr>
+          <tr><td><code>-p 6379:6379</code></td><td>Port on your machine, then port in the container. Without it, nothing outside Docker can connect.</td></tr>
+          <tr><td><code>-e KEY=value</code></td><td>Set an environment variable for the program.</td></tr>
+          <tr><td><code>-v name:/path</code></td><td>Keep the files at that path outside the container.</td></tr>
+          <tr><td><code>--network shop</code></td><td>Join a network so containers find each other by name.</td></tr>
+          <tr><td><code>--rm</code></td><td>Delete the container when it exits. Good for one-off commands.</td></tr>
+          <tr><td><code>redis:8</code></td><td>Image name and tag. The tag is the version.</td></tr>
+        </table></div>
+        <p class="trap"><b>Trap.</b> "Container name already in use" means an old container with that name still exists, running or stopped. Remove it with <code>docker rm -f redis</code>. "Port is already allocated" means something else on your machine holds that port.</p>
+      </div>
+
+      <div class="lesson">
+        <h3>Try the flags</h3>
+        <div class="lab">
+          <p class="cap">Tick the flags and read what changes. This is a model of the rules, not a running container.</p>
+          <div class="opts">
+            <label><input type="checkbox" id="dk-d" checked> <span><code>-d</code> run in the background</span></label>
+            <label><input type="checkbox" id="dk-p" checked> <span><code>-p 6379:6379</code> publish the port</span></label>
+            <label><input type="checkbox" id="dk-v"> <span><code>-v redis-data:/data</code> named volume</span></label>
+            <label><input type="checkbox" id="dk-n"> <span><code>--network shop</code> user-defined network</span></label>
+          </div>
+          <pre id="dkcmd" aria-live="polite"></pre>
+          <ul class="outc" id="dkout"></ul>
+        </div>
+      </div>
+    </section>
+
+    <section class="level" id="d2">
+      <header><span class="eyebrow">Level 2 · 2 to 3 days</span><h2>A real local stack</h2></header>
+
+      <div class="lesson">
+        <h3>Volumes: keeping data</h3>
+        <p>Files written inside a container belong to that container. Delete it and start a new one, and Redis is empty. A volume is storage that Docker keeps separately and attaches at a path.</p>
+<pre><code>docker volume create redis-data
+docker run -d --name redis -v redis-data:/data redis:8 redis-server --appendonly yes
+docker exec redis redis-cli SET city Bengaluru     <span class="c"># OK</span>
+docker rm -f redis                                 <span class="c"># container gone</span>
+
+docker run -d --name redis -v redis-data:/data redis:8 redis-server --appendonly yes
+docker exec redis redis-cli GET city               <span class="c"># Bengaluru</span></code></pre>
+        <p>A named volume (<code>redis-data:/data</code>) is managed by Docker and is right for database files. A bind mount (<code>./src:/app/src</code>) maps a folder from your machine and is right for source code you are editing.</p>
+      </div>
+
+      <div class="lesson">
+        <h3>Networks: containers finding each other</h3>
+<pre><code>docker network create shop
+docker run -d --name redis --network shop redis:8
+
+docker run --rm --network shop redis:8 redis-cli -h redis PING
+PONG
+docker run --rm redis:8 redis-cli -h redis PING    <span class="c"># not on the network</span>
+Could not connect to Redis at redis:6379: Name or service not known</code></pre>
+        <p>On a network you create, the container name works as a hostname. That is why app config says <code>redis://redis:6379</code> and not an IP address.</p>
+        <p class="trap"><b>Trap.</b> Inside a container, <code>localhost</code> is that container, not your Mac and not the Redis container. An app in a container that connects to <code>localhost:6379</code> finds nothing.</p>
+      </div>
+
+      <div class="lesson">
+        <h3>A Dockerfile for your own app</h3>
+        <p>A Dockerfile is the recipe for an image. Each line adds a layer, and Docker reuses a layer when its inputs have not changed. Copying <code>package.json</code> before the rest of the code means dependencies are reinstalled only when they change.</p>
+<pre><code>FROM node:22-alpine AS deps
+WORKDIR /app
+COPY package.json ./
+RUN npm install --omit=dev
+
+FROM node:22-alpine
+WORKDIR /app
+COPY --from=deps /app/node_modules ./node_modules
+COPY . .
+USER node
+EXPOSE 3000
+CMD ["node", "server.js"]</code></pre>
+        <p>Add a <code>.dockerignore</code> file with <code>node_modules</code> and <code>.git</code> so they are not copied in. Build with <code>docker build -t shop-api ./app</code>.</p>
+      </div>
+
+      <div class="lesson">
+        <h3>Compose: the whole stack in one file</h3>
+        <p>Compose starts several containers together, on one shared network, from a file you keep in the repository. This file runs Redis, Kafka and a small Node API that counts page views in Redis and publishes each view to Kafka.</p>
+<pre><code>services:
+  redis:
+    image: redis:8
+    command: redis-server --appendonly yes
+    volumes:
+      - redis-data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+
+  kafka:
+    image: apache/kafka:latest
+    ports:
+      - "9092:9092"
+    environment:
+      KAFKA_NODE_ID: 1
+      KAFKA_PROCESS_ROLES: broker,controller
+      KAFKA_CONTROLLER_QUORUM_VOTERS: 1@kafka:9093
+      KAFKA_CONTROLLER_LISTENER_NAMES: CONTROLLER
+      KAFKA_LISTENERS: INTERNAL://:19092,HOST://:9092,CONTROLLER://:9093
+      KAFKA_ADVERTISED_LISTENERS: INTERNAL://kafka:19092,HOST://localhost:9092
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: INTERNAL:PLAINTEXT,HOST:PLAINTEXT,CONTROLLER:PLAINTEXT
+      KAFKA_INTER_BROKER_LISTENER_NAME: INTERNAL
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+    healthcheck:
+      test: ["CMD-SHELL", "/opt/kafka/bin/kafka-topics.sh --bootstrap-server localhost:19092 --list"]
+      interval: 10s
+      timeout: 10s
+      retries: 10
+
+  api:
+    build: ./app
+    ports:
+      - "3000:3000"
+    environment:
+      REDIS_URL: redis://redis:6379
+      KAFKA_BROKER: kafka:19092
+    depends_on:
+      redis:
+        condition: service_healthy
+      kafka:
+        condition: service_healthy
+
+volumes:
+  redis-data:</code></pre>
+<pre><code>docker compose up -d --build       <span class="c"># build the api image, start everything</span>
+docker compose ps
+SERVICE   STATUS                    PORTS
+api       Up 4 seconds              0.0.0.0:3000->3000/tcp
+kafka     Up 46 seconds (healthy)   0.0.0.0:9092->9092/tcp
+redis     Up 46 seconds (healthy)   6379/tcp
+
+curl localhost:3000                <span class="c"># views: 1</span>
+curl localhost:3000                <span class="c"># views: 2</span>
+docker compose logs -f api         <span class="c"># follow one service's output</span>
+docker compose down                <span class="c"># stop and remove containers, keep the volume</span>
+docker compose up -d
+curl localhost:3000                <span class="c"># views: 3, the count survived</span>
+docker compose down -v             <span class="c"># also delete the volume</span></code></pre>
+        <p>The API takes a few seconds to connect before it answers. Redis has no <code>ports</code> entry on purpose: only the API needs it, and the API reaches it over the Compose network.</p>
+      </div>
+
+      <div class="lesson">
+        <h3>The Kafka listener trap</h3>
+        <p>A Kafka client connects twice. First to the address you gave it, to ask for the cluster layout. Then to the address the broker <em>advertises</em> for itself. If the broker advertises <code>localhost:9092</code>, a client in another container follows that to its own localhost and fails.</p>
+        <p>The fix is two listeners, as in the file above. <code>INTERNAL</code> advertises <code>kafka:19092</code> for other containers. <code>HOST</code> advertises <code>localhost:9092</code> for programs on your Mac. Each client uses the one that matches where it runs.</p>
+      </div>
+    </section>
+
+    <section class="level" id="d3">
+      <header><span class="eyebrow">Level 3 · 1 to 2 weeks</span><h2>Production habits</h2></header>
+
+      <div class="lesson">
+        <h3>Health checks and start order</h3>
+        <p>Plain <code>depends_on</code> waits only until the other container has started, not until the server inside is ready. Kafka takes several seconds to accept connections. A health check plus <code>condition: service_healthy</code> makes the API wait for a real answer. Your app should still retry its connections, because servers also restart later.</p>
+      </div>
+
+      <div class="lesson">
+        <h3>Limits and restarts</h3>
+<pre><code>docker run -d --name redis --memory 256m --cpus 1 --restart unless-stopped redis:8
+docker stats --no-stream redis
+redis   11.68MiB / 256MiB   0.37%</code></pre>
+        <ul>
+          <li>Without a memory limit, one container can take all the memory on the machine. With one, the container is killed when it goes over, so set Redis <code>maxmemory</code> below the limit.</li>
+          <li><code>--restart unless-stopped</code> brings the container back after a crash or a reboot. <code>on-failure</code> restarts only on a non-zero exit.</li>
+        </ul>
+      </div>
+
+      <div class="lesson">
+        <h3>Images: small, pinned, not root</h3>
+        <ul>
+          <li>Pin versions. <code>redis:8</code> and <code>apache/kafka:4.3.1</code> give the same result next month. <code>latest</code>, used in this guide for convenience, does not.</li>
+          <li>Use a small base (<code>-alpine</code> or <code>-slim</code>) and a multi-stage build so compilers and caches stay out of the final image. The API image above is 254 MB, most of it the Node runtime.</li>
+          <li><code>USER node</code> in the Dockerfile runs the app as a normal user. If the app is broken into, the attacker is not root.</li>
+          <li>Never copy secrets into an image or write them in a Dockerfile. Anyone with the image can read them. Pass them at run time.</li>
+        </ul>
+      </div>
+
+      <div class="lesson">
+        <h3>Stateful servers in containers</h3>
+        <p>Redis and Kafka hold data, so they need more care than a stateless API. Give each one a volume, give Kafka brokers stable names, and stop them gracefully so they can flush to disk. In Kubernetes this is what a StatefulSet does. Many teams run their apps in containers and use a managed Redis and a managed Kafka instead.</p>
+      </div>
+
+      <div class="lesson">
+        <h3>Seeing and cleaning what Docker holds</h3>
+<pre><code>docker system df                   <span class="c"># space used by images, containers, volumes</span>
+docker image ls
+docker volume ls
+docker image prune                 <span class="c"># remove images nothing uses and nothing tags</span>
+docker system prune                <span class="c"># also stopped containers and unused networks</span></code></pre>
+        <p class="trap"><b>Trap.</b> <code>docker system prune -a --volumes</code> deletes every unused image and every unused volume, including database files you may want. Read the confirmation line before you answer yes.</p>
+      </div>
+
+      <div class="lesson">
+        <h3>Practice projects</h3>
+        <ul>
+          <li>Level 1: start Redis, set a key, remove the container, start it again and explain why the key is gone.</li>
+          <li>Level 2: write the Compose file above from memory, then add a second API container and watch both share one counter.</li>
+          <li>Level 3: break the Kafka listeners on purpose (advertise only <code>localhost:9092</code>), read the error the API prints, and fix it.</li>
+        </ul>
+      </div>
+
+      <div class="lesson">
+        <h3>Check yourself</h3>
+        <div class="qa">
+          <details><summary>Image or container?</summary><p>An image is the read-only package. A container is a running copy of it with its own writable files. Many containers can run from one image.</p></details>
+          <details><summary>How is a container different from a virtual machine?</summary><p>A virtual machine runs a full operating system. A container is a process on the host's kernel, separated by the operating system, so it is smaller and starts in about a second.</p></details>
+          <details><summary>What does -p 8080:80 mean?</summary><p>Port 8080 on your machine forwards to port 80 inside the container. Host first, container second.</p></details>
+          <details><summary>Where does data go when a container is removed?</summary><p>Files in the container are lost. Files in a volume or a bind mount stay.</p></details>
+          <details><summary>Why can the API reach Redis at the name redis?</summary><p>Compose puts all services on one network, and Docker's built-in name lookup resolves each service name to its container.</p></details>
+          <details><summary>Why does Kafka in Docker need two listeners?</summary><p>Clients reconnect to the address the broker advertises. Containers need the service name, programs on the host need localhost, so the broker advertises one of each.</p></details>
+          <details><summary>depends_on is set, yet the app fails at startup. Why?</summary><p>Without a health condition, depends_on waits for the container to start, not for the server to be ready. Add a health check and <code>condition: service_healthy</code>, and retry in the app.</p></details>
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <!-- ================= ZOOKEEPER ================= -->
+  <div class="panel" id="p-zookeeper" role="tabpanel" aria-labelledby="tab-zookeeper" hidden>
+    <p class="note">Do you need this? Kafka 4 runs without ZooKeeper. Learn it if you work on Kafka 3.x or older, on HBase, Hadoop or Solr, or if interviews ask how Kafka picks a controller.</p>
+    <ol class="ladder">
+      <li><span class="t">2 to 3 hours</span><span class="w">Znodes and the shell</span><span class="d">The tree, create, get, set, temporary nodes, watches.</span><a href="#z1">Level 1</a></li>
+      <li><span class="t">2 to 4 days</span><span class="w">Ensembles and Kafka</span><span class="d">Quorum, sessions, leader election, what Kafka stored.</span><a href="#z2">Level 2</a></li>
+      <li><span class="t">1 to 2 weeks</span><span class="w">Operating it and leaving it</span><span class="d">Config, monitoring, disks, the move to KRaft.</span><a href="#z3">Level 3</a></li>
+    </ol>
+
+    <section class="level" id="z1">
+      <header><span class="eyebrow">Level 1 · 2 to 3 hours</span><h2>Znodes and the shell</h2></header>
+
+      <div class="lesson">
+        <h3>What ZooKeeper is</h3>
+        <p>A cluster of servers has to agree on a few small facts. Which servers are alive? Which one is in charge? What is the current configuration? ZooKeeper is a small, very reliable store built to hold exactly those facts.</p>
+        <p>It looks like a file system. Data lives in a tree of nodes called <b>znodes</b>, each with a path such as <code>/brokers/ids/1</code> and a small value. Every server in a ZooKeeper group sees every change in the same order, so two clients can never both believe they are the leader.</p>
+        <p>It is not a database for your application data. A znode holds at most about 1 MB, and the whole tree sits in memory.</p>
+      </div>
+
+      <div class="lesson">
+        <h3>Start it and open the shell</h3>
+<pre><code>docker run -d --name zk -p 2181:2181 zookeeper:3.9
+docker exec -it zk zkCli.sh
+[zk: localhost:2181(CONNECTED) 0]</code></pre>
+      </div>
+
+      <div class="lesson">
+        <h3>Core commands</h3>
+<pre><code>ls /                               <span class="c"># [zookeeper]</span>
+create /shop "hello"               <span class="c"># Created /shop</span>
+get /shop                          <span class="c"># hello</span>
+set /shop "v2"
+get -s /shop                       <span class="c"># v2, then details: dataVersion = 1 ...</span>
+create /shop/config "retries=3"
+ls /shop                           <span class="c"># [config]</span>
+
+create -e /shop/worker-1 "alive"   <span class="c"># -e: temporary, tied to this session</span>
+create -s /shop/job- "a"           <span class="c"># -s: ZooKeeper adds a number</span>
+create -s /shop/job- "b"
+ls /shop                           <span class="c"># [config, job-0000000002, job-0000000003, worker-1]</span>
+
+get -w /shop/config                <span class="c"># read and ask to be told about the next change</span>
+set /shop/config "retries=5"       <span class="c"># WatchedEvent type:NodeDataChanged path:/shop/config</span>
+
+delete /shop/config
+deleteall /shop                    <span class="c"># delete a node and everything under it</span>
+quit</code></pre>
+        <p>The job numbers start at 2 because the counter belongs to the parent and <code>config</code> and <code>worker-1</code> were created first.</p>
+      </div>
+
+      <div class="lesson">
+        <h3>Three ideas that make it useful</h3>
+        <div class="tbl"><table>
+          <tr><th>Idea</th><th>What it does</th><th>Used for</th></tr>
+          <tr><td>Ephemeral node (<code>-e</code>)</td><td>Deleted automatically when the client that made it disconnects or stops sending heartbeats</td><td>"I am alive" markers</td></tr>
+          <tr><td>Sequential node (<code>-s</code>)</td><td>Gets a growing number added to its name</td><td>Fair ordering: queues, locks, elections</td></tr>
+          <tr><td>Watch (<code>-w</code>)</td><td>Tells the client once when a node changes; set it again to keep watching</td><td>Reacting to changes without polling</td></tr>
+        </table></div>
+        <p>Put the first and third together and you have failure detection. Each worker creates an ephemeral node. Everyone else watches the parent. When a worker dies, its node disappears and the watchers are told.</p>
+      </div>
+    </section>
+
+    <section class="level" id="z2">
+      <header><span class="eyebrow">Level 2 · 2 to 4 days</span><h2>Ensembles and Kafka</h2></header>
+
+      <div class="lesson">
+        <h3>Ensemble and quorum</h3>
+        <p>One ZooKeeper server is a single point of failure, so production runs a group called an ensemble. A change is accepted only when more than half of the servers have it. That majority is the quorum.</p>
+        <div class="tbl"><table>
+          <tr><th>Servers</th><th>Majority needed</th><th>Failures survived</th></tr>
+          <tr><td>1</td><td>1</td><td>0</td></tr>
+          <tr><td>3</td><td>2</td><td>1</td></tr>
+          <tr><td>4</td><td>3</td><td>1</td></tr>
+          <tr><td>5</td><td>3</td><td>2</td></tr>
+        </table></div>
+        <p>Four servers survive no more failures than three, which is why ensembles have an odd size. Three is normal, five for large clusters.</p>
+        <p>This is a real run of three servers. Each prints its role when asked with <code>srvr</code>.</p>
+<pre><code>zk1: Mode: follower     zk2: Mode: follower     zk3: Mode: leader
+
+docker compose stop zk3            <span class="c"># stop the leader</span>
+zk1: Mode: follower     zk2: Mode: leader       zk3: down
+set /shop v2                       <span class="c"># still works: 2 of 3 is a majority</span>
+
+docker compose stop zk2            <span class="c"># now only 1 of 3</span>
+zk1: This ZooKeeper instance is not currently serving requests
+
+docker compose start zk2 zk3
+zk1: Mode: follower     zk2: Mode: leader       zk3: Mode: follower
+get /shop                          <span class="c"># v2, on the server that was down</span></code></pre>
+        <p>One server left alone refuses to answer. That is deliberate. It cannot know whether the other two are dead or merely unreachable, and answering could produce two different truths.</p>
+      </div>
+
+      <div class="lesson">
+        <h3>Leader, followers and sessions</h3>
+        <ul>
+          <li>One server is the leader. Every write goes through it and is copied to the followers in a fixed order. The protocol is called ZAB.</li>
+          <li>Reads are answered by whichever server the client is connected to, so a read can be a moment behind.</li>
+          <li>A client holds a <b>session</b> and sends heartbeats. If none arrive within the session timeout, the session expires and its ephemeral nodes are removed.</li>
+        </ul>
+        <p class="trap"><b>Trap.</b> A long garbage-collection pause looks the same as a crash. The session expires, the node vanishes, and a healthy process loses its role. Timeouts are a trade between fast detection and false alarms.</p>
+      </div>
+
+      <div class="lesson">
+        <h3>Leader election, the standard recipe</h3>
+        <p>Every candidate creates an ephemeral sequential node under one parent, for example <code>/election/n-</code>. The candidate with the lowest number is the leader. Each other candidate watches only the node just before its own. When the leader dies, its node disappears, exactly one candidate is told, and it takes over.</p>
+        <p>A lock works the same way: lowest number holds the lock. In Java, use the Curator library for these recipes. The edge cases are hard to get right by hand.</p>
+      </div>
+
+      <div class="lesson">
+        <h3>What Kafka kept in ZooKeeper</h3>
+        <p>This is from a real two-broker cluster on Kafka 3.6 (image <code>confluentinc/cp-kafka:7.6.1</code>) after creating the topic <code>orders</code> with 3 partitions and replication factor 2.</p>
+<pre><code>ls /
+[admin, brokers, cluster, config, consumers, controller, controller_epoch, feature, ...]
+
+ls /brokers/ids                    <span class="c"># one ephemeral node per live broker</span>
+[1, 2]
+get /brokers/ids/1
+{"endpoints":["PLAINTEXT://kafka1:9092"],"host":"kafka1","port":9092, ...}
+
+get /controller                    <span class="c"># ephemeral: the broker in charge of the cluster</span>
+{"version":2,"brokerid":1, ...}
+
+get /brokers/topics/orders         <span class="c"># which brokers hold each partition</span>
+{"partitions":{"0":[2,1],"1":[1,2],"2":[2,1]}, ...}
+get /brokers/topics/orders/partitions/0/state
+{"leader":2,"leader_epoch":0,"isr":[2,1], ...}</code></pre>
+        <p>Then broker 1, the controller, was stopped:</p>
+<pre><code>ls /brokers/ids                    <span class="c"># its ephemeral node is gone</span>
+[2]
+get /controller                    <span class="c"># broker 2 won the race to create it</span>
+{"version":2,"brokerid":2, ...}
+get /brokers/topics/orders/partitions/0/state
+{"leader":2,"leader_epoch":1,"isr":[2], ...}</code></pre>
+        <p>That is the whole mechanism. Brokers announce themselves with ephemeral nodes. The first broker to create <code>/controller</code> becomes the controller. When it dies, the node vanishes, the others are told through a watch, and one of them creates it again.</p>
+      </div>
+
+      <div class="lesson">
+        <h3>See the election</h3>
+        <div class="lab">
+          <p class="cap">A model of three Kafka brokers on ZooKeeper. Stop and start brokers and watch the tree. In the model the lowest running id wins; on a real cluster whichever broker creates the node first wins.</p>
+          <pre id="zktree" aria-live="polite"></pre>
+          <div class="row" id="zkbtns"></div>
+          <p class="cap" id="zklog"></p>
+        </div>
+      </div>
+    </section>
+
+    <section class="level" id="z3">
+      <header><span class="eyebrow">Level 3 · 1 to 2 weeks</span><h2>Operating it and leaving it</h2></header>
+
+      <div class="lesson">
+        <h3>Configuration</h3>
+<pre><code><span class="c"># zoo.cfg</span>
+tickTime=2000                      <span class="c"># heartbeat unit in ms; session timeouts are multiples of it</span>
+initLimit=5                        <span class="c"># ticks a follower may take to connect and sync</span>
+syncLimit=2                        <span class="c"># ticks a follower may fall behind</span>
+dataDir=/data                      <span class="c"># snapshots, and the myid file</span>
+dataLogDir=/datalog                <span class="c"># transaction log</span>
+server.1=zk1:2888:3888;2181        <span class="c"># 2888 followers to leader, 3888 election, 2181 clients</span>
+server.2=zk2:2888:3888;2181
+server.3=zk3:2888:3888;2181</code></pre>
+        <p>Each server also needs a file named <code>myid</code> in <code>dataDir</code> holding its own number. The Docker image writes both from two environment variables:</p>
+<pre><code>services:
+  zk1:
+    image: zookeeper:3.9
+    hostname: zk1
+    environment:
+      ZOO_MY_ID: 1
+      ZOO_SERVERS: server.1=zk1:2888:3888;2181 server.2=zk2:2888:3888;2181 server.3=zk3:2888:3888;2181
+  <span class="c"># zk2 and zk3 are the same with ZOO_MY_ID 2 and 3</span></code></pre>
+      </div>
+
+      <div class="lesson">
+        <h3>Monitoring with four-letter commands</h3>
+        <p>ZooKeeper answers short text commands on its client port. Only <code>srvr</code> is allowed by default. Allow more with <code>4lw.commands.whitelist</code> in the config, or <code>ZOO_4LW_COMMANDS_WHITELIST=ruok,srvr,mntr</code> on the Docker image.</p>
+<pre><code>echo ruok | nc localhost 2181      <span class="c"># imok</span>
+echo srvr | nc localhost 2181
+Zookeeper version: 3.9.7
+Latency min/avg/max: 0/0.0/0
+Connections: 1
+Outstanding: 0
+Mode: standalone
+Node count: 5
+echo mntr | nc localhost 2181      <span class="c"># the same as key and value lines, for a metrics agent</span>
+zk_avg_latency  0.0
+zk_outstanding_requests  0
+zk_znode_count  5</code></pre>
+        <p>Alert on rising latency, outstanding requests that do not drain, a server that is not a leader or follower, and fewer followers in sync than expected.</p>
+      </div>
+
+      <div class="lesson">
+        <h3>Disks and housekeeping</h3>
+        <ul>
+          <li>Every write is saved to the transaction log before it is confirmed. A slow disk makes the whole ensemble slow, so give the log a fast disk of its own.</li>
+          <li>Old snapshots and logs are not deleted by default. The Docker image ships with <code>autopurge.purgeInterval=0</code>, which means never. Set it to <code>1</code> (hours) or the disk fills.</li>
+          <li>Keep the servers close together. Spreading an ensemble across distant regions adds latency to every write.</li>
+          <li>Do not store large values, do not use it as a queue, and do not run two servers: two cannot survive one failure.</li>
+        </ul>
+      </div>
+
+      <div class="lesson">
+        <h3>Why Kafka left ZooKeeper</h3>
+        <ul>
+          <li>Two systems to install, secure, monitor and upgrade for one product.</li>
+          <li>When the controller failed, the new one had to load all metadata from ZooKeeper before it could work. With hundreds of thousands of partitions that took minutes.</li>
+          <li>Metadata lived in two places, the controller's memory and ZooKeeper, and they could drift apart.</li>
+        </ul>
+        <p>KRaft replaces it. A small group of Kafka nodes called controllers keeps the metadata as a Kafka log and agrees on it with the Raft protocol. Standby controllers already have the data, so failover is quick.</p>
+        <div class="tbl"><table>
+          <tr><th>Question</th><th>Kafka with ZooKeeper</th><th>Kafka with KRaft</th></tr>
+          <tr><td>Systems to run</td><td>Kafka plus a ZooKeeper ensemble</td><td>Kafka only</td></tr>
+          <tr><td>Where metadata lives</td><td>Znodes</td><td>An internal Kafka topic, <code>__cluster_metadata</code></td></tr>
+          <tr><td>Who is controller</td><td>The broker that created <code>/controller</code></td><td>The leader of the controller quorum</td></tr>
+          <tr><td>Controller failover</td><td>Slower as partitions grow</td><td>Fast, standbys are already in sync</td></tr>
+          <tr><td>Kafka versions</td><td>Up to 3.9</td><td>Production-ready from 3.3, the only mode from 4.0</td></tr>
+        </table></div>
+      </div>
+
+      <div class="lesson">
+        <h3>Moving an old cluster to KRaft</h3>
+        <p>You cannot upgrade a ZooKeeper cluster straight to Kafka 4. The path goes through 3.9, the last release that speaks both.</p>
+        <ul>
+          <li>Upgrade the cluster to Kafka 3.9.</li>
+          <li>Start a new KRaft controller quorum with migration enabled. It copies the metadata out of ZooKeeper.</li>
+          <li>Restart brokers one at a time in migration mode. Metadata is now written to both places, so you can still roll back.</li>
+          <li>Restart brokers in KRaft mode, then finalize. After that there is no way back.</li>
+          <li>Shut ZooKeeper down, then upgrade to Kafka 4.</li>
+        </ul>
+        <p class="note">This migration was not run for this guide. Follow the Apache Kafka documentation for your exact version and rehearse it on a copy of the cluster first.</p>
+      </div>
+
+      <div class="lesson">
+        <h3>Where ZooKeeper still runs</h3>
+        <p>HBase, Hadoop high availability, SolrCloud and many older Kafka clusters depend on it. The same job is done by etcd in Kubernetes and by ClickHouse Keeper in ClickHouse. The ideas carry over: a small group that agrees by majority, temporary nodes or leases for liveness, and watches for change.</p>
+      </div>
+
+      <div class="lesson">
+        <h3>Practice projects</h3>
+        <ul>
+          <li>Level 1: open two shells. Create an ephemeral node in one, list it from the other, quit the first and list again.</li>
+          <li>Level 2: run three servers with Compose, stop the leader and find the new one with <code>srvr</code>.</li>
+          <li>Level 3: run Kafka 3.x with ZooKeeper, read <code>/controller</code>, stop that broker and read it again.</li>
+        </ul>
+      </div>
+
+      <div class="lesson">
+        <h3>Check yourself</h3>
+        <div class="qa">
+          <details><summary>What is ZooKeeper for?</summary><p>Holding small shared facts that a cluster must agree on: who is alive, who leads, current configuration. It gives every client the same ordered view of changes.</p></details>
+          <details><summary>What is an ephemeral node?</summary><p>A znode tied to the session that created it. When the session ends or expires, ZooKeeper deletes it. It is how others learn a process has died.</p></details>
+          <details><summary>Why an odd number of servers?</summary><p>Changes need a majority. Four servers tolerate one failure, the same as three, so the extra server adds cost without adding safety.</p></details>
+          <details><summary>What happens when the ensemble loses its majority?</summary><p>The remaining servers stop serving requests. Refusing is safer than letting two halves of a split network accept different writes.</p></details>
+          <details><summary>How did Kafka choose its controller with ZooKeeper?</summary><p>Every broker tried to create the ephemeral node <code>/controller</code>. The one that succeeded became controller. The rest watched the node and raced again when it disappeared.</p></details>
+          <details><summary>Why did Kafka replace ZooKeeper with KRaft?</summary><p>To run one system instead of two, to remove the slow metadata reload on controller failover, and to support far more partitions per cluster.</p></details>
+          <details><summary>Can a ZooKeeper-based cluster upgrade directly to Kafka 4?</summary><p>No. Upgrade to 3.9, migrate the metadata to KRaft there, and only then move to 4.</p></details>
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <footer>
+    <p>The RabbitMQ commands, the Node and Python code and the three-node cluster were run on RabbitMQ 4.4.0 (packages amqplib 2.4.0 and pika 1.5.0) on 18 Nov 2026. Not run: streams, TLS and the reply-queue pattern.</p>
+    <p>The Docker commands, the Dockerfile and the Compose stack were run on Docker 29.6.1 with Compose 5.2.0, and the ZooKeeper commands on ZooKeeper 3.9.7 (one server and a three-server ensemble) on 18 Nov 2026. The Kafka znodes come from a real two-broker Kafka 3.6 cluster. Not run: the ZooKeeper to KRaft migration and the hand-written election recipe.</p>
+    <p>Time estimates for Redis come from the outline you shared. The Kafka, RabbitMQ, Docker and ZooKeeper estimates are mine. The Redis commands and Lua scripts were run on Redis 8.10.3 and the Kafka CLI commands on Apache Kafka 4.3.1, both in Docker, on 13 Nov 2026. The four Node and Python snippets were run against the same servers with a stub database (packages redis 6.3.1 and kafkajs 2.2.4 on Node 25; redis 8.1.0 and confluent-kafka 2.16.1 on Python 3.12). Not run: anything that needs more than one server (Sentinel, Cluster, replication factor 3).</p>
+    <p>Official material: <a href="https://university.redis.io/">Redis University</a> · <a href="https://redis.io/docs/latest/">Redis docs</a> · <a href="https://kafka.apache.org/documentation/">Apache Kafka docs</a></p>
+  </footer>
+</div>
+
+<script>
+/* ---------- tabs ---------- */
+(function(){
+  var tabs=[].slice.call(document.querySelectorAll('.tabs button'));
+  function show(name,save){
+    tabs.forEach(function(b){
+      var on=b.dataset.tab===name;
+      b.setAttribute('aria-selected',on?'true':'false');
+      document.getElementById('p-'+b.dataset.tab).hidden=!on;
+    });
+    document.body.dataset.tab=name;
+    if(save){try{localStorage.setItem('rk-tab',name);}catch(e){}}
+  }
+  tabs.forEach(function(b){b.addEventListener('click',function(){show(b.dataset.tab,true);window.scrollTo(0,0);});});
+  var start='redis';
+  try{start=localStorage.getItem('rk-tab')||start;}catch(e){}
+  var byLetter={r:'redis',k:'kafka',q:'rabbitmq',d:'docker',z:'zookeeper'};
+  var names=tabs.map(function(b){return b.dataset.tab;});
+  var h=location.hash.slice(1);
+  if(names.indexOf(h)>=0)start=h;else if(/^[rkqdz]\d$/.test(h))start=byLetter[h[0]];
+  if(names.indexOf(start)<0)start='redis';
+  show(start,false);
+  document.addEventListener('click',function(e){
+    var a=e.target.closest&&e.target.closest('a[href^="#"]');
+    if(!a)return;var id=a.getAttribute('href').slice(1);
+    if(/^[rkqdz]\d$/.test(id))show(byLetter[id[0]],true);
+  });
+})();
+
+/* ---------- Redis look-alike ---------- */
+(function(){
+  var db=new Map();
+  function now(){return Date.now();}
+  function get(k){var e=db.get(k);if(e&&e.exp&&e.exp<=now()){db.delete(k);return undefined;}return e;}
+  function need(k,t){var e=get(k);if(e&&e.t!==t)throw 'WRONGTYPE Operation against a key holding the wrong kind of value';return e;}
+  function mk(k,t,v){var e={t:t,v:v,exp:0};db.set(k,e);return e;}
+  function q(s){return '"'+s+'"';}
+  function int(n){return '(integer) '+n;}
+  function arr(a){return a.length?a.map(function(x,i){return (i+1)+') '+q(x);}).join('\n'):'(empty array)';}
+  function toInt(s){if(!/^-?\d+$/.test(s))throw 'ERR value is not an integer or out of range';return parseInt(s,10);}
+  function range(len,a,b){a=toInt(a);b=toInt(b);if(a<0)a=Math.max(0,len+a);if(b<0)b=len+b;return [a,Math.min(b,len-1)];}
+  function push(a,front){var e=need(a[0],'list')||mk(a[0],'list',[]);a.slice(1).forEach(function(x){front?e.v.unshift(x):e.v.push(x);});return int(e.v.length);}
+  function pop(a,front){var e=need(a[0],'list');if(!e)return '(nil)';var x=front?e.v.shift():e.v.pop();if(!e.v.length)db.delete(a[0]);return q(x);}
+  var C={
+    PING:[0,function(){return 'PONG';}],
+    SET:[2,function(a){var ex=0,nx=false;for(var i=2;i<a.length;i++){var o=a[i].toUpperCase();if(o==='EX'&&a[i+1])ex=toInt(a[++i])*1000;else if(o==='PX'&&a[i+1])ex=toInt(a[++i]);else if(o==='NX')nx=true;else throw 'ERR syntax error';}
+      if(nx&&get(a[0]))return '(nil)';var e=mk(a[0],'string',a[1]);if(ex)e.exp=now()+ex;return 'OK';}],
+    GET:[1,function(a){var e=need(a[0],'string');return e?q(e.v):'(nil)';}],
+    DEL:[1,function(a){var n=0;a.forEach(function(k){if(get(k)){db.delete(k);n++;}});return int(n);}],
+    EXISTS:[1,function(a){return int(a.filter(function(k){return get(k);}).length);}],
+    INCR:[1,function(a){return C.INCRBY[1]([a[0],'1']);}],
+    INCRBY:[2,function(a){var e=need(a[0],'string');var n=(e?toInt(e.v):0)+toInt(a[1]);if(e)e.v=String(n);else mk(a[0],'string',String(n));return int(n);}],
+    EXPIRE:[2,function(a){var e=get(a[0]);if(!e)return int(0);e.exp=now()+toInt(a[1])*1000;return int(1);}],
+    TTL:[1,function(a){var e=get(a[0]);if(!e)return int(-2);return int(e.exp?Math.ceil((e.exp-now())/1000):-1);}],
+    TYPE:[1,function(a){var e=get(a[0]);return e?e.t:'none';}],
+    KEYS:[1,function(a){var re=new RegExp('^'+a[0].replace(/[.+^${}()|\\[\]]/g,'\\$&').replace(/\*/g,'.*').replace(/\?/g,'.')+'$');return arr(Array.from(db.keys()).filter(function(k){return get(k)&&re.test(k);}).sort());}],
+    FLUSHALL:[0,function(){db.clear();return 'OK';}],
+    HSET:[3,function(a){var e=need(a[0],'hash')||mk(a[0],'hash',new Map());var n=0;for(var i=1;i+1<a.length;i+=2){if(!e.v.has(a[i]))n++;e.v.set(a[i],a[i+1]);}return int(n);}],
+    HGET:[2,function(a){var e=need(a[0],'hash');return e&&e.v.has(a[1])?q(e.v.get(a[1])):'(nil)';}],
+    HGETALL:[1,function(a){var e=need(a[0],'hash');var out=[];if(e)e.v.forEach(function(v,k){out.push(k,v);});return arr(out);}],
+    LPUSH:[2,function(a){return push(a,true);}],
+    RPUSH:[2,function(a){return push(a,false);}],
+    LPOP:[1,function(a){return pop(a,true);}],
+    RPOP:[1,function(a){return pop(a,false);}],
+    LRANGE:[3,function(a){var e=need(a[0],'list');if(!e)return arr([]);var r=range(e.v.length,a[1],a[2]);return arr(e.v.slice(r[0],r[1]+1));}],
+    SADD:[2,function(a){var e=need(a[0],'set')||mk(a[0],'set',new Set());var n=0;a.slice(1).forEach(function(x){if(!e.v.has(x)){e.v.add(x);n++;}});return int(n);}],
+    SISMEMBER:[2,function(a){var e=need(a[0],'set');return int(e&&e.v.has(a[1])?1:0);}],
+    SMEMBERS:[1,function(a){var e=need(a[0],'set');return arr(e?Array.from(e.v).sort():[]);}],
+    ZADD:[3,function(a){var e=need(a[0],'zset')||mk(a[0],'zset',new Map());var n=0;for(var i=1;i+1<a.length;i+=2){var s=parseFloat(a[i]);if(isNaN(s))throw 'ERR value is not a valid float';if(!e.v.has(a[i+1]))n++;e.v.set(a[i+1],s);}return int(n);}],
+    ZINCRBY:[3,function(a){var d=parseFloat(a[1]);if(isNaN(d))throw 'ERR value is not a valid float';var e=need(a[0],'zset')||mk(a[0],'zset',new Map());var s=(e.v.get(a[2])||0)+d;e.v.set(a[2],s);return q(String(s));}],
+    ZSCORE:[2,function(a){var e=need(a[0],'zset');return e&&e.v.has(a[1])?q(String(e.v.get(a[1]))):'(nil)';}],
+    ZRANGE:[3,function(a){var e=need(a[0],'zset');if(!e)return arr([]);var o=a.slice(3).map(function(x){return x.toUpperCase();});
+      var m=Array.from(e.v).sort(function(x,y){return x[1]-y[1]||(x[0]<y[0]?-1:1);});if(o.indexOf('REV')>=0)m.reverse();
+      var r=range(m.length,a[1],a[2]);m=m.slice(r[0],r[1]+1);var out=[];m.forEach(function(x){out.push(x[0]);if(o.indexOf('WITHSCORES')>=0)out.push(String(x[1]));});return arr(out);}]
+  };
+  function run(line){
+    var t=[],m,re=/"([^"]*)"|'([^']*)'|(\S+)/g;
+    while((m=re.exec(line)))t.push(m[1]!==undefined?m[1]:m[2]!==undefined?m[2]:m[3]);
+    if(!t.length)return '';
+    var name=t[0].toUpperCase(),c=C[name];
+    if(!c)return "(error) ERR unknown command '"+t[0]+"' in this look-alike. Supported: "+Object.keys(C).join(' ');
+    if(t.length-1<c[0])return "(error) ERR wrong number of arguments for '"+name.toLowerCase()+"' command";
+    try{return c[1](t.slice(1));}catch(e){return '(error) '+(typeof e==='string'?e:'ERR '+e.message);}
+  }
+  var out=document.getElementById('rout'),inp=document.getElementById('rin');
+  function exec(line){
+    line=line.trim();if(!line)return;
+    var a=document.createElement('span');a.className='in';a.textContent='> '+line+'\n';
+    out.appendChild(a);out.appendChild(document.createTextNode(run(line)+'\n'));
+    out.scrollTop=out.scrollHeight;
+  }
+  document.getElementById('rrun').addEventListener('click',function(){exec(inp.value);inp.value='';inp.focus();});
+  inp.addEventListener('keydown',function(e){if(e.key==='Enter'){exec(inp.value);inp.value='';}});
+  ['SET otp:42 918273 EX 60','TTL otp:42','INCR page:home:views','HGETALL user:42','LRANGE jobs 0 -1','ZINCRBY board 30 ravi','ZRANGE board 0 -1 REV WITHSCORES','GET board','KEYS *'].forEach(function(c){
+    var b=document.createElement('button');b.className='chip';b.type='button';b.textContent=c;b.addEventListener('click',function(){exec(c);});
+    document.getElementById('rchips').appendChild(b);
+  });
+  ['SET user:42:name "Asha"','GET user:42:name','HSET user:42 name Asha city Bengaluru','RPUSH jobs resize:1 resize:2','ZADD board 120 asha 95 ravi 140 meera','ZRANGE board 0 2 REV WITHSCORES'].forEach(exec);
+})();
+
+/* ---------- Kafka partition model ---------- */
+(function(){
+  var N=3,parts,committed,consumers,seq;
+  function hash(s){var h=0;for(var i=0;i<s.length;i++)h=(h*31+s.charCodeAt(i))>>>0;return h;}
+  function produce(key){parts[hash(key)%N].push(key);}
+  function esc(s){return String(s).replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];});}
+  function reset(){
+    parts=[[],[],[]];consumers=2;seq=6;
+    ['order-1','order-2','order-3','order-1','order-4','order-2','order-5','order-1','order-3','order-6'].forEach(produce);
+    committed=parts.map(function(p){return Math.min(2,p.length);});
+  }
+  function owner(i){return 'c'+((i%Math.min(consumers,N))+1);}
+  function render(){
+    var h='';
+    parts.forEach(function(p,i){
+      var from=Math.max(0,p.length-9),cells='';
+      for(var o=from;o<p.length;o++)cells+='<div class="cell '+(o<committed[i]?'done':'lag')+'"><b>'+o+'</b>'+esc(p[o].slice(0,10))+'</div>';
+      h+='<div class="plabel">orders-'+i+'</div><div class="cells">'+(cells||'<div class="cell done">empty</div>')+'</div>'+
+         '<div class="pmeta">end offset '+p.length+' · committed '+committed[i]+' · lag '+(p.length-committed[i])+' · read by '+owner(i)+'</div>';
+    });
+    document.getElementById('kparts').innerHTML=h;
+    var c='<span class="cap">Group "billing":</span>';
+    for(var k=1;k<=consumers;k++){
+      var mine=[];for(var i=0;i<N;i++)if(owner(i)==='c'+k)mine.push('orders-'+i);
+      c+='<span class="pill'+(mine.length?'':' idle')+'">c'+k+': '+(mine.length?mine.join(', '):'idle, no partition left')+'</span>';
+    }
+    document.getElementById('kcons').innerHTML=c;
+  }
+  function on(id,fn){document.getElementById(id).addEventListener('click',function(){fn();render();});}
+  on('ksend',function(){var k=document.getElementById('kkey').value.trim();if(k)produce(k);});
+  on('kmany',function(){for(var i=0;i<5;i++){seq=seq%8+1;produce('order-'+seq);}});
+  on('kpoll',function(){parts.forEach(function(p,i){committed[i]=Math.min(p.length,committed[i]+2);});});
+  on('kplus',function(){if(consumers<4)consumers++;});
+  on('kminus',function(){if(consumers>1)consumers--;});
+  on('kreset',reset);
+  reset();render();
+})();
+
+/* ---------- RabbitMQ routing model ---------- */
+(function(){
+  var B=[['billing','order.paid'],['emails','order.*'],['audit','#']],count,last;
+  function topic(p,k){
+    if(!p.length)return !k.length;
+    if(p[0]==='#')return topic(p.slice(1),k)||(k.length>0&&topic(p,k.slice(1)));
+    if(!k.length)return false;
+    return (p[0]==='*'||p[0]===k[0])&&topic(p.slice(1),k.slice(1));
+  }
+  function hit(type,pat,key){return type==='fanout'||(type==='direct'?pat===key:topic(pat.split('.'),key.split('.')));}
+  function esc(s){return String(s).replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];});}
+  function reset(){count={billing:0,emails:0,audit:0};last=null;document.getElementById('rblog').textContent='Nothing sent yet.';}
+  function render(){
+    var h='<tr><th>Queue</th><th>Binding key</th><th>Messages</th><th>Last send</th></tr>';
+    B.forEach(function(b){h+='<tr><td><code>'+b[0]+'</code></td><td><code>'+esc(b[1])+'</code></td><td>'+count[b[0]]+'</td><td>'+(last?(last[b[0]]?'<span class="yes">received</span>':'<span class="no">skipped</span>'):'')+'</td></tr>';});
+    document.getElementById('rbtable').innerHTML=h;
+  }
+  function send(){
+    var type=document.getElementById('rbtype').value,key=document.getElementById('rbkey').value.trim(),got=[];
+    last={};
+    B.forEach(function(b){if(hit(type,b[1],key)){count[b[0]]++;last[b[0]]=true;got.push(b[0]);}});
+    document.getElementById('rblog').textContent='"'+key+'" on a '+type+' exchange: '+(got.length?'copied to '+got.join(', ')+'.':'matched no queue. Message published but NOT routed, so it is dropped.')+
+      (type==='direct'?' A direct exchange compares the whole key, so * and # are ordinary characters.':type==='fanout'?' A fanout exchange ignores the key.':'');
+    render();
+  }
+  document.getElementById('rbsend').addEventListener('click',send);
+  document.getElementById('rbkey').addEventListener('keydown',function(e){if(e.key==='Enter')send();});
+  document.getElementById('rbreset').addEventListener('click',function(){reset();render();});
+  ['order.paid','order.placed','order.paid.eu','user.signup.web','#'].forEach(function(k){
+    var b=document.createElement('button');b.className='chip';b.type='button';b.textContent=k;
+    b.addEventListener('click',function(){document.getElementById('rbkey').value=k;send();});
+    document.getElementById('rbchips').appendChild(b);
+  });
+  reset();render();
+})();
+
+/* ---------- Docker flag model ---------- */
+(function(){
+  function on(id){return document.getElementById(id).checked;}
+  function li(label,ok,text){return '<li><b>'+label+':</b> <span class="'+(ok?'yes':'no')+'">'+(ok?'yes':'no')+'</span>. '+text+'</li>';}
+  function render(){
+    var d=on('dk-d'),p=on('dk-p'),v=on('dk-v'),n=on('dk-n');
+    document.getElementById('dkcmd').textContent='docker run'+(d?' -d':'')+' --name redis'+(p?' -p 6379:6379':'')+(v?' -v redis-data:/data':'')+(n?' --network shop':'')+' redis:8';
+    document.getElementById('dkout').innerHTML=
+      li('Terminal free',d,d?'The container runs in the background. Read its output with docker logs redis.':'The terminal shows the server log until you press Ctrl-C, which also stops the container.')+
+      li('Reachable from your Mac at localhost:6379',p,p?'Port 6379 on your machine forwards into the container.':'Nothing is published, so only other containers can connect.')+
+      li('Other containers can use the name redis',n,n?'Containers on the shop network find it at redis:6379.':'On the default network there is no name lookup. They would need its IP address.')+
+      li('Data survives docker rm',v,v?'Redis files live in the volume redis-data. A new container with the same -v sees them.':'The files go with the container. A new container starts empty.');
+  }
+  ['dk-d','dk-p','dk-v','dk-n'].forEach(function(id){document.getElementById(id).addEventListener('change',render);});
+  render();
+})();
+
+/* ---------- ZooKeeper election model ---------- */
+(function(){
+  var up={1:true,2:true,3:true},ctrl=1,epoch=1,log='All three brokers are registered. Broker 1 created /controller first.';
+  function running(){return [1,2,3].filter(function(i){return up[i];});}
+  function elect(why){
+    var r=running();
+    if(!r.length){ctrl=0;log=why+' No broker is left, so /controller does not exist.';return;}
+    ctrl=r[0];epoch++;log=why+' Broker '+ctrl+' created /controller and is the new controller (epoch '+epoch+').';
+  }
+  function toggle(i){
+    if(up[i]){
+      up[i]=false;
+      if(ctrl===i)elect('Broker '+i+' stopped. Its session ended, so /brokers/ids/'+i+' and /controller were deleted.');
+      else log='Broker '+i+' stopped. Its session ended, so /brokers/ids/'+i+' was deleted. The controller moves its partitions to other brokers.';
+    }else{
+      up[i]=true;
+      if(!ctrl)elect('Broker '+i+' started and registered.');
+      else log='Broker '+i+' started and created /brokers/ids/'+i+'. Broker '+ctrl+' stays controller; a running controller is not replaced.';
+    }
+    render();
+  }
+  function render(){
+    var r=running(),t='/brokers/ids\n';
+    t+=r.length?r.map(function(i){return '  /'+i+'    (ephemeral)  {"host":"kafka'+i+'","port":9092}';}).join('\n')+'\n':'  (empty)\n';
+    t+=ctrl?'/controller    (ephemeral)  {"brokerid":'+ctrl+'}\n':'/controller    (does not exist)\n';
+    t+='/controller_epoch          '+epoch;
+    document.getElementById('zktree').textContent=t;
+    document.getElementById('zklog').textContent=log;
+    var b=document.getElementById('zkbtns');b.innerHTML='';
+    [1,2,3].forEach(function(i){
+      var x=document.createElement('button');x.type='button';x.className='btn q';x.id='zkb'+i;
+      x.textContent=(up[i]?'Stop':'Start')+' broker '+i+(ctrl===i?' (controller)':'');
+      x.addEventListener('click',function(){toggle(i);});b.appendChild(x);
+    });
+  }
+  render();
+})();
+</script>
+
+</body></html>

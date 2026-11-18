@@ -1,0 +1,37 @@
+# Local development: PostgreSQL 16 + the API on http://localhost:8000. Not a production setup.
+services:
+  db:
+    image: postgres:16
+    environment:
+      POSTGRES_USER: academy
+      POSTGRES_PASSWORD: academy
+      POSTGRES_DB: academy
+    ports: ["5432:5432"]
+    volumes: ["pgdata:/var/lib/postgresql/data"]
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U academy"]
+      interval: 3s
+      retries: 20
+  api:
+    build:
+      context: .
+      dockerfile: backend/Dockerfile
+    environment:
+      DATABASE_URL: postgresql+psycopg://academy:academy@db:5432/academy
+      JWT_SECRET: ${JWT_SECRET:-dev-only-secret-not-for-production-use}
+      ENVIRONMENT: development
+      # Phase 2 (AI). Put the real values in a file named .env beside this file (it is git-ignored), never here.
+      ANTHROPIC_API_KEY: ${ANTHROPIC_API_KEY:-}
+      APP_KEY: ${APP_KEY:-}
+      AI_MODEL_FAST: ${AI_MODEL_FAST:-claude-haiku-5-5}
+      AI_MODEL_STRONG: ${AI_MODEL_STRONG:-claude-sonnet-5-5}
+      AI_DAILY_LIMIT: ${AI_DAILY_LIMIT:-100}
+      AI_MONTHLY_CAP_USD: ${AI_MONTHLY_CAP_USD:-5}
+      AI_PRICE_FAST: ${AI_PRICE_FAST:-1,5}
+      AI_PRICE_STRONG: ${AI_PRICE_STRONG:-3,15}
+    ports: ["8000:8000"]
+    depends_on:
+      db:
+        condition: service_healthy
+volumes:
+  pgdata:

@@ -1,0 +1,1101 @@
+<!doctype html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"></head><body>
+<title>Git & GitHub Field Guide</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;600&family=Space+Grotesk:wght@500;700&display=swap">
+<style>
+/* Layout: sticky tab rail over a single reading column; commit-graph lanes are the only colour. */
+:root{
+  --bg:#f5f7fb; --surface:#ffffff; --ink:#0f1b2d; --ink2:#44546b; --muted:#66758b; --line:#d9e0ea;
+  --accent:#2a78d6; --accent-ink:#1c5cab; --code-bg:#eef2f8; --wash:#e8f0fb;
+  --warn-bg:#fdf1e3; --warn-ink:#8a4a06; --ok-bg:#e6f5ea; --ok-ink:#0b6a2b;
+  --s1:#2a78d6; --s2:#eb6834; --s3:#1baf7a; --s4:#eda100; --s5:#e87ba4;
+  --display:"Space Grotesk",system-ui,sans-serif; --body:"Inter",system-ui,-apple-system,"Segoe UI",sans-serif;
+  --mono:"JetBrains Mono",ui-monospace,Menlo,Consolas,monospace;
+}
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]){
+    color-scheme:dark;
+    --bg:#0e141d; --surface:#161e2a; --ink:#e8eef7; --ink2:#b6c2d3; --muted:#8a99ae; --line:#2a3545;
+    --accent:#3987e5; --accent-ink:#86b6ef; --code-bg:#1b2533; --wash:#182a42;
+    --warn-bg:#33240f; --warn-ink:#f3c48a; --ok-bg:#11301c; --ok-ink:#8fdba8;
+    --s1:#3987e5; --s2:#d95926; --s3:#199e70; --s4:#c98500; --s5:#d55181;
+  }
+}
+:root[data-theme="dark"]{
+  color-scheme:dark;
+  --bg:#0e141d; --surface:#161e2a; --ink:#e8eef7; --ink2:#b6c2d3; --muted:#8a99ae; --line:#2a3545;
+  --accent:#3987e5; --accent-ink:#86b6ef; --code-bg:#1b2533; --wash:#182a42;
+  --warn-bg:#33240f; --warn-ink:#f3c48a; --ok-bg:#11301c; --ok-ink:#8fdba8;
+  --s1:#3987e5; --s2:#d95926; --s3:#199e70; --s4:#c98500; --s5:#d55181;
+}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font:16px/1.6 var(--body);margin:0}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:10;background:var(--bg)}
+.wrap{max-width:900px;margin:0 auto;padding-block:0;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+header.top{padding-block:28px 12px}
+h1{font:700 clamp(28px,5vw,40px)/1.1 var(--display);margin:0 0 8px;text-wrap:balance}
+.lede{color:var(--ink2);max-width:62ch;margin:0}
+nav.tabs{position:sticky;top:env(safe-area-inset-top,0px);z-index:5;background:var(--bg);border-bottom:1px solid var(--line)}
+.tabrow{display:flex;gap:4px;overflow-x:auto;padding-block:8px;scrollbar-width:thin}
+.tabrow button{font:500 14px var(--body);color:var(--ink2);background:none;border:1px solid transparent;border-radius:999px;padding:6px 12px;white-space:nowrap;cursor:pointer}
+.tabrow button:hover{background:var(--wash)}
+.tabrow button[aria-selected="true"]{background:var(--ink);color:var(--bg)}
+button:focus-visible,summary:focus-visible,input:focus-visible,a:focus-visible,[tabindex]:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+main{padding-block:24px 64px}
+section.panel{display:flex;flex-direction:column;gap:18px}
+section.panel[hidden]{display:none}
+h2{font:700 26px/1.2 var(--display);margin:8px 0 0;text-wrap:balance}
+h3{font:700 19px/1.25 var(--display);margin:14px 0 0}
+p,ul,ol{margin:0;max-width:68ch}
+ul,ol{padding-left:22px}
+li+li{margin-top:4px}
+a{color:var(--accent-ink)}
+code{font:0.88em var(--mono);background:var(--code-bg);padding:1px 5px;border-radius:4px}
+pre{font:13px/1.55 var(--mono);background:var(--code-bg);border:1px solid var(--line);border-radius:8px;padding:12px 14px;margin:0;overflow-x:auto;white-space:pre}
+pre .c{color:var(--muted)}
+.note{background:var(--wash);border-radius:8px;padding:10px 14px;max-width:68ch}
+.warn{background:var(--warn-bg);color:var(--warn-ink);border-radius:8px;padding:10px 14px;max-width:68ch}
+.ok{background:var(--ok-bg);color:var(--ok-ink);border-radius:8px;padding:10px 14px;max-width:68ch}
+figure{margin:0;background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:14px}
+figure .scroll{overflow-x:auto}
+figure svg{display:block;max-width:100%;height:auto;color:var(--ink)}
+figure svg.fixed{max-width:none}
+figure .scroll svg{min-width:560px}
+figcaption{color:var(--ink2);font-size:14px;margin-top:10px;max-width:70ch}
+.tbl{overflow-x:auto}
+table{border-collapse:collapse;width:100%;font-size:14.5px}
+th,td{text-align:left;padding:8px 10px;border-bottom:1px solid var(--line);vertical-align:top}
+th{font:600 12px var(--body);letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}
+td.num{font-variant-numeric:tabular-nums;text-align:right;white-space:nowrap}
+.grid3{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:12px}
+.grid3 figure{padding:10px}
+.ctrl{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.ctrl button{font:500 13px var(--mono);background:var(--surface);color:var(--ink);border:1px solid var(--line);border-radius:6px;padding:6px 10px;cursor:pointer}
+.ctrl button:hover{border-color:var(--accent)}
+.ctrl button.on{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+.ctrl .lbl{font-size:13px;color:var(--muted)}
+#pgLog{font:13px var(--mono);color:var(--ink2);min-height:1.5em}
+.lab{border-top:1px solid var(--line);padding-top:14px;display:flex;flex-direction:column;gap:8px}
+.lab h3{margin:0}
+.lab .n{font:600 12px var(--mono);color:var(--muted)}
+details.qa{border-bottom:1px solid var(--line);padding:10px 0}
+details.qa summary{cursor:pointer;font-weight:600;list-style-position:outside}
+details.qa p{margin-top:8px;color:var(--ink2)}
+.lv{font:600 11px var(--mono);letter-spacing:.04em;color:var(--muted);margin-left:8px;white-space:nowrap}
+#qaSearch{font:15px var(--body);width:100%;max-width:420px;padding:8px 12px;border:1px solid var(--line);border-radius:8px;background:var(--surface);color:var(--ink)}
+.trick{display:grid;grid-template-columns:minmax(0,1fr);gap:4px;border-bottom:1px solid var(--line);padding:10px 0}
+.trick code{justify-self:start;white-space:pre-wrap;word-break:break-word}
+.trick span{color:var(--ink2);font-size:15px}
+.week{display:grid;grid-template-columns:90px minmax(0,1fr);gap:12px;border-top:1px solid var(--line);padding-top:12px}
+.week b{font:700 15px var(--display)}
+.pie{display:grid;grid-template-columns:minmax(260px,1fr) minmax(240px,1fr);gap:18px;align-items:center}
+@media (max-width:640px){.pie{grid-template-columns:1fr}.week{grid-template-columns:1fr}}
+.sw{display:inline-block;width:10px;height:10px;border-radius:2px;margin-right:8px}
+#tip{position:fixed;pointer-events:none;background:var(--ink);color:var(--bg);font:13px var(--body);padding:6px 9px;border-radius:6px;z-index:20}
+.fl-node{fill:var(--surface);stroke:var(--line);stroke-width:1.5}
+.fl-ask{fill:var(--wash);stroke:var(--accent);stroke-width:1.5}
+.fl-end{fill:var(--ok-bg);stroke:var(--ok-ink);stroke-width:1.5}
+.fl-warn{fill:var(--warn-bg);stroke:var(--warn-ink);stroke-width:1.5}
+.fl-edge{fill:none;stroke:var(--muted);stroke-width:1.5}
+.fl-lblbg{fill:var(--surface)}
+.fl-t{font:12px var(--body);fill:var(--ink)}
+.fl-tm{font:11.5px var(--mono);fill:var(--ink)}
+.fl-l{font:600 11px var(--body);fill:var(--ink2)}
+</style>
+
+<div class="wrap">
+<header class="top">
+  <h1>Git &amp; GitHub Field Guide</h1>
+  <p class="lede">From your first commit to rebases, rescues, pull requests and working safely with AI coding tools. Every chapter uses one small practice project, a recipe box, so you can type along.</p>
+</header>
+</div>
+<nav class="tabs" aria-label="Chapters"><div class="wrap"><div class="tabrow" role="tablist" id="tabrow"></div></div></nav>
+<div class="wrap"><main>
+
+<!-- ============ START ============ -->
+<section class="panel" id="p-start" data-tab="Start here">
+  <h2>What Git is, in one picture</h2>
+  <p>Git saves snapshots of your project. Each snapshot is a <b>commit</b>. Git keeps every commit, so you can go back, compare, and work on several ideas side by side. GitHub is a website that stores a copy of your Git project so other people (and your other machines) can share it.</p>
+  <figure>
+    <div class="scroll">
+    <svg viewBox="0 0 820 250" width="820" role="img" aria-label="Files move from the working folder to the staging area with git add, to the local repository with git commit, and to GitHub with git push. git fetch, git pull and git restore move things back.">
+      <defs><marker id="ar0" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" fill="currentColor"/></marker></defs>
+      <g>
+        <rect class="fl-node" x="20" y="60" width="150" height="56" rx="8"/><text class="fl-t" x="95" y="84" text-anchor="middle" font-weight="600">Working folder</text><text class="fl-l" x="95" y="102" text-anchor="middle">files you edit</text>
+        <rect class="fl-ask" x="230" y="60" width="150" height="56" rx="8"/><text class="fl-t" x="305" y="84" text-anchor="middle" font-weight="600">Staging area</text><text class="fl-l" x="305" y="102" text-anchor="middle">next commit, in draft</text>
+        <rect class="fl-node" x="440" y="60" width="150" height="56" rx="8"/><text class="fl-t" x="515" y="84" text-anchor="middle" font-weight="600">Local repository</text><text class="fl-l" x="515" y="102" text-anchor="middle">.git folder, all commits</text>
+        <rect class="fl-node" x="650" y="60" width="150" height="56" rx="8"/><text class="fl-t" x="725" y="84" text-anchor="middle" font-weight="600">Remote (GitHub)</text><text class="fl-l" x="725" y="102" text-anchor="middle">shared copy, "origin"</text>
+      </g>
+      <g class="fl-edge" marker-end="url(#ar0)">
+        <path d="M115 60 C115 20,285 20,285 60"/><path d="M325 60 C325 20,495 20,495 60"/><path d="M535 60 C535 20,705 20,705 60"/>
+        <path d="M285 116 C285 156,115 156,115 116"/><path d="M705 116 C705 156,535 156,535 116"/>
+        <path d="M745 116 C745 250,75 250,75 116"/>
+      </g>
+      <text class="fl-tm" x="200" y="22" text-anchor="middle">git add</text>
+      <text class="fl-tm" x="410" y="22" text-anchor="middle">git commit</text>
+      <text class="fl-tm" x="620" y="22" text-anchor="middle">git push</text>
+      <text class="fl-tm" x="200" y="136" text-anchor="middle">restore --staged</text>
+      <text class="fl-tm" x="620" y="136" text-anchor="middle">git fetch</text>
+      <text class="fl-tm" x="410" y="206" text-anchor="middle">git pull  (fetch, then merge into your files)</text>
+    </svg>
+    </div>
+    <figcaption>The four places your work can be. Most confusion in Git comes from not knowing which of these a command touches.</figcaption>
+  </figure>
+
+  <h3>One-time setup</h3>
+<pre>git --version                          <span class="c"># check it is installed</span>
+git config --global user.name  "Your Name"
+git config --global user.email "you@example.com"
+git config --global init.defaultBranch main
+git config --global pull.rebase true   <span class="c"># optional: keeps history straight when you pull</span></pre>
+
+  <h3>The loop you will repeat every day</h3>
+<pre>git status                 <span class="c"># where am I, what changed?</span>
+git diff                   <span class="c"># what exactly changed?</span>
+git add recipes/chai.txt   <span class="c"># choose what goes in the next snapshot</span>
+git commit -m "Add cardamom to chai"
+git push                   <span class="c"># share it</span></pre>
+
+  <h3>Words you will hear</h3>
+  <div class="tbl"><table>
+    <tr><th>Word</th><th>Plain meaning</th></tr>
+    <tr><td>Repository (repo)</td><td>A project folder that Git is tracking. The history lives in the hidden <code>.git</code> folder.</td></tr>
+    <tr><td>Commit</td><td>One saved snapshot, with a message, an author, and a unique ID (the hash, like <code>a1b2c3d</code>).</td></tr>
+    <tr><td>Branch</td><td>A movable name that points to a commit. Making a branch copies nothing; it just adds a name.</td></tr>
+    <tr><td>HEAD</td><td>"You are here." Usually it points at the branch you are on.</td></tr>
+    <tr><td>Remote</td><td>Another copy of the repo, usually on GitHub. The default name is <code>origin</code>.</td></tr>
+    <tr><td>Clone</td><td>Download a full copy of a remote repo, including all history.</td></tr>
+    <tr><td>Pull request (PR)</td><td>A GitHub page that says "please review my branch and merge it."</td></tr>
+    <tr><td>Merge conflict</td><td>Two branches changed the same lines. Git stops and asks you to pick.</td></tr>
+  </table></div>
+</section>
+
+<!-- ============ CORE ============ -->
+<section class="panel" id="p-core" data-tab="Core Git" hidden>
+  <h2>Commits, branches and merges</h2>
+  <p>Every commit remembers its parent. That chain is the history. A branch is a label on one commit, and it moves forward each time you commit on it.</p>
+
+  <h3>Try it: commit graph playground</h3>
+  <p>Press the buttons and watch what each command does to the graph. Nothing here touches your real files. To type commands yourself, open the <b>Playground</b> tab.</p>
+  <figure>
+    <div class="ctrl" style="margin-bottom:10px">
+      <button id="pgCommit">git commit</button>
+      <button id="pgBranch">git switch -c new-branch</button>
+      <button id="pgMerge">git merge …</button>
+      <button id="pgReset">git reset --hard HEAD~1</button>
+      <button id="pgClear">Start over</button>
+    </div>
+    <div class="ctrl" style="margin-bottom:10px"><span class="lbl">Switch to:</span><span id="pgSwitch" class="ctrl"></span></div>
+    <div class="scroll"><svg id="pg" class="fixed" role="img" aria-label="Interactive commit graph"></svg></div>
+    <div id="pgLog" aria-live="polite"></div>
+    <figcaption>Filled ring = the commit HEAD is on. A faded commit is no longer reachable from any branch; in real Git it still lives in the reflog for a while, which is how rescues work.</figcaption>
+  </figure>
+
+  <h3>Branching commands</h3>
+<pre>git branch                    <span class="c"># list branches</span>
+git switch -c add-dosa        <span class="c"># create and move to a new branch</span>
+git switch main               <span class="c"># move back</span>
+git switch -                  <span class="c"># jump to the previous branch</span>
+git merge add-dosa            <span class="c"># bring add-dosa into the branch you are on</span>
+git branch -d add-dosa        <span class="c"># delete a merged branch</span></pre>
+
+  <h3>Merge or rebase?</h3>
+  <p>Both combine work. Merge keeps the true shape of history and adds one merge commit. Rebase replays your commits on top of the latest main, which gives a straight line but creates new commits with new IDs.</p>
+  <div class="grid3">
+    <figure><svg id="dBefore" role="img" aria-label="Before: main has commits A, B, C. Feature branched from B and has D and E."></svg><figcaption><b>Before.</b> feature started at B; main moved on to C.</figcaption></figure>
+    <figure><svg id="dMerge" role="img" aria-label="After merge: a new commit M has two parents, C and E."></svg><figcaption><b>git merge feature.</b> New commit M joins both lines. Nothing is rewritten.</figcaption></figure>
+    <figure><svg id="dRebase" role="img" aria-label="After rebase: D and E are copied on top of C as new commits."></svg><figcaption><b>git rebase main.</b> D and E are copied after C as D′ and E′. The old D and E are dropped.</figcaption></figure>
+  </div>
+  <p class="warn"><b>The one rule of rebase:</b> do not rebase commits that other people already pulled. Rebase your own unshared branch freely.</p>
+
+  <h3>Solving a merge conflict</h3>
+  <p>When two branches change the same line, Git writes both versions into the file between markers and stops.</p>
+<pre>&lt;&lt;&lt;&lt;&lt;&lt;&lt; HEAD
+- 1 tsp jaggery
+=======
+- half tsp sugar
+&gt;&gt;&gt;&gt;&gt;&gt;&gt; less-sugar</pre>
+  <ol>
+    <li>Run <code>git status</code> to see which files are in conflict.</li>
+    <li>Open each file, keep the lines you want, and delete the three marker lines.</li>
+    <li><code>git add &lt;file&gt;</code> to mark it solved, then <code>git commit</code> (or <code>git rebase --continue</code> during a rebase).</li>
+    <li>Want out? <code>git merge --abort</code> or <code>git rebase --abort</code> puts everything back.</li>
+  </ol>
+
+  <h3>Working with a remote</h3>
+<pre>git clone git@github.com:you/recipe-box.git   <span class="c"># download a repo</span>
+git remote -v                                  <span class="c"># see where origin points</span>
+git fetch                                      <span class="c"># download new commits, change nothing locally</span>
+git pull                                       <span class="c"># fetch + merge (or rebase) into your branch</span>
+git push -u origin add-dosa                    <span class="c"># first push of a new branch</span>
+git push                                       <span class="c"># later pushes</span></pre>
+  <p class="note"><code>git fetch</code> is always safe. If you are unsure what a pull will do, fetch first and look with <code>git log --oneline main..origin/main</code>.</p>
+
+  <h3>Parking work: stash</h3>
+<pre>git stash push -m "wip peanuts"   <span class="c"># save uncommitted edits and clean the folder</span>
+git stash -u                      <span class="c"># also include brand-new files</span>
+git stash list
+git stash pop                     <span class="c"># bring the latest one back</span></pre>
+
+  <h3>Marking releases: tags</h3>
+<pre>git tag -a v1.0 -m "First menu"
+git push origin v1.0</pre>
+</section>
+
+<!-- PLAY-START -->
+<section class="panel" id="p-play" data-tab="Playground" hidden>
+<style>
+.term{background:var(--code-bg);border:1px solid var(--line);border-radius:8px;display:flex;flex-direction:column}
+#tgOut{font:13px/1.55 var(--mono);white-space:pre-wrap;word-break:break-word;padding:12px 14px;height:260px;overflow-y:auto;color:var(--ink)}
+#tgOut .tp{color:var(--accent-ink);font-weight:600}
+#tgOut .tn{color:var(--muted)}
+.tin{display:flex;gap:8px;align-items:center;border-top:1px solid var(--line);padding:8px 10px}
+.tin label{font:600 14px var(--mono);color:var(--accent-ink)}
+#tgIn{flex:1;min-width:0;font:16px var(--mono);background:var(--surface);color:var(--ink);border:1px solid var(--line);border-radius:6px;padding:7px 10px}
+.tin button{font:600 13px var(--body);background:var(--ink);color:var(--bg);border:0;border-radius:6px;padding:8px 14px;cursor:pointer}
+.tgbar{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap}
+.tgbar>button{font:500 13px var(--body);background:var(--surface);color:var(--ink);border:1px solid var(--line);border-radius:6px;padding:7px 12px;cursor:pointer;white-space:nowrap}
+.tgbar>button:hover{border-color:var(--accent)}
+.areas{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
+.areas>div{background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:10px 12px;min-width:0}
+.areas h4{font:600 12px var(--body);letter-spacing:.06em;text-transform:uppercase;color:var(--muted);margin:0 0 6px}
+.areas ul{list-style:none;margin:0;padding:0;font:13px var(--mono)}
+.areas li{display:flex;justify-content:space-between;gap:8px;padding:2px 0;margin:0}
+.areas li span:first-child{overflow-wrap:anywhere}
+.areas .st{color:var(--muted);white-space:nowrap}
+.areas .st.ch{color:var(--warn-ink)}
+.areas .st.ok{color:var(--ok-ink)}
+.areas .none{color:var(--muted);font-family:var(--body)}
+@media (max-width:640px){.areas{grid-template-columns:1fr}}
+#tgCh{list-style:none;padding:0;margin:0;max-width:none}
+#tgCh li{display:grid;grid-template-columns:26px minmax(0,1fr);gap:4px 8px;padding:9px 0;border-bottom:1px solid var(--line);margin:0}
+#tgCh .mk{font:600 14px var(--mono);color:var(--muted)}
+#tgCh li.done .mk{color:var(--ok-ink)}
+#tgCh li.done b{color:var(--ok-ink)}
+#tgCh .hint{grid-column:2;color:var(--ink2);font-size:14px}
+#tgCh .hint code{white-space:pre-wrap}
+</style>
+  <h2>Playground: type real Git commands</h2>
+  <p>A small Git runs inside this page. Type a command, press Enter, and watch the graph, the three areas and the challenge list change. Nothing here touches your real files.</p>
+  <figure>
+    <div class="scroll" id="tgScroll"><svg id="tgGraph" class="fixed" role="img" aria-label="Commit graph of the playground repository"></svg></div>
+    <figcaption id="tgCap">Each circle is a commit with its ID underneath. The filled one is where HEAD is. Faded commits are no longer on any branch.</figcaption>
+  </figure>
+  <div class="areas" aria-live="polite">
+    <div><h4>Working folder</h4><ul id="tgWork"></ul></div>
+    <div><h4>Staging area</h4><ul id="tgStage"></ul></div>
+    <div><h4>Last commit</h4><ul id="tgHead"></ul></div>
+  </div>
+  <div class="term">
+    <div id="tgOut" role="log" aria-label="Terminal output" tabindex="0"></div>
+    <form class="tin" id="tgForm" autocomplete="off">
+      <label for="tgIn">$</label>
+      <input id="tgIn" type="text" spellcheck="false" autocapitalize="off" autocorrect="off" placeholder="git status" aria-label="Command">
+      <button type="submit">Run</button>
+    </form>
+  </div>
+  <div class="tgbar">
+    <div class="ctrl" id="tgQuick"><span class="lbl">Try:</span></div>
+    <button type="button" class="ghost" id="tgReset">Start over</button>
+  </div>
+  <h3>Challenges</h3>
+  <p>Each one ticks itself when the playground sees you do it. <span id="tgScore"></span></p>
+  <ol id="tgCh"></ol>
+  <p class="note">This is a simulator, so it covers the everyday commands and leaves some things out: there is no remote (no push, pull or fetch), no text editor (always give <code>-m</code>), and a rebase, cherry-pick or revert that hits a conflict is refused with an explanation, where real Git would pause and wait for you. Merge conflicts work fully. Type <code>help</code> for the list.</p>
+</section>
+<!-- PLAY-END -->
+<!-- ============ UNDO ============ -->
+<section class="panel" id="p-undo" data-tab="Undo &amp; rescue" hidden>
+  <h2>Undo almost anything</h2>
+  <p>Pick the undo by answering two questions: is it committed, and has anyone else seen it?</p>
+  <figure>
+    <div class="scroll"><svg id="fUndo" role="img" aria-label="Decision flowchart for choosing the right undo command"></svg></div>
+    <figcaption>If the commit is already pushed, use <code>git revert</code>: it adds a new commit that cancels the old one, so nobody's history breaks. Lost something? <code>git reflog</code> lists every place HEAD has been.</figcaption>
+  </figure>
+
+  <h3>What each reset mode touches</h3>
+  <div class="tbl"><table>
+    <tr><th>Command</th><th>Branch pointer</th><th>Staging area</th><th>Working files</th><th>Use it when</th></tr>
+    <tr><td><code>git reset --soft HEAD~1</code></td><td>moves back</td><td>kept</td><td>kept</td><td>You want to redo the last commit with the same changes.</td></tr>
+    <tr><td><code>git reset HEAD~1</code> (mixed)</td><td>moves back</td><td>cleared</td><td>kept</td><td>You want to re-choose what to stage.</td></tr>
+    <tr><td><code>git reset --hard HEAD~1</code></td><td>moves back</td><td>cleared</td><td><b>overwritten</b></td><td>You want the commit and its changes gone.</td></tr>
+  </table></div>
+  <p class="warn"><code>--hard</code> throws away uncommitted edits, and those cannot be recovered. Committed work can, through the reflog.</p>
+
+  <h3>Everyday undo commands</h3>
+<pre>git restore chai.txt              <span class="c"># discard unstaged edits in one file</span>
+git restore --staged chai.txt     <span class="c"># unstage, keep the edits</span>
+git commit --amend                <span class="c"># fix the last message or add a forgotten file</span>
+git revert a1b2c3d                <span class="c"># new commit that cancels a1b2c3d (safe after push)</span>
+git restore --source=HEAD~3 chai.txt   <span class="c"># get an old version of one file</span>
+git clean -fdn                    <span class="c"># preview which untracked files would be deleted</span></pre>
+
+  <h3>The rescue: reflog</h3>
+<pre>git reflog                        <span class="c"># every move HEAD made, newest first</span>
+git reset --hard "HEAD@{1}"       <span class="c"># go back to where HEAD was one move ago</span>
+git switch -c rescued a1b2c3d     <span class="c"># or put a branch on a lost commit</span></pre>
+  <p>Deleted a branch by mistake? Find its last commit in the reflog and run <code>git branch name &lt;hash&gt;</code>. Entries stay for about 90 days by default.</p>
+
+  <h3>Finding the commit that broke something: bisect</h3>
+<pre>git bisect start
+git bisect bad                    <span class="c"># current commit is broken</span>
+git bisect good v1.0              <span class="c"># this old one worked</span>
+<span class="c"># Git checks out the middle commit. Test, then answer:</span>
+git bisect good    <span class="c"># or</span>    git bisect bad
+git bisect reset                  <span class="c"># when it names the culprit</span>
+git bisect run ./test.sh          <span class="c"># or let a script answer for you</span></pre>
+  <p>Bisect halves the search each step, so 1,000 commits take about 10 checks.</p>
+</section>
+
+<!-- ============ GITHUB ============ -->
+<section class="panel" id="p-github" data-tab="GitHub" hidden>
+  <h2>GitHub: sharing and reviewing</h2>
+  <p>Teams rarely push straight to <code>main</code>. You push a branch, open a pull request, checks run, someone reviews, and then it merges.</p>
+  <figure style="max-width:600px">
+    <div class="scroll"><svg id="fPr" role="img" aria-label="Pull request flow from new branch to merge, with a loop for fixes"></svg></div>
+    <figcaption>New pushes to the same branch update the open pull request. You never need to open a second one for fixes.</figcaption>
+  </figure>
+
+  <h3>Connect your machine once (SSH)</h3>
+<pre>ssh-keygen -t ed25519 -C "you@example.com"
+cat ~/.ssh/id_ed25519.pub      <span class="c"># paste into GitHub → Settings → SSH and GPG keys</span>
+ssh -T git@github.com          <span class="c"># should greet you by username</span></pre>
+
+  <h3>Put the practice project on GitHub</h3>
+<pre>gh auth login                                  <span class="c"># GitHub CLI, once</span>
+gh repo create recipe-box --private --source=. --push
+<span class="c"># without gh: create an empty repo on github.com, then</span>
+git remote add origin git@github.com:you/recipe-box.git
+git push -u origin main</pre>
+
+  <h3>A pull request from the terminal</h3>
+<pre>git switch -c add-upma
+<span class="c"># edit, add, commit</span>
+git push -u origin add-upma
+gh pr create --fill            <span class="c"># title and body from your commits</span>
+gh pr status                   <span class="c"># checks and reviews</span>
+gh pr checkout 12              <span class="c"># try someone else's PR locally</span>
+gh pr merge --squash --delete-branch</pre>
+
+  <h3>Fork or branch?</h3>
+  <div class="tbl"><table>
+    <tr><th></th><th>Branch in the same repo</th><th>Fork</th></tr>
+    <tr><td>Use when</td><td>You have write access (your team's repo).</td><td>You do not (open source).</td></tr>
+    <tr><td>Remotes</td><td><code>origin</code> only</td><td><code>origin</code> = your fork, <code>upstream</code> = the original</td></tr>
+    <tr><td>Stay current</td><td><code>git pull</code></td><td><code>git fetch upstream</code> then <code>git rebase upstream/main</code></td></tr>
+  </table></div>
+
+  <h3>Three merge buttons</h3>
+  <div class="tbl"><table>
+    <tr><th>Button</th><th>Result on main</th><th>Good for</th></tr>
+    <tr><td>Create a merge commit</td><td>All commits plus one merge commit</td><td>Keeping the full story of a long branch</td></tr>
+    <tr><td>Squash and merge</td><td>One commit for the whole PR</td><td>Messy "fix typo" commits; most teams' default</td></tr>
+    <tr><td>Rebase and merge</td><td>Each commit replayed, no merge commit</td><td>Clean, meaningful commits you want to keep one by one</td></tr>
+  </table></div>
+
+  <h3>Automatic checks: GitHub Actions</h3>
+  <p>Save this as <code>.github/workflows/ci.yml</code>. It runs on every pull request.</p>
+<pre>name: CI
+on:
+  pull_request:
+  push:
+    branches: [main]
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: ./run-tests.sh</pre>
+
+  <h3>Settings worth turning on</h3>
+  <ul>
+    <li><b>Branch protection</b> on <code>main</code>: require a pull request, one approval, and passing checks.</li>
+    <li><b>CODEOWNERS</b> file: the right reviewers are asked automatically.</li>
+    <li><b>Pull request template</b> at <code>.github/pull_request_template.md</code>: what changed, how it was tested, screenshots.</li>
+    <li><b>Secret scanning and push protection</b>: GitHub blocks pushes that contain known key formats.</li>
+    <li>Write <code>Closes #12</code> in the PR body and issue 12 closes when the PR merges.</li>
+  </ul>
+</section>
+
+<!-- ============ AI ============ -->
+<section class="panel" id="p-ai" data-tab="Git with AI" hidden>
+  <h2>Using Git with AI coding tools</h2>
+  <p>AI assistants (Claude Code, Cursor, Copilot, Codex) edit many files quickly. Git is what makes that safe: every AI change becomes a diff you can read, and one command takes it back.</p>
+  <figure style="max-width:640px">
+    <div class="scroll"><svg id="fAi" role="img" aria-label="Safe loop for AI edits: clean tree, branch, small task, read the diff, commit or discard"></svg></div>
+    <figcaption>Start clean, keep tasks small, and read the diff before anything is committed. If the result is wrong, discarding it costs nothing.</figcaption>
+  </figure>
+
+  <h3>Habits that keep you safe</h3>
+  <ul>
+    <li><b>Commit before you prompt.</b> A clean <code>git status</code> means the whole AI change is exactly <code>git diff</code>.</li>
+    <li><b>One task, one branch.</b> Easy to review, easy to throw away.</li>
+    <li><b>Stage in pieces</b> with <code>git add -p</code>. You approve each hunk, so nothing slips in unread.</li>
+    <li><b>You approve the risky commands.</b> <code>push --force</code>, <code>reset --hard</code>, <code>clean -fd</code> and branch deletes should need your yes.</li>
+    <li><b>Keep secrets out.</b> Put <code>.env</code> in <code>.gitignore</code> before the first commit, and check <code>git diff --staged</code> for keys.</li>
+    <li><b>Say who wrote it.</b> Many teams add a <code>Co-Authored-By:</code> line to AI-assisted commits.</li>
+  </ul>
+  <p class="note">This Mac already follows the fourth habit: a hook in <code>~/ai-handoff/hooks</code> stops an AI session from running <code>git commit</code> unless you ask for it in that message.</p>
+
+  <h3>Prompts that work well</h3>
+  <div class="tbl"><table>
+    <tr><th>You want</th><th>Give the AI</th><th>Ask</th></tr>
+    <tr><td>A commit message</td><td><code>git diff --staged</code></td><td>"Write a commit message: imperative subject under 60 characters, then why."</td></tr>
+    <tr><td>A PR description</td><td><code>git log main..HEAD</code> and <code>git diff main...HEAD</code></td><td>"Summarise what changed, why, and how to test it."</td></tr>
+    <tr><td>Help with a conflict</td><td>The conflicted file and both branch names</td><td>"Explain what each side intended, then propose a merged version. Do not pick one side silently."</td></tr>
+    <tr><td>To understand old code</td><td><code>git log -p --follow file</code> or <code>git blame -L 10,40 file</code></td><td>"Why did these lines change over time?"</td></tr>
+    <tr><td>To find a regression</td><td>A failing test command</td><td>"Run <code>git bisect</code> with this test and tell me the first bad commit."</td></tr>
+    <tr><td>To clean history</td><td><code>git log --oneline main..HEAD</code></td><td>"Suggest how to squash these into logical commits. Show the plan first; do not run it."</td></tr>
+    <tr><td>To recover from a mistake</td><td><code>git status</code> and <code>git reflog -15</code></td><td>"I did X and lost Y. What is the safest way back?"</td></tr>
+  </table></div>
+
+  <h3>Parallel AI sessions: worktrees</h3>
+  <p>A worktree is a second folder on a different branch that shares the same repository. Two AI sessions can work at once without overwriting each other's files.</p>
+<pre>git worktree add ../recipe-box-hotfix -b hotfix   <span class="c"># new folder, new branch</span>
+git worktree list
+git worktree remove ../recipe-box-hotfix          <span class="c"># when the branch is merged</span>
+claude --worktree add-upma                        <span class="c"># Claude Code: start a session in its own worktree</span></pre>
+
+  <h3>AI on GitHub itself</h3>
+  <ul>
+    <li><b>Claude Code</b> can run the whole loop when you ask in words: "commit this", "open a PR". It uses your <code>git</code> and <code>gh</code>.</li>
+    <li><b>@claude on pull requests:</b> run <code>/install-github-app</code> in Claude Code to add the GitHub Action, then mention <code>@claude</code> in a PR or issue comment to ask for a review or a fix.</li>
+    <li><b>Copilot and Cursor</b> have a button that drafts a commit message from the staged diff. Read it; it describes what changed, and you often need to add why.</li>
+    <li><b>AI review is a first pass.</b> A person still approves the merge.</li>
+  </ul>
+
+  <h3>Tell the AI your Git rules</h3>
+  <p>Put the rules in the file your tool reads at the start of each session (<code>CLAUDE.md</code>, <code>AGENTS.md</code>, or Cursor rules).</p>
+<pre># Git rules for this repo
+- Never commit or push unless I ask.
+- Branch names: feature/&lt;ticket&gt;-short-name
+- Commit subject: imperative, under 60 characters.
+- Never force-push, never rewrite main.
+- Do not touch generated files or .env.</pre>
+</section>
+
+<!-- ============ TRICKS ============ -->
+<section class="panel" id="p-tricks" data-tab="Tricks" hidden>
+  <h2>Tricks that save time</h2>
+  <h3>Git</h3><div id="tGit"></div>
+  <h3>GitHub website</h3><div id="tHub"></div>
+  <h3>Aliases worth having</h3>
+<pre>git config --global alias.st  "status -sb"
+git config --global alias.lg  "log --oneline --graph --decorate --all"
+git config --global alias.last "log -1 --stat"
+git config --global alias.undo "reset --soft HEAD~1"
+git config --global alias.amend "commit --amend --no-edit"</pre>
+</section>
+
+<!-- ============ LABS ============ -->
+<section class="panel" id="p-labs" data-tab="Demo project" hidden>
+  <h2>Demo project: recipe-box</h2>
+  <p>Fourteen short labs on one tiny project. Type them yourself in an empty folder, or run the script to build the finished repo and read its history.</p>
+<pre>zsh ~/ai-handoff/topics/git-github-field-guide-build/build-demo.sh
+cd ~/Documents/git-practice-recipe-box &amp;&amp; git log --oneline --graph --all</pre>
+  <p class="ok">The script was last run on 12 Nov 2026 with Git 2.50.1 and all 14 labs behaved as described below. The finished repo is at <code>~/Documents/git-practice-recipe-box</code>. To start again, delete that folder and re-run, or pass another folder name to the script.</p>
+  <div id="labs"></div>
+</section>
+
+<!-- ============ QA ============ -->
+<section class="panel" id="p-qa" data-tab="Interview Q&amp;A" hidden>
+  <h2>Interview questions and answers</h2>
+  <div class="ctrl">
+    <input id="qaSearch" type="search" placeholder="Search questions, e.g. rebase" aria-label="Search questions">
+    <span id="qaLv" class="ctrl"></span>
+    <span class="lbl" id="qaCount"></span>
+  </div>
+  <div id="qa"></div>
+</section>
+
+<!-- ============ PLAN ============ -->
+<section class="panel" id="p-plan" data-tab="Plan &amp; checklist" hidden>
+  <h2>What you need, and a four-week plan</h2>
+  <h3>Tools</h3>
+  <div class="tbl"><table>
+    <tr><th>Need</th><th>Check or install</th><th>Why</th></tr>
+    <tr><td>Git</td><td><code>git --version</code> (this Mac has 2.50.1)</td><td>Everything in this guide</td></tr>
+    <tr><td>GitHub account</td><td>github.com</td><td>Remotes, pull requests, Actions</td></tr>
+    <tr><td>SSH key</td><td><code>ssh -T git@github.com</code></td><td>Push without typing a password</td></tr>
+    <tr><td>GitHub CLI</td><td><code>brew install gh</code></td><td>Pull requests from the terminal; AI tools use it too</td></tr>
+    <tr><td>An editor with a diff view</td><td>VS Code, Cursor, Android Studio</td><td>Reading diffs and solving conflicts</td></tr>
+    <tr><td>An AI assistant</td><td>Claude Code, Cursor or Copilot</td><td>The "Git with AI" chapter</td></tr>
+  </table></div>
+
+  <h3>Where to spend your study time</h3>
+  <p>A suggested split of about 20 hours. This is a recommendation for a beginner, not measured data.</p>
+  <figure>
+    <div class="pie">
+      <svg id="pie" viewBox="0 0 320 300" role="img" aria-label="Pie chart of suggested study time: daily basics 30 percent, branching and merging 25, undo and rescue 20, GitHub teamwork 15, AI workflows 10"></svg>
+      <div class="tbl"><table id="pieTbl"><tr><th>Area</th><th style="text-align:right">Hours</th><th style="text-align:right">Share</th></tr></table></div>
+    </div>
+    <figcaption>Daily basics and branching take more than half the time because every later skill depends on them.</figcaption>
+  </figure>
+
+  <h3>Four weeks, about an hour a day</h3>
+  <div class="week"><b>Week 1</b><div>Start here + labs 1 to 3. Goal: commit without thinking, read <code>git status</code> and <code>git diff</code>, write a <code>.gitignore</code>.</div></div>
+  <div class="week"><b>Week 2</b><div>Core Git + labs 4 to 7. Goal: branch, merge, solve one conflict by hand, rebase a branch, use stash.</div></div>
+  <div class="week"><b>Week 3</b><div>Undo &amp; rescue + labs 8 to 13. Goal: choose the right undo from the flowchart, recover a commit with reflog, run one bisect.</div></div>
+  <div class="week"><b>Week 4</b><div>GitHub + Git with AI + lab 14. Goal: push the project, open and merge a pull request, add one Action, do one AI-assisted change through the safe loop. Then read the interview questions.</div></div>
+</section>
+
+</main></div>
+<div id="tip" hidden></div>
+
+<script>
+/*ENGINE-START*/
+/* Git simulator for the guide's Playground tab. Pure logic, no DOM. Inlined into the page by inline.py. */
+function GitSim(){
+  var S;
+  function cp(o){var r={},k;for(k in o)r[k]=o[k];return r;}
+  function keys(){var s={},i,k;for(i=0;i<arguments.length;i++)for(k in arguments[i])s[k]=1;return Object.keys(s).sort();}
+  function hid(n){var x=Math.imul(n+7,2654435761)>>>0;x^=x>>>15;x=Math.imul(x,2246822519)>>>0;x^=x>>>13;return ('000000'+(x>>>0).toString(16)).slice(-7);}
+  function head(){return S.head.ref?S.branches[S.head.ref]:S.head.id;}
+  function tr(id){return id?S.commits[id].tree:{};}
+  function anc(id){var s={},q=[id],x;while(q.length){x=q.pop();if(!x||s[x])continue;s[x]=1;q=q.concat(S.commits[x].parents);}return s;}
+  function isAnc(a,b){return !!a&&!!b&&!!anc(b)[a];}
+  function mk(msg,parents,tree){var id=hid(++S.seq);S.commits[id]={id:id,parents:parents.filter(Boolean),msg:msg,tree:cp(tree),seq:S.seq,lane:S.head.ref?S.lanes[S.head.ref]:0};S.order.push(id);return id;}
+  function move(id,what){if(S.head.ref)S.branches[S.head.ref]=id;else S.head.id=id;S.reflog.unshift({id:id,what:what});}
+  function untracked(){return Object.keys(S.files).filter(function(p){return !(p in S.index);}).sort();}
+  function setTree(t){var keep={};untracked().forEach(function(p){keep[p]=S.files[p];});S.files=cp(t);for(var p in keep)if(!(p in t))S.files[p]=keep[p];S.index=cp(t);}
+  function changes(){var ht=tr(head()),st=[],un=[];
+    keys(S.index,ht).forEach(function(p){if(S.index[p]!==ht[p])st.push([!(p in ht)?'new file':!(p in S.index)?'deleted':'modified',p]);});
+    Object.keys(S.index).sort().forEach(function(p){if(!(p in S.files))un.push(['deleted',p]);else if(S.files[p]!==S.index[p])un.push(['modified',p]);});
+    return {staged:st,unstaged:un,untracked:untracked()};}
+  function clean(){var c=changes();return !c.staged.length&&!c.unstaged.length;}
+  function ev(o){S.events.push(o);}
+  function resolve(spec){
+    if(!spec)return null;var m=/^HEAD@\{(\d+)\}$/.exec(spec);if(m)return S.reflog[+m[1]]?S.reflog[+m[1]].id:null;
+    var up=0,base=spec;m=/^(.+?)((?:~\d*|\^)+)$/.exec(spec);
+    if(m){base=m[1];m[2].replace(/~(\d*)|\^/g,function(a,n){up+=a==='^'?1:(n===''?1:+n);});}
+    var id=null;
+    if(base==='HEAD')id=head();else if(base in S.branches)id=S.branches[base];else if(base in S.tags)id=S.tags[base];
+    else if(/^[0-9a-f]{4,7}$/.test(base)){var c=S.order.filter(function(x){return x.indexOf(base)===0;});if(c.length===1)id=c[0];}
+    while(id&&up-->0)id=S.commits[id].parents[0]||null;
+    return id;}
+  function merge3(b,o,t,label){var out={},conf=[];keys(b,o,t).forEach(function(p){var B=b[p],O=o[p],T=t[p],R;
+    if(O===T)R=O;else if(O===B)R=T;else if(T===B)R=O;else{var done=false;
+      if(B!=null&&O!=null&&T!=null){var lb=B.split('\n'),lo=O.split('\n'),lt=T.split('\n');
+        if(lb.length===lo.length&&lb.length===lt.length){var res=[],bad=false;for(var i=0;i<lb.length;i++){
+          if(lo[i]===lt[i])res.push(lo[i]);else if(lo[i]===lb[i])res.push(lt[i]);else if(lt[i]===lb[i])res.push(lo[i]);
+          else{bad=true;res.push('<<<<<<< HEAD',lo[i],'=======',lt[i],'>>>>>>> '+label);}}
+          R=res.join('\n');done=true;if(bad)conf.push(p);}}
+      if(!done){R='<<<<<<< HEAD\n'+(O||'')+'=======\n'+(T||'')+'>>>>>>> '+label+'\n';conf.push(p);}}
+    if(R!=null)out[p]=R;});return {tree:out,conf:conf};}
+  function diffLines(a,b){a=a?a.replace(/\n$/,'').split('\n'):[];b=b?b.replace(/\n$/,'').split('\n'):[];
+    var n=a.length,m=b.length,d=[],i,j;for(i=0;i<=n;i++){d.push([]);for(j=0;j<=m;j++)d[i].push(0);}
+    for(i=n-1;i>=0;i--)for(j=m-1;j>=0;j--)d[i][j]=a[i]===b[j]?d[i+1][j+1]+1:Math.max(d[i+1][j],d[i][j+1]);
+    var o=[];i=0;j=0;while(i<n||j<m){if(i<n&&j<m&&a[i]===b[j]){i++;j++;}else if(j<m&&(i===n||d[i][j+1]>=d[i+1][j])){o.push('+'+b[j++]);}else o.push('-'+a[i++]);}
+    return o;}
+  function deco(id){var d=[];if(head()===id)d.push(S.head.ref?'HEAD -> '+S.head.ref:'HEAD');
+    Object.keys(S.branches).sort().forEach(function(b){if(S.branches[b]===id&&b!==S.head.ref)d.push(b);});
+    Object.keys(S.tags).sort().forEach(function(t){if(S.tags[t]===id)d.push('tag: '+t);});
+    return d.length?' ('+d.join(', ')+')':'';}
+  function nfiles(a,b){return keys(a,b).filter(function(p){return a[p]!==b[p];}).length;}
+  function plural(n){return n+' file'+(n===1?'':'s')+' changed';}
+  function norm(p){return p.replace(/^\.\//,'');}
+
+  var HELP=['Files:   ls   cat <file>   echo "text" > file   echo "text" >> file   touch <file>   rm <file>',
+    'Basics:  git status [-s]   git add <file>|.   git commit -m "msg" [-a] [--amend]   git diff [--staged]   git log [--oneline] [--all]   git show [ref]',
+    'Branch:  git branch [name] [-d name]   git switch [-c] <name>   git merge <name> [--abort]   git rebase <name>   git cherry-pick <id>   git tag [name]',
+    'Undo:    git restore [--staged] <file>   git reset [--soft|--mixed|--hard] <ref>   git revert <id>   git stash [pop|list|drop]   git reflog',
+    'Refs:    HEAD   HEAD~1   HEAD@{1}   a branch or tag name   the first 4+ letters of a commit ID',
+    'Other:   clear   help   (join commands with &&)'].join('\n');
+
+  function git(a){
+    var c=a[0],rest=a.slice(1),flags=rest.filter(function(x){return x[0]==='-';}),args=rest.filter(function(x){return x[0]!=='-';});
+    function has(f){return flags.indexOf(f)>=0;}
+    var h=head(),ht=tr(h),ch,id,i,r,out;
+    if(!c||c==='help'||c==='--help')return HELP;
+    if(c==='init')return 'Reinitialized existing Git repository in /recipe-box/.git/';
+    if(c==='remote'||c==='push'||c==='pull'||c==='fetch'||c==='clone')return 'This playground has no remote. See the GitHub tab for '+c+'.';
+    if(c==='status'){ch=changes();
+      if(has('-s')||has('--short')||has('-sb')){out=[];ch.staged.forEach(function(x){if(!S.unmerged[x[1]])out.push((x[0]==='new file'?'A':x[0]==='deleted'?'D':'M')+'  '+x[1]);});
+        Object.keys(S.unmerged).forEach(function(p){out.push('UU '+p);});
+        ch.unstaged.forEach(function(x){if(!S.unmerged[x[1]])out.push(' '+(x[0]==='deleted'?'D':'M')+' '+x[1]);});ch.untracked.forEach(function(p){out.push('?? '+p);});return out.join('\n');}
+      out=[S.head.ref?'On branch '+S.head.ref:'HEAD detached at '+h];
+      var um=Object.keys(S.unmerged);
+      if(S.merging)out.push(um.length?'You have unmerged paths.\n  (fix conflicts, then run "git add <file>" and "git commit")':'All conflicts fixed but you are still merging.\n  (use "git commit" to conclude merge)');
+      if(um.length){out.push('Unmerged paths:');um.forEach(function(p){out.push('  both modified:   '+p);});}
+      var st=ch.staged.filter(function(x){return !S.unmerged[x[1]];}),un=ch.unstaged.filter(function(x){return !S.unmerged[x[1]];});
+      if(st.length){out.push('Changes to be committed:');st.forEach(function(x){out.push('  '+x[0]+':   '+x[1]);});}
+      if(un.length){out.push('Changes not staged for commit:');un.forEach(function(x){out.push('  '+x[0]+':   '+x[1]);});}
+      if(ch.untracked.length){out.push('Untracked files:');ch.untracked.forEach(function(p){out.push('  '+p);});}
+      if(!st.length&&!un.length&&!um.length&&!S.merging)out.push(ch.untracked.length?'nothing added to commit but untracked files present':'nothing to commit, working tree clean');
+      return out.join('\n');}
+    if(c==='add'){var all=has('-A')||has('--all')||args.indexOf('.')>=0,ps=all?keys(S.files,S.index):args.map(norm);
+      if(!ps.length)return 'Nothing specified, nothing added.';
+      for(i=0;i<ps.length;i++){var p=ps[i];if(p in S.files)S.index[p]=S.files[p];else if(p in S.index)delete S.index[p];else return "fatal: pathspec '"+p+"' did not match any files";delete S.unmerged[p];}
+      return '';}
+    if(c==='rm'){for(i=0;i<args.length;i++){var q=norm(args[i]);if(!(q in S.index))return "fatal: pathspec '"+q+"' did not match any files";delete S.index[q];delete S.files[q];}return args.map(function(x){return "rm '"+norm(x)+"'";}).join('\n');}
+    if(c==='commit'){var msg=null,amend=has('--amend'),k;
+      for(k=0;k<rest.length;k++){if(rest[k]==='-m'||rest[k]==='-am'||rest[k]==='-ma'){msg=rest[k+1];break;}}
+      if(has('-a')||has('-am')||has('-ma'))Object.keys(S.index).forEach(function(p){if(p in S.files)S.index[p]=S.files[p];else delete S.index[p];});
+      if(Object.keys(S.unmerged).length)return 'error: Committing is not possible because you have unmerged files.\nhint: Fix them up in the work tree, and then use "git add <file>".';
+      if(amend){if(!h)return 'fatal: You have nothing to amend.';var old=S.commits[h];id=mk(msg||old.msg,old.parents,S.index);move(id,'commit (amend): '+(msg||old.msg));ev({t:'amend'});
+        return '['+(S.head.ref||'detached HEAD')+' '+id+'] '+S.commits[id].msg+'\n '+plural(nfiles(tr(old.parents[0]),S.index));}
+      if(S.merging){msg=msg||"Merge branch '"+S.merging.name+"'";id=mk(msg,[h,S.merging.theirs],S.index);move(id,'commit (merge): '+msg);S.merging=null;ev({t:'mergeDone'});ev({t:'merge',into:S.head.ref,kind:'merge'});return '['+(S.head.ref||'detached HEAD')+' '+id+'] '+msg;}
+      if(!nfiles(ht,S.index)){ch=changes();return (S.head.ref?'On branch '+S.head.ref:'HEAD detached at '+h)+'\n'+(ch.unstaged.length?'Changes not staged for commit:\n'+ch.unstaged.map(function(x){return '  '+x[0]+':   '+x[1];}).join('\n')+'\nno changes added to commit (use "git add")':ch.untracked.length?'nothing added to commit but untracked files present (use "git add" to track)':'nothing to commit, working tree clean');}
+      if(msg==null)return 'This playground has no editor. Add a message: git commit -m "Describe the change"';
+      var added=Object.keys(S.index).filter(function(p){return !(p in ht);}).length,n=nfiles(ht,S.index);
+      id=mk(msg,[h],S.index);move(id,'commit: '+msg);ev({t:'commit',branch:S.head.ref,added:added});
+      return '['+(S.head.ref||'detached HEAD')+(h?'':' (root-commit)')+' '+id+'] '+msg+'\n '+plural(n);}
+    if(c==='log'){if(!h)return "fatal: your current branch '"+S.head.ref+"' does not have any commits yet";
+      var set=anc(h),lim=Infinity;if(has('--all')){Object.keys(S.branches).forEach(function(b){var s=anc(S.branches[b]);for(var x in s)set[x]=1;});Object.keys(S.tags).forEach(function(t){var s=anc(S.tags[t]);for(var x in s)set[x]=1;});}
+      flags.forEach(function(f){var m=/^-(?:n)?(\d+)$/.exec(f);if(m)lim=+m[1];});if(has('-n')&&args.length)lim=+args[0];
+      var list=S.order.filter(function(x){return set[x];}).reverse().slice(0,lim),one=has('--oneline'),g=has('--graph');
+      return list.map(function(x){var cm=S.commits[x];return one?(g?'* ':'')+x+deco(x)+' '+cm.msg:'commit '+x+deco(x)+(cm.parents.length>1?'\nMerge: '+cm.parents.join(' '):'')+'\n\n    '+cm.msg+'\n';}).join('\n');}
+    if(c==='reflog')return S.reflog.length?S.reflog.map(function(e,n){return e.id+' HEAD@{'+n+'}: '+e.what;}).join('\n'):'';
+    if(c==='diff'){var A=has('--staged')||has('--cached')?ht:S.index,B=has('--staged')||has('--cached')?S.index:S.files,only=args.map(norm);out=[];
+      keys(A,B).forEach(function(p){if(!(p in S.index)&&!(p in ht))return;if(only.length&&only.indexOf(p)<0)return;if(A[p]===B[p])return;
+        out.push('diff --git a/'+p+' b/'+p);diffLines(A[p],B[p]).forEach(function(l){out.push(l);});});return out.join('\n');}
+    if(c==='show'){id=resolve(args[0]||'HEAD');if(!id)return "fatal: bad revision '"+(args[0]||'HEAD')+"'";var cm=S.commits[id],pt=tr(cm.parents[0]);
+      return 'commit '+id+deco(id)+'\n\n    '+cm.msg+'\n\n'+keys(pt,cm.tree).filter(function(p){return pt[p]!==cm.tree[p];}).map(function(p){return ' '+(!(p in pt)?'A':!(p in cm.tree)?'D':'M')+'  '+p;}).join('\n');}
+    if(c==='branch'){if(has('-d')||has('-D')){var b=args[0];if(!(b in S.branches))return "error: branch '"+b+"' not found";if(b===S.head.ref)return "error: cannot delete branch '"+b+"' used by worktree at '/recipe-box'";
+        if(!has('-D')&&!isAnc(S.branches[b],h))return "error: the branch '"+b+"' is not fully merged.\nhint: If you are sure you want to delete it, run 'git branch -D "+b+"'";
+        id=S.branches[b];delete S.branches[b];return 'Deleted branch '+b+' (was '+id+').';}
+      if(!args.length)return Object.keys(S.branches).sort().map(function(b){return (b===S.head.ref?'* ':'  ')+b;}).join('\n');
+      if(args[0] in S.branches)return "fatal: a branch named '"+args[0]+"' already exists";if(!h)return 'fatal: not a valid object name: no commits yet';
+      id=args[1]?resolve(args[1]):h;if(!id)return "fatal: not a valid object name: '"+args[1]+"'";
+      S.branches[args[0]]=id;S.lanes[args[0]]=Object.keys(S.lanes).length;return '';}
+    if(c==='switch'||c==='checkout'){var create=has('-c')||has('-b'),name=args[0];
+      if(c==='checkout'&&!create&&name&&!(name in S.branches)&&!resolve(name)&&(norm(name) in S.index))return git(['restore'].concat(args));
+      if(!name)return 'fatal: missing branch or commit argument';if(S.merging)return 'error: you need to resolve your current index first (finish the merge or run git merge --abort)';
+      if(create){if(name in S.branches)return "fatal: a branch named '"+name+"' already exists";id=args[1]?resolve(args[1]):h;if(args[1]&&!id)return "fatal: invalid reference: "+args[1];
+        if(id!==h){r=go(id);if(r)return r;}S.branches[name]=id;S.lanes[name]=Object.keys(S.lanes).length;S.head={ref:name};S.reflog.unshift({id:id,what:'checkout: moving to '+name});ev({t:'branch',name:name});return "Switched to a new branch '"+name+"'";}
+      if(name==='-'){return 'Use the branch name here: git switch main';}
+      if(name in S.branches){if(name===S.head.ref)return "Already on '"+name+"'";r=go(S.branches[name]);if(r)return r;S.head={ref:name};S.reflog.unshift({id:S.branches[name],what:'checkout: moving to '+name});return "Switched to branch '"+name+"'";}
+      id=resolve(name);if(!id)return c==='switch'?"fatal: invalid reference: "+name:"error: pathspec '"+name+"' did not match any file(s) known to git";
+      if(c==='switch'&&!has('--detach'))return "fatal: a branch is expected, got commit '"+name+"'\nhint: If you want to detach HEAD at the commit, try again with the --detach option.";
+      r=go(id);if(r)return r;S.head={id:id};S.reflog.unshift({id:id,what:'checkout: moving to '+name});return "Note: switching to '"+name+"'.\nYou are in 'detached HEAD' state. Commits made here belong to no branch.\nKeep them with: git switch -c <new-branch>\nHEAD is now at "+id+' '+S.commits[id].msg;}
+    if(c==='merge'){if(has('--abort')){if(!S.merging)return 'fatal: There is no merge to abort (MERGE_HEAD missing).';S.merging=null;S.unmerged={};setTree(ht);return '';}
+      if(S.merging)return 'fatal: You have not concluded your merge (MERGE_HEAD exists).\nPlease, commit your changes before you merge.';
+      var th=resolve(args[0]);if(!args[0]||!th)return 'merge: '+(args[0]||'')+' - not something we can merge';
+      if(isAnc(th,h))return 'Already up to date.';if(!clean())return 'error: Your local changes would be overwritten by merge.\nPlease commit your changes or stash them before you merge.';
+      if(isAnc(h,th)&&!has('--no-ff')){var nf=nfiles(ht,tr(th));move(th,'merge '+args[0]+': Fast-forward');setTree(tr(th));ev({t:'merge',into:S.head.ref,kind:'ff'});return 'Updating '+h+'..'+th+'\nFast-forward\n '+plural(nf);}
+      var ca=anc(h),cb=anc(th),base=null;S.order.forEach(function(x){if(ca[x]&&cb[x])base=x;});r=merge3(tr(base),ht,tr(th),args[0]);
+      if(r.conf.length){S.files=cp(r.tree);untracked();S.index=cp(r.tree);r.conf.forEach(function(p){S.unmerged[p]=1;if(p in ht)S.index[p]=ht[p];else delete S.index[p];});S.merging={theirs:th,name:args[0]};ev({t:'conflict'});
+        return r.conf.map(function(p){return 'Auto-merging '+p+'\nCONFLICT (content): Merge conflict in '+p;}).join('\n')+'\nAutomatic merge failed; fix conflicts and then commit the result.';}
+      var mm="Merge branch '"+args[0]+"'"+(S.head.ref==='main'?'':' into '+S.head.ref),keepU={};untracked().forEach(function(p){keepU[p]=S.files[p];});
+      id=mk(mm,[h,th],r.tree);move(id,'merge '+args[0]+': Merge made');S.files=cp(r.tree);S.index=cp(r.tree);for(var up in keepU)if(!(up in S.files))S.files[up]=keepU[up];ev({t:'merge',into:S.head.ref,kind:'merge'});
+      return "Merge made by the 'ort' strategy.\n "+plural(nfiles(ht,r.tree));}
+    if(c==='rebase'){if(has('--abort')||has('--continue'))return 'fatal: No rebase in progress?';if(S.merging)return 'error: finish or abort the merge first';
+      var on=resolve(args[0]);if(!args[0]||!on)return "fatal: invalid upstream '"+(args[0]||'')+"'";if(!clean())return 'error: cannot rebase: You have unstaged changes.\nPlease commit or stash them.';
+      if(isAnc(on,h))return 'Current branch '+(S.head.ref||'HEAD')+' is up to date.';
+      if(isAnc(h,on)){move(on,'rebase (finish): fast-forward');setTree(tr(on));return 'Successfully rebased and updated refs/heads/'+S.head.ref+'.';}
+      var oa=anc(on),ha=anc(h),todo=S.order.filter(function(x){return ha[x]&&!oa[x]&&S.commits[x].parents.length<2;}),t=tr(on),plan=[];
+      for(i=0;i<todo.length;i++){var cm2=S.commits[todo[i]];r=merge3(tr(cm2.parents[0]),t,cm2.tree,todo[i]);
+        if(r.conf.length)return 'CONFLICT in '+r.conf.join(', ')+' while replaying '+todo[i]+' "'+cm2.msg+'".\nThis playground cannot pause a rebase, so nothing was changed. Real Git would stop here and wait for: fix, git add, git rebase --continue.';
+        t=r.tree;plan.push([cm2.msg,t]);}
+      var cur=on;plan.forEach(function(pl){cur=mk(pl[0],[cur],pl[1]);});move(cur,'rebase (finish): onto '+on);setTree(t);ev({t:'rebase'});
+      return 'Successfully rebased and updated refs/heads/'+(S.head.ref||'HEAD')+'.\n'+plan.length+' commit'+(plan.length===1?'':'s')+' replayed with new IDs.';}
+    if(c==='cherry-pick'||c==='revert'){id=resolve(args[0]);if(!args[0]||!id)return "fatal: bad revision '"+(args[0]||'')+"'";if(S.merging)return 'error: finish or abort the merge first';if(!clean())return 'error: your local changes would be overwritten by '+c+'.\nCommit your changes or stash them to proceed.';
+      var src=S.commits[id],par=tr(src.parents[0]);r=c==='revert'?merge3(src.tree,ht,par,'parent of '+id):merge3(par,ht,src.tree,id);
+      if(r.conf.length)return 'CONFLICT in '+r.conf.join(', ')+'.\nThis playground cannot pause a '+c+', so nothing was changed. Real Git would stop and wait for you to fix the file.';
+      if(!nfiles(ht,r.tree))return 'The change is already present; nothing to commit.';
+      var m2=c==='revert'?'Revert "'+src.msg+'"':src.msg,nid=mk(m2,[h],r.tree);move(nid,c+': '+m2);setTree(r.tree);ev({t:c==='revert'?'revert':'pick'});
+      return '['+(S.head.ref||'detached HEAD')+' '+nid+'] '+m2+'\n '+plural(nfiles(ht,r.tree));}
+    if(c==='reset'){var mode=has('--soft')?'soft':has('--hard')?'hard':'mixed',tgt=args.length?resolve(args[0]):h;
+      if(args.length&&!tgt){var pths=args.map(norm);for(i=0;i<pths.length;i++){if(!(pths[i] in S.index)&&!(pths[i] in ht))return "fatal: ambiguous argument '"+args[0]+"': unknown revision or path";if(pths[i] in ht)S.index[pths[i]]=ht[pths[i]];else delete S.index[pths[i]];}return 'Unstaged changes after reset.';}
+      if(!tgt)return 'fatal: no commits yet';if(args.length>1){args.slice(1).map(norm).forEach(function(p){if(p in ht)S.index[p]=ht[p];else delete S.index[p];});return 'Unstaged changes after reset.';}
+      var back=tgt!==h&&isAnc(tgt,h),fwd=tgt!==h&&isAnc(h,tgt);
+      if(mode==='hard'){setTree(tr(tgt));}else if(mode==='mixed'){S.index=cp(tr(tgt));}
+      S.merging=null;S.unmerged={};move(tgt,'reset: moving to '+(args[0]||'HEAD'));ev({t:'reset',mode:mode,back:back,fwd:fwd||(tgt!==h&&!back)});
+      return mode==='hard'?'HEAD is now at '+tgt+' '+S.commits[tgt].msg:mode==='mixed'&&changes().unstaged.length?'Unstaged changes after reset:\n'+changes().unstaged.map(function(x){return (x[0]==='deleted'?'D':'M')+'\t'+x[1];}).join('\n'):'';}
+    if(c==='restore'){var staged=has('--staged'),srcT=null;flags.forEach(function(f){var m=/^--source=(.+)$/.exec(f);if(m)srcT=resolve(m[1]);});
+      var rp=args.indexOf('.')>=0?keys(S.files,S.index,ht):args.map(norm);if(!rp.length)return 'fatal: you must specify path(s) to restore';
+      for(i=0;i<rp.length;i++){var x=rp[i],from=srcT?tr(srcT):staged?ht:S.index;
+        if(args.indexOf('.')<0&&!(x in from)&&!(x in S.index)&&!(x in S.files))return "error: pathspec '"+x+"' did not match any file(s) known to git";
+        if(staged){if(x in ht)S.index[x]=ht[x];else delete S.index[x];}
+        else if(x in from)S.files[x]=from[x];else if(x in S.index||srcT)delete S.files[x];}
+      return '';}
+    if(c==='stash'){var sub=args[0]||'push';
+      if(sub==='list')return S.stash.map(function(s,n){return 'stash@{'+n+'}: On '+s.branch+': '+s.msg;}).join('\n');
+      if(sub==='push'||sub==='save'){if(clean())return 'No local changes to save';var sm='WIP';for(i=0;i<rest.length;i++)if(rest[i]==='-m')sm=rest[i+1];
+        var sf={},keepS={};untracked().forEach(function(p){keepS[p]=S.files[p];});Object.keys(S.files).forEach(function(p){if(!(p in keepS))sf[p]=S.files[p];});
+        S.stash.unshift({msg:sm,branch:S.head.ref||'(no branch)',base:cp(ht),files:sf,index:cp(S.index)});S.files=cp(ht);for(var kp in keepS)S.files[kp]=keepS[kp];S.index=cp(ht);ev({t:'stash'});
+        return 'Saved working directory and index state On '+(S.head.ref||'(no branch)')+': '+sm;}
+      if(sub==='pop'||sub==='apply'||sub==='drop'){if(!S.stash.length)return 'No stash entries found.';var s0=S.stash[0];
+        if(sub!=='drop'){keys(s0.files,s0.base).forEach(function(p){if(s0.files[p]!==s0.base[p]){if(p in s0.files)S.files[p]=s0.files[p];else delete S.files[p];}});
+          keys(s0.index,s0.base).forEach(function(p){if(s0.index[p]!==s0.base[p]){if(p in s0.index)S.index[p]=s0.index[p];else delete S.index[p];}});}
+        if(sub!=='apply')S.stash.shift();if(sub==='pop')ev({t:'pop'});
+        return sub==='drop'?'Dropped stash@{0}':git(['status'])+(sub==='pop'?'\nDropped stash@{0}':'');}
+      return 'This playground supports: git stash, git stash list, git stash pop, git stash apply, git stash drop';}
+    if(c==='tag'){if(has('-d')){if(!(args[0] in S.tags))return "error: tag '"+args[0]+"' not found.";delete S.tags[args[0]];return "Deleted tag '"+args[0]+"'";}
+      var ta=[],skip=false;rest.forEach(function(x,n){if(skip){skip=false;return;}if(x==='-m'){skip=true;return;}if(x[0]!=='-')ta.push(x);});
+      if(!ta.length)return Object.keys(S.tags).sort().join('\n');if(ta[0] in S.tags)return "fatal: tag '"+ta[0]+"' already exists";
+      id=ta[1]?resolve(ta[1]):h;if(!id)return 'fatal: Failed to resolve as a valid ref.';S.tags[ta[0]]=id;return '';}
+    return "git: '"+c+"' is not supported in this playground. Type help to see what is.";
+
+    function go(target){var tt=tr(target),bad=[],dirty=[];
+      keys(S.files,S.index,ht).forEach(function(p){var tracked=(p in S.index)||(p in ht);
+        if(!tracked){if((p in tt)&&tt[p]!==S.files[p])bad.push(p);return;}
+        if(S.files[p]!==ht[p]||S.index[p]!==ht[p]){dirty.push(p);if(ht[p]!==tt[p])bad.push(p);}});
+      if(bad.length)return 'error: Your local changes to the following files would be overwritten by checkout:\n\t'+bad.join('\n\t')+'\nPlease commit your changes or stash them before you switch branches.';
+      var of=S.files,oi=S.index,keep={};untracked().forEach(function(p){keep[p]=of[p];});S.files=cp(tt);S.index=cp(tt);
+      dirty.forEach(function(p){if(p in of)S.files[p]=of[p];else delete S.files[p];if(p in oi)S.index[p]=oi[p];else delete S.index[p];});
+      for(var p in keep)S.files[p]=keep[p];return null;}
+  }
+
+  function tok(s){var t=[],cur='',q=null,any=false,i,ch;function push(){if(any)t.push(cur);cur='';any=false;}
+    for(i=0;i<s.length;i++){ch=s[i];
+      if(q){if(ch===q)q=null;else cur+=ch;}
+      else if(ch==='"'||ch==="'"){q=ch;any=true;}
+      else if(ch===' '||ch==='\t')push();
+      else if(ch==='>'){push();if(s[i+1]==='>'){t.push('\u0000>>');i++;}else t.push('\u0000>');}
+      else{cur+=ch;any=true;}}
+    push();return t;}
+  function one(line){var t=tok(line.replace(/^\$\s*/,'')),c=t[0],a=t.slice(1),ri=-1,i;if(!c)return '';
+    for(i=0;i<t.length;i++)if(t[i]==='\u0000>'||t[i]==='\u0000>>')ri=i;
+    if(c==='git')return ri>=0?'Redirecting git output is not supported here.':git(a);
+    if(c==='help')return HELP;
+    if(c==='clear')return '\u0000clear';
+    if(c==='pwd')return '/recipe-box';
+    if(c==='cd'||c==='mkdir')return c==='cd'?'This playground has one folder: /recipe-box':'';
+    if(c==='ls')return keys(S.files).join('\n');
+    if(c==='cat'){if(!a.length)return 'cat: missing file name';if(!(norm(a[0]) in S.files))return 'cat: '+a[0]+': No such file or directory';return S.files[norm(a[0])].replace(/\n$/,'');}
+    if(c==='touch'){a.forEach(function(p){p=norm(p);if(!(p in S.files))S.files[p]='';});return '';}
+    if(c==='rm'){var fs=a.filter(function(x){return x[0]!=='-';});for(i=0;i<fs.length;i++){if(!(norm(fs[i]) in S.files))return 'rm: '+fs[i]+': No such file or directory';delete S.files[norm(fs[i])];}return '';}
+    if(c==='echo'||c==='printf'){var words=t.slice(1,ri>=0?ri:t.length).filter(function(x){return x!=='-n'&&x!=='-e'&&x!=='--';}),text=words.join(' ').replace(/\\n/g,'\n');
+      if(ri<0)return text;var f=t[ri+1];if(!f)return 'syntax error: missing file name after >';f=norm(f);if(!/\n$/.test(text))text+='\n';
+      S.files[f]=t[ri]==='\u0000>>'?(S.files[f]||'')+text:text;return '';}
+    return c+': command not found. Type help to see what this playground supports.';}
+
+  function reset(){S={files:{},index:{},commits:{},order:[],branches:{main:null},lanes:{main:0},head:{ref:'main'},tags:{},stash:[],reflog:[],merging:null,unmerged:{},seq:0,events:[]};
+    S.files['README.md']='# Recipe Box\n';one('git add .');one('git commit -m "Add README"');
+    S.files['chai.txt']='Masala Chai\n- 2 cups water\n- 1 cup milk\n- 1 tsp sugar\n';one('git add .');one('git commit -m "Add chai recipe"');S.events=[];}
+  reset();
+  return {
+    run:function(line){var parts=String(line).split(/\s*&&\s*/),outs=[],o,i;for(i=0;i<parts.length;i++){o=one(parts[i].trim());if(o==='\u0000clear')return {clear:true,out:''};if(o)outs.push(o);if(/^(error|fatal|CONFLICT)/.test(o))break;}return {out:outs.join('\n')};},
+    reset:reset, S:function(){return S;}, head:head, anc:anc, changes:changes
+  };
+}
+GitSim.challenges=[
+  {t:'Create a new file and commit it',h:'echo "Dosa" > dosa.txt, then git add and git commit -m "..."',ok:function(e){return e.some(function(x){return x.t==='commit'&&x.added>0;});}},
+  {t:'Make a branch and commit on it',h:'git switch -c add-poha, change a file, add, commit',ok:function(e){return e.some(function(x){return x.t==='commit'&&x.branch&&x.branch!=='main';});}},
+  {t:'Merge that branch into main',h:'git switch main, then git merge add-poha',ok:function(e){return e.some(function(x){return x.t==='merge'&&x.into==='main';});}},
+  {t:'Undo the last commit but keep the work',h:'git reset --soft HEAD~1, then git status',ok:function(e){return e.some(function(x){return x.t==='reset'&&x.mode!=='hard'&&x.back;});}},
+  {t:'Park unfinished work and bring it back',h:'edit a file, git stash, git stash pop',ok:function(e){var s=false;return e.some(function(x){if(x.t==='stash')s=true;return s&&x.t==='pop';});}},
+  {t:'Cancel a commit with a new commit',h:'git revert HEAD',ok:function(e){return e.some(function(x){return x.t==='revert';});}},
+  {t:'Lose a commit, then rescue it',h:'git reset --hard HEAD~1, git reflog, git reset --hard "HEAD@{1}"',ok:function(e){var lost=false;return e.some(function(x){if(x.t==='reset'&&x.mode==='hard'&&x.back)lost=true;return lost&&x.t==='reset'&&x.fwd;});}},
+  {t:'Cause a merge conflict and resolve it',h:'change the same line of chai.txt on two branches, merge, fix the file with echo, git add, git commit',ok:function(e){var c=false;return e.some(function(x){if(x.t==='conflict')c=true;return c&&x.t==='mergeDone';});}}
+];
+/*ENGINE-END*/
+(function(){
+var NS='http://www.w3.org/2000/svg';
+function el(n,a,p,t){var e=document.createElementNS(NS,n);for(var k in a)e.setAttribute(k,a[k]);if(t!=null)e.textContent=t;if(p)p.appendChild(e);return e;}
+function h(n,a,p,t){var e=document.createElement(n);for(var k in a)e.setAttribute(k,a[k]);if(t!=null)e.textContent=t;if(p)p.appendChild(e);return e;}
+var LANES=['var(--s1)','var(--s2)','var(--s3)','var(--s4)','var(--s5)'];
+
+/* ---------- tabs ---------- */
+var panels=[].slice.call(document.querySelectorAll('section.panel')),row=document.getElementById('tabrow'),btns=[];
+function show(i,focus){panels.forEach(function(p,j){p.hidden=j!==i;btns[j].setAttribute('aria-selected',j===i?'true':'false');btns[j].tabIndex=j===i?0:-1;});
+  try{localStorage.setItem('gitguide.tab',i);}catch(e){} if(focus){btns[i].focus();window.scrollTo(0,0);} row.scrollLeft=Math.max(0,btns[i].offsetLeft-row.clientWidth/2+btns[i].offsetWidth/2);}
+panels.forEach(function(p,i){var b=h('button',{role:'tab',type:'button',id:'tab'+i,'aria-controls':p.id},row);b.innerHTML=p.dataset.tab;p.setAttribute('role','tabpanel');p.setAttribute('aria-labelledby','tab'+i);
+  b.onclick=function(){show(i,true);};btns.push(b);});
+row.addEventListener('keydown',function(e){var i=btns.indexOf(document.activeElement);if(i<0)return;
+  if(e.key==='ArrowRight')show((i+1)%btns.length,true);if(e.key==='ArrowLeft')show((i+btns.length-1)%btns.length,true);});
+var st=0;try{st=+localStorage.getItem('gitguide.tab')||0;}catch(e){} if(st>=panels.length)st=0;show(st,false);
+
+/* ---------- DAG drawing ---------- */
+function drawDag(svg,d){
+  while(svg.firstChild)svg.removeChild(svg.firstChild);
+  svg.setAttribute('viewBox','0 0 '+d.w+' '+d.h);svg.setAttribute('width',d.w);svg.setAttribute('height',d.h);
+  var by={};d.nodes.forEach(function(n){by[n.id]=n;});
+  d.edges.forEach(function(e){var a=by[e[0]],b=by[e[1]];if(!a||!b)return;var mx=(a.x+b.x)/2;
+    el('path',{d:a.y===b.y?'M'+a.x+' '+a.y+'L'+b.x+' '+b.y:'M'+a.x+' '+a.y+'C'+mx+' '+a.y+','+mx+' '+b.y+','+b.x+' '+b.y,fill:'none',stroke:LANES[b.c%5],'stroke-width':2.5,opacity:(a.dim||b.dim)?0.3:1},svg);});
+  d.nodes.forEach(function(n){var g=el('g',{opacity:n.dim?0.35:1},svg);
+    el('circle',{cx:n.x,cy:n.y,r:12,fill:n.head?LANES[n.c%5]:'var(--surface)',stroke:LANES[n.c%5],'stroke-width':2.5},g);
+    el('text',{x:n.x,y:n.y+4,'text-anchor':'middle','class':'fl-tm',style:'font-size:10.5px;'+(n.head?'fill:#fff;font-weight:600':'')},g,n.label!=null?n.label:n.id);if(n.sub)el('text',{x:n.x,y:n.y+27,'text-anchor':'middle','class':'fl-tm',style:'font-size:10.5px'},g,n.sub);});
+  var stack={};
+  (d.tags||[]).forEach(function(t){var n=by[t.at];if(!n)return;var k=stack[t.at]=(stack[t.at]||0)+1;var w=t.text.length*6.6+12,y=n.y-18-k*19;
+    el('rect',{x:n.x-w/2,y:y,width:w,height:17,rx:4,fill:t.head?'var(--ink)':'var(--code-bg)',stroke:'var(--line)'},svg);
+    el('text',{x:n.x,y:y+12,'text-anchor':'middle','class':'fl-tm',style:'font-size:10.5px;'+(t.head?'fill:var(--bg)':'')},svg,t.text);});
+}
+function N(id,x,y,c,o){var n={id:id,x:x,y:y,c:c};for(var k in o)n[k]=o[k];return n;}
+drawDag(document.getElementById('dBefore'),{w:250,h:140,nodes:[N('A',30,60,0),N('B',85,60,0),N('C',140,60,0),N('D',140,115,1),N('E',195,115,1)],edges:[['A','B'],['B','C'],['B','D'],['D','E']],tags:[{at:'C',text:'main'},{at:'E',text:'feature'}]});
+drawDag(document.getElementById('dMerge'),{w:290,h:140,nodes:[N('A',30,60,0),N('B',85,60,0),N('C',140,60,0),N('M',250,60,0,{head:1}),N('D',140,115,1),N('E',195,115,1)],edges:[['A','B'],['B','C'],['C','M'],['B','D'],['D','E'],['E','M']],tags:[{at:'M',text:'main'},{at:'E',text:'feature'}]});
+drawDag(document.getElementById('dRebase'),{w:290,h:140,nodes:[N('A',30,60,0),N('B',85,60,0),N('C',140,60,0),N("D'",195,60,1),N("E'",250,60,1,{head:1}),N('D',140,115,1,{dim:1}),N('E',195,115,1,{dim:1})],edges:[['A','B'],['B','C'],['C',"D'"],["D'","E'"],['B','D'],['D','E']],tags:[{at:'C',text:'main'},{at:"E'",text:'feature'}]});
+
+/* ---------- playground ---------- */
+var S,pg=document.getElementById('pg'),log=document.getElementById('pgLog'),sw=document.getElementById('pgSwitch');
+function init(){S={c:[],b:{main:null},lane:{main:0},head:'main',n:0,bn:0};
+  commit();commit();branch('add-dosa');commit();commit();S.head='main';commit();say('Sample history loaded. You are on main.');}
+function commit(){var id='c'+(++S.n),p=S.b[S.head];S.c.push({id:id,p:p?[p]:[],lane:S.lane[S.head]});S.b[S.head]=id;}
+function branch(name){S.b[name]=S.b[S.head];S.lane[name]=Object.keys(S.lane).length;S.head=name;}
+function get(id){for(var i=0;i<S.c.length;i++)if(S.c[i].id===id)return S.c[i];}
+function anc(id){var seen={},q=[id];while(q.length){var x=q.pop();if(!x||seen[x])continue;seen[x]=1;q=q.concat(get(x).p);}return seen;}
+function say(t){log.textContent=t;}
+function render(){
+  var reach={};Object.keys(S.b).forEach(function(b){var a=anc(S.b[b]);for(var k in a)reach[k]=1;});
+  var nl=Object.keys(S.lane).length,nodes=[],edges=[],tags=[];
+  S.c.forEach(function(c,i){nodes.push({id:c.id,x:44+i*58,y:66+c.lane*62,c:c.lane,dim:!reach[c.id],head:S.b[S.head]===c.id});c.p.forEach(function(p){edges.push([p,c.id]);});});
+  Object.keys(S.b).forEach(function(b){tags.push({at:S.b[b],text:(b===S.head?'HEAD → ':'')+b,head:b===S.head});});
+  tags.sort(function(a,b){return (a.head?1:0)-(b.head?1:0);});
+  drawDag(pg,{w:Math.max(560,88+S.c.length*58),h:44+nl*62+20,nodes:nodes,edges:edges,tags:tags});
+  sw.innerHTML='';Object.keys(S.b).forEach(function(b){var x=h('button',{type:'button'},sw,b);if(b===S.head)x.className='on';x.onclick=function(){S.head=b;say('$ git switch '+b);render();};});
+  var others=Object.keys(S.b).filter(function(b){return b!==S.head;});
+  document.getElementById('pgMerge').textContent='git merge '+(others.length?mergeTarget():'…');
+}
+function mergeTarget(){var o=Object.keys(S.b).filter(function(b){return b!==S.head;});
+  for(var i=o.length-1;i>=0;i--){if(!anc(S.b[S.head])[S.b[o[i]]])return o[i];}return o[o.length-1];}
+document.getElementById('pgCommit').onclick=function(){if(S.c.length>=16){say('The demo graph is full. Press Start over.');return;}commit();say('$ git commit   → new commit '+S.b[S.head]+'; '+S.head+' moves forward');render();};
+document.getElementById('pgBranch').onclick=function(){var names=['add-poha','add-upma','hotfix'];if(S.bn>=names.length){say('Enough branches for one demo. Press Start over.');return;}var n=names[S.bn++];branch(n);say('$ git switch -c '+n+'   → new label on the same commit; nothing is copied');render();};
+document.getElementById('pgMerge').onclick=function(){var o=Object.keys(S.b).filter(function(b){return b!==S.head;});if(!o.length){say('Create a branch first.');return;}
+  var t=mergeTarget(),mine=S.b[S.head],theirs=S.b[t];
+  if(anc(mine)[theirs]){say('$ git merge '+t+'   → Already up to date.');}
+  else if(anc(theirs)[mine]){S.b[S.head]=theirs;say('$ git merge '+t+'   → Fast-forward: '+S.head+' just slides forward, no merge commit');}
+  else{var id='c'+(++S.n);S.c.push({id:id,p:[mine,theirs],lane:S.lane[S.head]});S.b[S.head]=id;say('$ git merge '+t+'   → merge commit '+id+' with two parents');}
+  render();};
+document.getElementById('pgReset').onclick=function(){var c=get(S.b[S.head]);if(!c.p.length){say('This is the first commit; there is nothing before it.');return;}
+  S.b[S.head]=c.p[0];say('$ git reset --hard HEAD~1   → '+S.head+' moves back; '+c.id+' fades unless another branch still reaches it');render();};
+document.getElementById('pgClear').onclick=function(){init();render();};
+init();render();
+
+/*PLAYUI-START*/
+/* ---------- typed playground ---------- */
+(function(){
+  var sim=GitSim(),out=document.getElementById('tgOut'),inp=document.getElementById('tgIn'),svg=document.getElementById('tgGraph'),
+      scr=document.getElementById('tgScroll'),hist=[],hi=0,done={};
+  function line(cls,text){var s=h('span',{'class':cls},out,text);out.appendChild(document.createTextNode('\n'));return s;}
+  function areaList(id,rows,empty){var ul=document.getElementById(id);ul.innerHTML='';
+    if(!rows.length){h('li',{'class':'none'},ul,empty);return;}
+    rows.forEach(function(r){var li=h('li',{},ul);h('span',{},li,r[0]);h('span',{'class':'st '+(r[2]||'')},li,r[1]);});}
+  function render(){
+    var S=sim.S(),hd=sim.head(),reach={},nodes=[],edges=[],tags=[],nl=1,k;
+    function mark(id){var a=sim.anc(id);for(var x in a)reach[x]=1;}
+    Object.keys(S.branches).forEach(function(b){if(S.branches[b])mark(S.branches[b]);});
+    Object.keys(S.tags).forEach(function(t){mark(S.tags[t]);});if(hd)mark(hd);
+    S.order.forEach(function(id,i){var c=S.commits[id];nl=Math.max(nl,c.lane+1);
+      nodes.push({id:id,label:'',sub:id,x:50+i*66,y:92+c.lane*66,c:c.lane,dim:!reach[id],head:hd===id});
+      c.parents.forEach(function(p){edges.push([p,id]);});});
+    Object.keys(S.tags).sort().forEach(function(t){tags.push({at:S.tags[t],text:'tag: '+t});});
+    Object.keys(S.branches).sort().forEach(function(b){if(S.branches[b]&&b!==S.head.ref)tags.push({at:S.branches[b],text:b});});
+    if(hd)tags.push({at:hd,text:S.head.ref?'HEAD → '+S.head.ref:'HEAD (detached)',head:true});
+    drawDag(svg,{w:Math.max(560,100+S.order.length*66),h:92+nl*66,nodes:nodes,edges:edges,tags:tags});
+    var hx=0;nodes.forEach(function(n){if(n.head)hx=n.x;});scr.scrollLeft=Math.max(0,hx-scr.clientWidth/2);
+    var ch=sim.changes(),ht=hd?S.commits[hd].tree:{},st={};
+    ch.unstaged.forEach(function(x){st[x[1]]=[x[0],'ch'];});ch.untracked.forEach(function(p){st[p]=['untracked','ch'];});
+    Object.keys(S.unmerged).forEach(function(p){st[p]=['conflict','ch'];});
+    areaList('tgWork',Object.keys(S.files).sort().map(function(p){return [p,st[p]?st[p][0]:'unchanged',st[p]?st[p][1]:''];}),'No files');
+    areaList('tgStage',ch.staged.filter(function(x){return !S.unmerged[x[1]];}).map(function(x){return [x[1],x[0],'ok'];}),'Nothing staged');
+    areaList('tgHead',Object.keys(ht).sort().map(function(p){return [p,'',''];}),'No commits yet');
+    var n=0;GitSim.challenges.forEach(function(c,i){if(!done[i]&&c.ok(S.events))done[i]=1;if(done[i])n++;});
+    var ol=document.getElementById('tgCh');ol.innerHTML='';
+    GitSim.challenges.forEach(function(c,i){var li=h('li',done[i]?{'class':'done'}:{},ol);h('span',{'class':'mk','aria-hidden':'true'},li,done[i]?'[x]':'[ ]');
+      h('b',{},li,c.t+(done[i]?' (done)':''));var hint=h('span',{'class':'hint'},li,'Hint: ');h('code',{},hint,c.h);});
+    document.getElementById('tgScore').textContent=n+' of '+GitSim.challenges.length+' done.';
+  }
+  function exec(cmd){cmd=cmd.trim();if(!cmd)return;
+    hist.push(cmd);hi=hist.length;var r=sim.run(cmd);
+    if(r.clear){out.innerHTML='';}else{line('tp','$ '+cmd);if(r.out)line('',r.out);}
+    out.scrollTop=out.scrollHeight;render();}
+  document.getElementById('tgForm').addEventListener('submit',function(e){e.preventDefault();exec(inp.value);inp.value='';});
+  inp.addEventListener('keydown',function(e){
+    if(e.key==='ArrowUp'&&hist.length){e.preventDefault();hi=Math.max(0,hi-1);inp.value=hist[hi];}
+    if(e.key==='ArrowDown'&&hist.length){e.preventDefault();hi=Math.min(hist.length,hi+1);inp.value=hist[hi]||'';}});
+  ['git status','git log --oneline --all','echo "- ginger" >> chai.txt','git diff','git add .','git commit -m "Add ginger"','git switch -c add-dosa','git switch main','git merge add-dosa','git reflog','help']
+    .forEach(function(c){var b=h('button',{type:'button'},document.getElementById('tgQuick'),c);b.onclick=function(){exec(c);};});
+  function welcome(){out.innerHTML='';line('tn','Recipe Box practice repo: 2 commits on main, files README.md and chai.txt.');line('tn','Type a command below, or press a Try button. Up arrow recalls your last command.');}
+  document.getElementById('tgReset').onclick=function(){sim.reset();done={};hist=[];hi=0;welcome();render();};
+  welcome();render();
+})();
+/*PLAYUI-END*/
+/* ---------- flowcharts ---------- */
+var fid=0;
+function flow(svg,W,H,nodes,edges){
+  svg.setAttribute('viewBox','0 0 '+W+' '+H);svg.setAttribute('width',W);
+  var m='arw'+(++fid),df=el('defs',{},svg),mk=el('marker',{id:m,viewBox:'0 0 10 10',refX:9,refY:5,markerWidth:7,markerHeight:7,orient:'auto'},df);
+  el('path',{d:'M0 0L10 5L0 10z',fill:'var(--muted)'},mk);
+  var by={};nodes.forEach(function(n){n.w=n.w||170;n.h=n.h||(n.t.length>1?46:36);by[n.id]=n;});
+  var labels=[];
+  edges.forEach(function(e){var a=by[e.a],b=by[e.b],d,lx,ly,mode=e.m||(Math.abs(b.y-a.y)>=Math.abs(b.x-a.x)*0.5?'v':'h');
+    if(mode==='v'){var s=b.y>a.y?1:-1,y1=a.y+s*a.h/2,y2=b.y-s*b.h/2,my=(y1+y2)/2;d='M'+a.x+' '+y1+'V'+my+'H'+b.x+'V'+y2;lx=a.x===b.x?a.x:(a.x+b.x)/2;ly=my;}
+    else if(mode==='h'){var s2=b.x>a.x?1:-1,x1=a.x+s2*a.w/2,x2=b.x-s2*b.w/2,mx=(x1+x2)/2;d='M'+x1+' '+a.y+'H'+mx+'V'+b.y+'H'+x2;lx=mx;ly=a.y===b.y?a.y:(a.y+b.y)/2;}
+    else{var s3=b.y>a.y?1:-1,s4=a.x>b.x?1:-1;d='M'+a.x+' '+(a.y+s3*a.h/2)+'V'+b.y+'H'+(b.x+s4*b.w/2);lx=a.x;ly=(a.y+b.y)/2;}
+    el('path',{d:d,'class':'fl-edge','marker-end':'url(#'+m+')'},svg);if(e.l)labels.push([lx,ly,e.l]);});
+  nodes.forEach(function(n){var x=n.x-n.w/2,y=n.y-n.h/2,cls={ask:'fl-ask',end:'fl-end',warn:'fl-warn'}[n.k]||'fl-node';
+    if(n.k==='ask')el('polygon',{points:[[x,n.y],[x+14,y],[x+n.w-14,y],[x+n.w,n.y],[x+n.w-14,y+n.h],[x+14,y+n.h]].join(' '),'class':cls},svg);
+    else el('rect',{x:x,y:y,width:n.w,height:n.h,rx:n.k==='end'?n.h/2:7,'class':cls},svg);
+    n.t.forEach(function(line,i){var mono=/^(git |gh )/.test(line);el('text',{x:n.x,y:n.y+4+(i-(n.t.length-1)/2)*15,'text-anchor':'middle','class':mono?'fl-tm':'fl-t'},svg,line);});});
+  labels.forEach(function(l){var w=l[2].length*6.3+10;el('rect',{x:l[0]-w/2,y:l[1]-9,width:w,height:18,rx:4,'class':'fl-lblbg'},svg);el('text',{x:l[0],y:l[1]+4,'text-anchor':'middle','class':'fl-l'},svg,l[2]);});
+}
+flow(document.getElementById('fUndo'),840,370,[
+  {id:'q1',x:420,y:36,k:'ask',w:220,t:['Is the change committed?']},
+  {id:'q2',x:190,y:126,k:'ask',w:180,t:['Is it staged?']},
+  {id:'r1',x:90,y:226,k:'warn',t:['git restore <file>','edits are discarded']},
+  {id:'r2',x:290,y:226,w:190,t:['git restore --staged <file>','edits are kept']},
+  {id:'q3',x:620,y:126,k:'ask',w:220,t:['Pushed or shared already?']},
+  {id:'r3',x:745,y:226,k:'end',w:170,t:['git revert <hash>','safe: adds a commit']},
+  {id:'q4',x:520,y:226,k:'ask',w:190,t:['What should change?']},
+  {id:'r4',x:330,y:330,w:180,t:['git commit --amend','message or forgotten file']},
+  {id:'r5',x:530,y:330,w:190,t:['git reset --soft HEAD~1','drop commit, keep work']},
+  {id:'r6',x:735,y:330,k:'warn',w:190,t:['git reset --hard HEAD~1','drop commit and work']}
+],[{a:'q1',b:'q2',l:'no'},{a:'q1',b:'q3',l:'yes'},{a:'q2',b:'r1',l:'no'},{a:'q2',b:'r2',l:'yes'},{a:'q3',b:'r3',l:'yes'},{a:'q3',b:'q4',l:'no'},{a:'q4',b:'r4'},{a:'q4',b:'r5'},{a:'q4',b:'r6',m:'v'}]);
+
+flow(document.getElementById('fPr'),570,510,[
+  {id:'a',x:190,y:30,w:220,t:['git switch -c add-upma']},
+  {id:'b',x:190,y:100,w:220,t:['Commit in small steps']},
+  {id:'c',x:190,y:170,w:220,t:['git push -u origin add-upma']},
+  {id:'d',x:190,y:240,w:220,t:['Open pull request','gh pr create']},
+  {id:'e',x:190,y:320,k:'ask',w:240,t:['Checks green and approved?']},
+  {id:'f',x:190,y:400,w:220,t:['Merge on GitHub']},
+  {id:'g',x:190,y:470,k:'end',w:260,t:['Delete branch, git pull on main']},
+  {id:'x',x:470,y:320,w:170,t:['Fix, commit locally']}
+],[{a:'a',b:'b'},{a:'b',b:'c'},{a:'c',b:'d'},{a:'d',b:'e'},{a:'e',b:'f',l:'yes'},{a:'f',b:'g'},{a:'e',b:'x',m:'h',l:'no'},{a:'x',b:'c',m:'vh',l:'push again'}]);
+
+flow(document.getElementById('fAi'),620,510,[
+  {id:'a',x:200,y:30,w:240,t:['git status shows a clean tree']},
+  {id:'b',x:200,y:100,w:240,t:['New branch or worktree']},
+  {id:'c',x:200,y:170,w:240,t:['Give the AI one small task']},
+  {id:'d',x:200,y:240,w:240,t:['Read git diff yourself']},
+  {id:'e',x:200,y:320,k:'ask',w:260,t:['Diff is right and tests pass?']},
+  {id:'f',x:200,y:400,w:240,t:['git add -p, then commit']},
+  {id:'g',x:200,y:470,k:'end',w:260,t:['Push, open PR, a person reviews']},
+  {id:'x',x:505,y:320,k:'warn',w:200,t:['git restore .','or explain what is wrong']}
+],[{a:'a',b:'b'},{a:'b',b:'c'},{a:'c',b:'d'},{a:'d',b:'e'},{a:'e',b:'f',l:'yes'},{a:'f',b:'g'},{a:'e',b:'x',m:'h',l:'no'},{a:'x',b:'c',m:'vh',l:'try again'}]);
+
+/* ---------- tricks ---------- */
+function tricks(id,list){var box=document.getElementById(id);list.forEach(function(t){var d=h('div',{'class':'trick'},box);h('code',{},d,t[0]);h('span',{},d,t[1]);});}
+tricks('tGit',[
+ ['git add -p','Stage a file piece by piece. The best habit for clean commits and for reviewing AI edits.'],
+ ['git switch -','Jump back to the branch you were on before.'],
+ ['git log --oneline --graph --decorate --all','The whole history as a drawing in the terminal.'],
+ ['git log -S "jaggery"','Find the commits that added or removed that text (the "pickaxe").'],
+ ['git log --follow -p recipes/chai.txt','Full history of one file, even across renames.'],
+ ['git blame -w -C -L 10,30 file','Who last changed lines 10 to 30, ignoring whitespace and following moved code.'],
+ ['git diff --word-diff','Show changed words instead of whole lines. Good for prose.'],
+ ['git diff main...HEAD','Everything your branch changed since it left main. This is what a pull request shows.'],
+ ['git commit --fixup <hash>  then  git rebase -i --autosquash main','Attach a small fix to an older commit and let Git fold it in.'],
+ ['git push --force-with-lease','Force-push after a rebase, but refuse if someone else pushed in the meantime. Never use plain --force.'],
+ ['git stash -u','Stash including new untracked files.'],
+ ['git restore --source=main -- path/file','Take one file from another branch without merging.'],
+ ['git cherry-pick <hash>','Copy one commit onto the branch you are on.'],
+ ['git config --global rerere.enabled true','Git remembers how you solved a conflict and reapplies it next time.'],
+ ['git config --global push.autoSetupRemote true','A plain git push works on a new branch; no -u origin needed.'],
+ ['git config --global fetch.prune true','Remove local records of remote branches that were deleted.'],
+ ['git clean -fdn','Dry run: list untracked files that -fd would delete. Drop the n to delete.'],
+ ['git grep -n "sugar"','Search tracked files only; faster than a general search in large repos.'],
+ ['git shortlog -sn','Commit count per author.'],
+ ['git bisect run <test command>','Automatic search for the commit that broke a test.'],
+ ['git worktree add ../hotfix -b hotfix','A second working folder on another branch, same repo.'],
+ ['git commit --allow-empty -m "Trigger CI"','A commit with no changes, to re-run checks.'],
+ ['git rev-parse --short HEAD','Print the current commit ID, handy in scripts.']
+]);
+tricks('tHub',[
+ ['Press  .  on any repo','Opens the repo in a browser editor (github.dev).'],
+ ['Press  t','Fuzzy file finder.'],
+ ['Press  y  on a file','Changes the URL to a permanent link that will not drift when the file changes.'],
+ ['Click a line number, Shift-click another','Link to an exact range of lines. Paste it in an issue and GitHub shows the code.'],
+ ['Add  .patch  or  .diff  to a PR or commit URL','Plain-text version, easy to give to an AI or apply with git apply.'],
+ ['Add  ?w=1  to a diff URL','Hide whitespace-only changes.'],
+ ['Draft pull request','Open early to run checks and show progress; reviewers are not notified until you mark it ready.'],
+ ['Suggested change in a review','A reviewer proposes exact lines; the author applies them with one click.'],
+ ['Closes #12  in the PR body','Issue 12 closes automatically when the PR merges.'],
+ ['.git-blame-ignore-revs','List big formatting commits here so blame skips them.'],
+ ['gh pr checkout 12','Fetch and switch to someone else\'s pull request in one command.'],
+ ['gh run watch','Follow the current Actions run from the terminal.']
+]);
+
+/* ---------- labs ---------- */
+var LABS=[
+ ['First commit','Create a repo and save one snapshot.','mkdir recipe-box && cd recipe-box\ngit init -b main\nprintf "# Recipe Box\\n" > README.md\ngit status\ngit add README.md\ngit commit -m "Add README"\ngit log --oneline','status shows README.md as untracked, then nothing to commit. log shows one line.'],
+ ['Ignore files','Keep secrets and junk out of history.','mkdir recipes\nprintf "Masala Chai\\n\\n- 2 cups water\\n- 1 tsp sugar\\n" > recipes/chai.txt\nprintf ".DS_Store\\n.env\\nnode_modules/\\n" > .gitignore\necho "API_KEY=not-a-real-key" > .env\ngit add .\ngit status --short --ignored\ngit commit -m "Add chai recipe and gitignore"','.env is listed with !! (ignored) and is not in the commit.'],
+ ['Staged vs unstaged','See the two kinds of diff.','echo "- 2 pods cardamom" >> recipes/chai.txt\ngit diff            # unstaged\ngit add recipes/chai.txt\ngit diff            # now empty\ngit diff --staged   # the change is here\ngit commit -m "Add cardamom to chai"','The same change moves from git diff to git diff --staged after add.'],
+ ['Branch and fast-forward','Work on a branch and merge it.','git switch -c add-dosa\nprintf "Dosa\\n\\n- 2 cups rice\\n" > recipes/dosa.txt\ngit add . && git commit -m "Add dosa recipe"\ngit switch main\ngit merge add-dosa\ngit branch -d add-dosa','The merge says Fast-forward: main had not moved, so its label just slides.'],
+ ['Merge conflict','Cause a conflict on purpose and solve it.','git switch -c less-sugar\n# change "1 tsp sugar" to "half tsp sugar", commit\ngit switch main\n# change the same line to "1 tsp jaggery", commit\ngit merge less-sugar\ngit status\n# edit chai.txt, remove the markers, then\ngit add recipes/chai.txt\ngit commit','CONFLICT (content) in recipes/chai.txt. After the commit, git log --graph shows two lines joining.'],
+ ['Rebase','Replay a branch on top of a moved main.','git switch -c add-poha   # commit a poha recipe\ngit switch main          # commit a README change\ngit switch add-poha\ngit log --oneline --graph --all\ngit rebase main\ngit log --oneline --graph --all','Before: a fork. After: one straight line, and the poha commit has a new ID.'],
+ ['Stash','Park unfinished work.','echo "- peanuts" >> recipes/poha.txt\ngit stash push -m "wip peanuts"\ngit status\ngit stash list\ngit stash pop','status is clean after the stash; the edit returns after pop.'],
+ ['Amend and restore','Fix the last commit; throw away an edit.','echo "- curry leaves" >> recipes/poha.txt\ngit add . && git commit --amend --no-edit\necho junk >> README.md\ngit restore README.md','The last commit now includes curry leaves and has a new ID. README is back to normal.'],
+ ['Revert','Cancel a bad commit safely.','echo "- 5 tsp salt" >> recipes/dosa.txt\ngit commit -am "Add far too much salt"\ngit revert --no-edit HEAD\ngit log --oneline -3','Two commits: the mistake and a Revert commit. History is not rewritten.'],
+ ['Reset and reflog rescue','Lose a commit, then get it back.','# commit recipes/upma.txt\ngit reset --hard HEAD~1\nls recipes               # upma is gone\ngit reflog -3\ngit reset --hard "HEAD@{1}"\nls recipes               # upma is back','The reflog still lists the "lost" commit, and reset returns to it.'],
+ ['Cherry-pick','Take one commit from another branch.','git switch -c experiments\n# commit 1: add licence line to README\n# commit 2: add scratch.txt\ngit switch main\n# commit "- 1 inch ginger" to chai.txt, so main moves on\ngit log --oneline -1 experiments~1\ngit cherry-pick experiments~1\ngit log --oneline --graph main experiments -5','main gets the licence commit only, as a copy with a new ID (same message, different hash from the one on experiments). scratch.txt stays on experiments.'],
+ ['Tag','Name a release.','git tag -a v1.0 -m "First menu"\ngit tag -n\ngit show v1.0 --stat','The tag points at the current commit and carries its own message.'],
+ ['Bisect','Let Git find the commit that broke chai.','# make 6 commits; in the 4th, change "2 cups water" to "20 cups water"\ngit bisect start HEAD v1.0\ngit bisect run sh -c \'! grep -q "20 cups" recipes/chai.txt\'\ngit bisect reset','Git prints "… is the first bad commit" for the 4th commit after two or three checks.'],
+ ['Worktree','Two folders, two branches, one repo.','git worktree add ../recipe-box-hotfix -b hotfix\ngit worktree list\ngit worktree remove ../recipe-box-hotfix\ngit branch -D hotfix','worktree list shows both folders with their branches.']
+];
+var lb=document.getElementById('labs');
+LABS.forEach(function(l,i){var d=h('div',{'class':'lab'},lb);h('span',{'class':'n'},d,'LAB '+(i+1)+' OF '+LABS.length);h('h3',{},d,l[0]);h('p',{},d,l[1]);h('pre',{},d,l[2]);var p=h('p',{},d);h('b',{},p,'You should see: ');p.appendChild(document.createTextNode(l[3]));});
+
+/* ---------- Q&A ---------- */
+var QA=[
+['B','What is the difference between Git and GitHub?','Git is the version control tool that runs on your machine and records history. GitHub is a hosting service for Git repositories that adds pull requests, issues, code review and automation. You can use Git with no GitHub at all.'],
+['B','What are the three states a file can be in?','Modified (changed in the working folder), staged (marked for the next commit) and committed (saved in the repository). A fourth practical state is untracked: a new file Git has never been told about.'],
+['B','Why does Git have a staging area?','It lets you choose exactly what goes into a commit. You can change five files and commit two of them, or even part of one file with git add -p, so each commit is one logical change.'],
+['B','What is a commit, internally?','A snapshot of the whole tracked tree plus metadata: author, date, message and the ID of its parent commit(s). Its hash is computed from all of that, so changing anything gives a different commit.'],
+['B','What is HEAD?','A pointer to what you have checked out. Normally it points to a branch name, and that branch points to a commit. If HEAD points straight at a commit, you are in "detached HEAD".'],
+['B','git fetch versus git pull?','fetch downloads new commits and updates remote-tracking branches like origin/main, without touching your branch or files. pull is fetch followed by a merge or rebase into your current branch.'],
+['B','What does git clone do?','Copies the entire repository with all history, sets up a remote called origin, creates remote-tracking branches and checks out the default branch.'],
+['B','What is .gitignore, and how do you stop tracking a file already committed?','A list of path patterns Git should not track. It has no effect on files already tracked; for those run git rm --cached <file>, commit, and add the pattern.'],
+['B','How do you write a good commit message?','A short imperative subject of about 50 to 60 characters ("Add cardamom to chai"), a blank line, then a body that explains why the change was needed. The diff already shows what changed.'],
+['B','What is a branch?','A lightweight movable pointer to a commit, stored as a small file containing one hash. Creating one is instant and copies no files.'],
+['I','Merge versus rebase?','Merge joins two histories with a merge commit and preserves what really happened. Rebase replays your commits on a new base, giving linear history but new commit IDs. Rebase private branches; merge shared ones.'],
+['I','What is a fast-forward merge?','If the target branch has no new commits since the feature branched off, Git just moves the branch pointer forward. No merge commit is made. Use --no-ff to force one.'],
+['I','How do you resolve a merge conflict?','git status lists conflicted files. Edit each file to the correct content and remove the markers, git add it, then git commit (or git rebase --continue). git merge --abort backs out.'],
+['I','git reset versus git revert?','reset moves the branch pointer backward and so rewrites history; use it on unpushed commits. revert makes a new commit that undoes an earlier one; use it on shared history.'],
+['I','Explain reset --soft, --mixed and --hard.','All three move the branch pointer. soft keeps the staging area and files. mixed (the default) clears staging but keeps files. hard also overwrites the working files.'],
+['I','git restore versus git reset versus git checkout?','restore changes files in the working folder or staging area. reset moves the branch pointer. checkout used to do both jobs plus switching branches; switch and restore were added to split it up.'],
+['I','What is git stash and when would you use it?','It saves uncommitted changes on a stack and cleans the working folder. Use it to switch branches quickly or pull without committing half-done work. stash pop brings it back.'],
+['I','What is a detached HEAD and how do you get out?','HEAD points at a commit instead of a branch, for example after checking out a tag. Commits made there belong to no branch. Keep them with git switch -c new-name, or leave with git switch main.'],
+['I','What is cherry-pick?','It applies the change from one specific commit onto your current branch as a new commit. Typical use: copying a bug fix to a release branch.'],
+['I','What does git commit --amend do, and when is it unsafe?','It replaces the last commit with a new one containing the updated message or staged changes. It is unsafe after the commit has been pushed and pulled by others, because the old commit ID disappears.'],
+['I','What are origin and upstream?','Conventional remote names. origin is where you cloned from. In a fork workflow, origin is your fork and upstream is the original project.'],
+['I','What is a remote-tracking branch?','A local read-only record such as origin/main that shows where the remote branch was at your last fetch. Your local main "tracks" it, which is how git status can say you are 2 commits ahead.'],
+['I','What is the difference between a lightweight and an annotated tag?','A lightweight tag is just a name on a commit. An annotated tag is its own object with tagger, date and message, and can be signed. Use annotated tags for releases.'],
+['I','How do you squash several commits into one?','git rebase -i HEAD~3 and mark the later commits as squash or fixup. Or git reset --soft HEAD~3 followed by one new commit. On GitHub, "Squash and merge" does it at merge time.'],
+['I','What does git diff show with no arguments, with --staged, and with HEAD?','No arguments: working folder versus staging. --staged: staging versus the last commit. HEAD: working folder versus the last commit, staged or not.'],
+['A','What is the reflog and how does it save you?','A local log of every position HEAD and each branch has had. After a bad reset, rebase or branch delete, find the old commit ID there and reset or branch to it. It is local only and expires (90 days by default).'],
+['A','How does git bisect work?','Binary search over history. You mark one good and one bad commit; Git checks out the midpoint and you say good or bad until it isolates the first bad commit. With bisect run, a script answers.'],
+['A','What are the four Git object types?','Blob (file content), tree (a folder listing: names pointing to blobs and trees), commit (points to a tree and to parent commits) and annotated tag. All are stored by the hash of their content.'],
+['A','Why is --force-with-lease safer than --force?','It only overwrites the remote branch if it is still where your last fetch saw it. If a teammate pushed in between, the push is rejected instead of destroying their commits.'],
+['A','What is interactive rebase used for?','Editing your own unpushed history: reorder, squash, reword, edit or drop commits. git rebase -i main opens the list of commits to change.'],
+['A','What are Git hooks?','Scripts in .git/hooks that run at events such as pre-commit, commit-msg and pre-push. Used for linting, message checks and blocking secrets. They are not cloned, so teams share them through a tool or core.hooksPath.'],
+['A','What is a worktree?','An extra working folder attached to the same repository, checked out on a different branch. It lets you fix a bug on one branch while a build or an AI session runs on another, with no stashing.'],
+['A','Submodule versus subtree?','A submodule stores a pointer to a specific commit of another repository; contributors must init and update it. A subtree copies the other project\'s files into your repo, which is simpler for consumers but makes pushing changes back harder.'],
+['A','What do git gc and packfiles do?','Git first stores each object as a separate compressed file. gc packs them into packfiles using delta compression and removes unreachable objects past their expiry, which keeps the repo small and fast.'],
+['A','What is rerere?','"Reuse recorded resolution." When enabled, Git records how you solved a conflict and applies the same solution automatically if the identical conflict appears again, for example during repeated rebases.'],
+['A','Shallow clone versus partial clone?','A shallow clone (--depth 1) cuts off history. A partial clone (--filter=blob:none) keeps all commits but downloads file contents only when needed. Both speed up CI on large repos.'],
+['A','What is Git LFS?','Large File Storage replaces big binary files with small pointer files in the repo and keeps the real content on a separate server, so clones stay small.'],
+['A','How do signed commits work?','You sign commits with a GPG or SSH key (git commit -S). GitHub checks the signature against keys on your account and shows "Verified". It proves the commit came from the key holder.'],
+['S','You committed to main by mistake instead of a feature branch. Fix it.','If not pushed: git branch feature (keeps the commits), git reset --hard origin/main (moves main back), git switch feature. If already pushed to a shared main, revert instead.'],
+['S','You pushed a secret key. What now?','Revoke and rotate the key first; assume it is compromised. Then remove it from history with git filter-repo or BFG, force-push, and ask collaborators to re-clone. Removing it in a new commit is not enough.'],
+['S','Your branch is far behind main and the PR shows conflicts. What do you do?','git fetch, then git rebase origin/main (or merge origin/main if the branch is shared). Resolve conflicts commit by commit, run tests, and push with --force-with-lease if you rebased.'],
+['S','A release is broken and you do not know which commit did it.','Find the last good tag, run git bisect start <bad> <good>, and use bisect run with a test that reproduces the bug. Revert the offending commit, then fix it properly on a branch.'],
+['S','You ran git reset --hard and lost two commits.','git reflog, find the entry before the reset, then git reset --hard that hash. If the work was never committed, Git cannot bring it back; check your editor\'s local history.'],
+['S','How would you set up a branching strategy for a small team?','Trunk-based: short-lived feature branches off main, pull requests with required review and CI, squash merges, release tags. Add release branches only if you must support old versions.'],
+['S','Describe a pull request you would approve quickly.','Small and single-purpose, with a description of what and why, tests or test notes, passing CI, and no unrelated formatting changes.'],
+['G','Fork versus clone?','A fork is your own server-side copy of someone else\'s repository on GitHub. A clone is a local copy on your machine. For open source you fork, clone your fork, and open a PR back to the original.'],
+['G','What is branch protection?','Rules on a branch such as main: require pull requests, approvals, passing status checks and up-to-date branches, and block force-pushes and deletion.'],
+['G','What is GitHub Actions?','GitHub\'s built-in automation. YAML workflows in .github/workflows run jobs on events like push or pull_request: tests, builds, deployments.'],
+['G','Squash merge, merge commit, or rebase merge on GitHub?','Squash turns the PR into one commit, good for tidy history. Merge commit preserves every commit and the branch shape. Rebase merge replays commits without a merge commit. Teams usually pick one and enforce it.'],
+['G','What is a CODEOWNERS file?','A file mapping paths to people or teams. GitHub requests their review automatically when those paths change, and branch protection can require their approval.'],
+['AI','How do you use Git safely with an AI coding assistant?','Start from a clean tree on a new branch, give small tasks, read git diff before staging, stage with git add -p, run tests, and keep destructive commands behind your approval. Every AI change is then reviewable and reversible.'],
+['AI','Why are worktrees useful with AI agents?','Each agent gets its own folder and branch on the same repository, so several can work in parallel without overwriting each other\'s uncommitted files. Each result arrives as a separate branch to review.'],
+['AI','Should AI-written code go through a pull request?','Yes, the same as human code: CI, a human reviewer and a clear description. Many teams also mark it with a Co-Authored-By trailer so the history shows where AI was involved.'],
+['AI','How can an AI help resolve a merge conflict responsibly?','Give it the conflicted file and the intent of both branches, ask it to explain each side before proposing a result, then review the merged file and run tests yourself. It should never silently drop one side.']
+];
+var LV={B:'Beginner',I:'Intermediate',A:'Advanced',S:'Scenario',G:'GitHub',AI:'AI'},cur='',qbox=document.getElementById('qa'),qs=document.getElementById('qaSearch'),qc=document.getElementById('qaCount'),lvb=document.getElementById('qaLv');
+function qaRender(){var f=qs.value.trim().toLowerCase(),n=0;qbox.innerHTML='';
+  QA.forEach(function(q){if(cur&&q[0]!==cur)return;if(f&&(q[1]+' '+q[2]).toLowerCase().indexOf(f)<0)return;n++;
+    var d=h('details',{'class':'qa'},qbox),s=h('summary',{},d,q[1]);h('span',{'class':'lv'},s,LV[q[0]].toUpperCase());h('p',{},d,q[2]);});
+  qc.textContent=n+' of '+QA.length+' questions';if(!n)h('p',{},qbox,'No question matches. Try a shorter word.');}
+[['','All']].concat(Object.keys(LV).map(function(k){return [k,LV[k]];})).forEach(function(l){var b=h('button',{type:'button'},lvb,l[1]);if(l[0]==='')b.className='on';
+  b.onclick=function(){cur=l[0];[].forEach.call(lvb.children,function(x){x.className='';});b.className='on';qaRender();};});
+qs.addEventListener('input',qaRender);qaRender();
+
+/* ---------- pie ---------- */
+var PIE=[['Daily basics',6],['Branching & merging',5],['Undo & rescue',4],['GitHub teamwork',3],['AI workflows',2]],tot=20,svgp=document.getElementById('pie'),tip=document.getElementById('tip'),tb=document.getElementById('pieTbl'),a0=-Math.PI/2,cx=160,cy=150,r=92;
+function pt(a,rr){return [cx+rr*Math.cos(a),cy+rr*Math.sin(a)];}
+PIE.forEach(function(s,i){var a1=a0+s[1]/tot*2*Math.PI,p0=pt(a0,r),p1=pt(a1,r),pct=Math.round(s[1]/tot*100);
+  var path=el('path',{d:'M'+cx+' '+cy+'L'+p0[0]+' '+p0[1]+'A'+r+' '+r+' 0 '+(a1-a0>Math.PI?1:0)+' 1 '+p1[0]+' '+p1[1]+'Z',fill:LANES[i],stroke:'var(--surface)','stroke-width':2,tabindex:0,'aria-label':s[0]+': '+s[1]+' hours, '+pct+' percent'},svgp);
+  var mid=(a0+a1)/2,lp=pt(mid,r+14),right=Math.cos(mid)>=0;
+  el('text',{x:lp[0],y:lp[1]+4,'text-anchor':Math.abs(Math.cos(mid))<0.25?'middle':(right?'start':'end'),'class':'fl-t','font-weight':600},svgp,pct+'%');
+  function on(e){tip.hidden=false;tip.textContent=s[0]+': '+s[1]+' h ('+pct+'%)';var b=path.getBoundingClientRect();var x=e&&e.clientX!=null?e.clientX:b.left+b.width/2,y=e&&e.clientY!=null?e.clientY:b.top+b.height/2;tip.style.left=Math.min(x+12,window.innerWidth-190)+'px';tip.style.top=(y+12)+'px';}
+  function off(){tip.hidden=true;}
+  path.addEventListener('mousemove',on);path.addEventListener('mouseleave',off);path.addEventListener('focus',on);path.addEventListener('blur',off);
+  var tr=h('tr',{},tb),td=h('td',{},tr);var sw2=h('span',{'class':'sw'},td);sw2.style.background=LANES[i];td.appendChild(document.createTextNode(s[0]));
+  h('td',{'class':'num'},tr,s[1]+' h');h('td',{'class':'num'},tr,pct+'%');a0=a1;});
+})();
+</script>
+
+</body></html>

@@ -1,0 +1,1311 @@
+{
+ "openapi": "3.0.3",
+ "info": {
+  "title": "Mastery Academy API",
+  "version": "1.0.0"
+ },
+ "paths": {
+  "/v1/health": {
+   "get": {
+    "operationId": "getHealth",
+    "summary": "Liveness and database check",
+    "tags": [
+     "ops"
+    ],
+    "x-rate-tier": "unlimited",
+    "responses": {
+     "200": {
+      "description": "OK",
+      "content": {
+       "application/json": {
+        "schema": {
+         "type": "object",
+         "required": [
+          "data"
+         ],
+         "properties": {
+          "data": {
+           "$ref": "#/components/schemas/Health"
+          }
+         }
+        }
+       }
+      }
+     },
+     "default": {
+      "description": "Error",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/Error"
+        }
+       }
+      }
+     }
+    }
+   }
+  },
+  "/v1/auth/users": {
+   "post": {
+    "operationId": "registerUser",
+    "summary": "Create an account and its first session",
+    "tags": [
+     "auth"
+    ],
+    "x-rate-tier": "auth",
+    "requestBody": {
+     "required": true,
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/RegisterBody"
+       }
+      }
+     }
+    },
+    "responses": {
+     "201": {
+      "description": "OK",
+      "content": {
+       "application/json": {
+        "schema": {
+         "type": "object",
+         "required": [
+          "data"
+         ],
+         "properties": {
+          "data": {
+           "$ref": "#/components/schemas/AuthResult"
+          }
+         }
+        }
+       }
+      }
+     },
+     "default": {
+      "description": "Error",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/Error"
+        }
+       }
+      }
+     }
+    }
+   }
+  },
+  "/v1/auth/sessions": {
+   "post": {
+    "operationId": "createSession",
+    "summary": "Sign in with email and password",
+    "tags": [
+     "auth"
+    ],
+    "x-rate-tier": "auth",
+    "requestBody": {
+     "required": true,
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/SessionBody"
+       }
+      }
+     }
+    },
+    "responses": {
+     "201": {
+      "description": "OK",
+      "content": {
+       "application/json": {
+        "schema": {
+         "type": "object",
+         "required": [
+          "data"
+         ],
+         "properties": {
+          "data": {
+           "$ref": "#/components/schemas/AuthResult"
+          }
+         }
+        }
+       }
+      }
+     },
+     "default": {
+      "description": "Error",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/Error"
+        }
+       }
+      }
+     }
+    }
+   }
+  },
+  "/v1/auth/sessions/refresh": {
+   "post": {
+    "operationId": "refreshSession",
+    "summary": "Rotate the refresh token; a reused token ends the session",
+    "tags": [
+     "auth"
+    ],
+    "x-rate-tier": "auth",
+    "requestBody": {
+     "required": true,
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/RefreshBody"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "description": "OK",
+      "content": {
+       "application/json": {
+        "schema": {
+         "type": "object",
+         "required": [
+          "data"
+         ],
+         "properties": {
+          "data": {
+           "$ref": "#/components/schemas/Tokens"
+          }
+         }
+        }
+       }
+      }
+     },
+     "default": {
+      "description": "Error",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/Error"
+        }
+       }
+      }
+     }
+    }
+   }
+  },
+  "/v1/auth/sessions/current": {
+   "delete": {
+    "operationId": "deleteSession",
+    "summary": "Sign out of this session",
+    "tags": [
+     "auth"
+    ],
+    "x-rate-tier": "standard",
+    "security": [
+     {
+      "bearer": []
+     }
+    ],
+    "responses": {
+     "204": {
+      "description": "No content"
+     },
+     "default": {
+      "description": "Error",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/Error"
+        }
+       }
+      }
+     }
+    }
+   }
+  },
+  "/v1/me": {
+   "get": {
+    "operationId": "getMe",
+    "summary": "The signed-in user",
+    "tags": [
+     "auth"
+    ],
+    "x-rate-tier": "standard",
+    "security": [
+     {
+      "bearer": []
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "OK",
+      "content": {
+       "application/json": {
+        "schema": {
+         "type": "object",
+         "required": [
+          "data"
+         ],
+         "properties": {
+          "data": {
+           "$ref": "#/components/schemas/User"
+          }
+         }
+        }
+       }
+      }
+     },
+     "default": {
+      "description": "Error",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/Error"
+        }
+       }
+      }
+     }
+    }
+   },
+   "delete": {
+    "operationId": "deleteMe",
+    "summary": "Delete the account, its sessions and its progress",
+    "tags": [
+     "auth"
+    ],
+    "x-rate-tier": "standard",
+    "security": [
+     {
+      "bearer": []
+     }
+    ],
+    "responses": {
+     "204": {
+      "description": "No content"
+     },
+     "default": {
+      "description": "Error",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/Error"
+        }
+       }
+      }
+     }
+    }
+   }
+  },
+  "/v1/courses": {
+   "get": {
+    "operationId": "listCourses",
+    "summary": "Course catalog with content versions",
+    "tags": [
+     "content"
+    ],
+    "x-rate-tier": "standard",
+    "responses": {
+     "200": {
+      "description": "OK",
+      "content": {
+       "application/json": {
+        "schema": {
+         "type": "object",
+         "required": [
+          "data"
+         ],
+         "properties": {
+          "data": {
+           "$ref": "#/components/schemas/Catalog"
+          }
+         }
+        }
+       }
+      }
+     },
+     "default": {
+      "description": "Error",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/Error"
+        }
+       }
+      }
+     }
+    }
+   }
+  },
+  "/v1/courses/{courseId}": {
+   "get": {
+    "operationId": "getCourse",
+    "summary": "Full content of one course; supports If-None-Match",
+    "tags": [
+     "content"
+    ],
+    "x-rate-tier": "standard",
+    "parameters": [
+     {
+      "name": "courseId",
+      "in": "path",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "OK",
+      "content": {
+       "application/json": {
+        "schema": {
+         "type": "object",
+         "required": [
+          "data"
+         ],
+         "properties": {
+          "data": {
+           "$ref": "#/components/schemas/Course"
+          }
+         }
+        }
+       }
+      }
+     },
+     "304": {
+      "description": "Not modified"
+     },
+     "default": {
+      "description": "Error",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/Error"
+        }
+       }
+      }
+     }
+    }
+   }
+  },
+  "/v1/progress": {
+   "get": {
+    "operationId": "listProgress",
+    "summary": "Progress records changed after a cursor",
+    "tags": [
+     "progress"
+    ],
+    "x-rate-tier": "standard",
+    "parameters": [
+     {
+      "name": "since",
+      "in": "query",
+      "required": false,
+      "schema": {
+       "type": "integer",
+       "nullable": true
+      }
+     },
+     {
+      "name": "limit",
+      "in": "query",
+      "required": false,
+      "schema": {
+       "type": "integer",
+       "nullable": true
+      }
+     }
+    ],
+    "security": [
+     {
+      "bearer": []
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "OK",
+      "content": {
+       "application/json": {
+        "schema": {
+         "type": "object",
+         "required": [
+          "data",
+          "page"
+         ],
+         "properties": {
+          "data": {
+           "type": "array",
+           "items": {
+            "$ref": "#/components/schemas/ProgressRecord"
+           }
+          },
+          "page": {
+           "type": "object",
+           "required": [
+            "cursor"
+           ],
+           "properties": {
+            "nextCursor": {
+             "type": "integer",
+             "nullable": true
+            },
+            "cursor": {
+             "type": "integer"
+            }
+           }
+          }
+         }
+        }
+       }
+      }
+     },
+     "default": {
+      "description": "Error",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/Error"
+        }
+       }
+      }
+     }
+    }
+   },
+   "put": {
+    "operationId": "pushProgress",
+    "summary": "Upsert progress records; newest updatedAt wins",
+    "tags": [
+     "progress"
+    ],
+    "x-rate-tier": "standard",
+    "security": [
+     {
+      "bearer": []
+     }
+    ],
+    "requestBody": {
+     "required": true,
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/ProgressPush"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "description": "OK",
+      "content": {
+       "application/json": {
+        "schema": {
+         "type": "object",
+         "required": [
+          "data"
+         ],
+         "properties": {
+          "data": {
+           "$ref": "#/components/schemas/ProgressPushResult"
+          }
+         }
+        }
+       }
+      }
+     },
+     "default": {
+      "description": "Error",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/Error"
+        }
+       }
+      }
+     }
+    }
+   }
+  },
+  "/v1/ai/ask": {
+   "post": {
+    "operationId": "askLesson",
+    "summary": "Answer a question about a lesson, or explain one of its code blocks, from the lesson text only",
+    "tags": [
+     "ai"
+    ],
+    "x-rate-tier": "ai",
+    "security": [
+     {
+      "appKey": []
+     }
+    ],
+    "requestBody": {
+     "required": true,
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/AskBody"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "description": "OK",
+      "content": {
+       "application/json": {
+        "schema": {
+         "type": "object",
+         "required": [
+          "data"
+         ],
+         "properties": {
+          "data": {
+           "$ref": "#/components/schemas/AskResult"
+          }
+         }
+        }
+       }
+      }
+     },
+     "default": {
+      "description": "Error",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/Error"
+        }
+       }
+      }
+     }
+    }
+   }
+  },
+  "/v1/ai/quiz": {
+   "post": {
+    "operationId": "makeQuiz",
+    "summary": "Fresh open questions on a lesson",
+    "tags": [
+     "ai"
+    ],
+    "x-rate-tier": "ai",
+    "security": [
+     {
+      "appKey": []
+     }
+    ],
+    "requestBody": {
+     "required": true,
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/QuizBody"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "description": "OK",
+      "content": {
+       "application/json": {
+        "schema": {
+         "type": "object",
+         "required": [
+          "data"
+         ],
+         "properties": {
+          "data": {
+           "$ref": "#/components/schemas/QuizResult"
+          }
+         }
+        }
+       }
+      }
+     },
+     "default": {
+      "description": "Error",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/Error"
+        }
+       }
+      }
+     }
+    }
+   }
+  },
+  "/v1/ai/mark": {
+   "post": {
+    "operationId": "markAnswer",
+    "summary": "Mark a typed answer to a quiz question, a lesson task or an interview question",
+    "tags": [
+     "ai"
+    ],
+    "x-rate-tier": "ai",
+    "security": [
+     {
+      "appKey": []
+     }
+    ],
+    "requestBody": {
+     "required": true,
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/MarkBody"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "description": "OK",
+      "content": {
+       "application/json": {
+        "schema": {
+         "type": "object",
+         "required": [
+          "data"
+         ],
+         "properties": {
+          "data": {
+           "$ref": "#/components/schemas/MarkResult"
+          }
+         }
+        }
+       }
+      }
+     },
+     "default": {
+      "description": "Error",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/Error"
+        }
+       }
+      }
+     }
+    }
+   }
+  },
+  "/v1/ai/usage": {
+   "get": {
+    "operationId": "getAiUsage",
+    "summary": "AI requests used today and cost this month against the limits",
+    "tags": [
+     "ai"
+    ],
+    "x-rate-tier": "standard",
+    "security": [
+     {
+      "appKey": []
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "OK",
+      "content": {
+       "application/json": {
+        "schema": {
+         "type": "object",
+         "required": [
+          "data"
+         ],
+         "properties": {
+          "data": {
+           "$ref": "#/components/schemas/AiUsage"
+          }
+         }
+        }
+       }
+      }
+     },
+     "default": {
+      "description": "Error",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/Error"
+        }
+       }
+      }
+     }
+    }
+   }
+  }
+ },
+ "components": {
+  "schemas": {
+   "User": {
+    "type": "object",
+    "properties": {
+     "id": {
+      "type": "string",
+      "format": "uuid"
+     },
+     "email": {
+      "type": "string"
+     },
+     "displayName": {
+      "type": "string"
+     },
+     "createdAt": {
+      "type": "string",
+      "format": "date-time"
+     }
+    },
+    "required": [
+     "id",
+     "email",
+     "displayName",
+     "createdAt"
+    ]
+   },
+   "Tokens": {
+    "type": "object",
+    "properties": {
+     "accessToken": {
+      "type": "string"
+     },
+     "refreshToken": {
+      "type": "string"
+     },
+     "expiresIn": {
+      "type": "integer"
+     }
+    },
+    "required": [
+     "accessToken",
+     "refreshToken",
+     "expiresIn"
+    ]
+   },
+   "AuthResult": {
+    "type": "object",
+    "properties": {
+     "user": {
+      "$ref": "#/components/schemas/User"
+     },
+     "tokens": {
+      "$ref": "#/components/schemas/Tokens"
+     }
+    },
+    "required": [
+     "user",
+     "tokens"
+    ]
+   },
+   "RegisterBody": {
+    "type": "object",
+    "properties": {
+     "email": {
+      "type": "string"
+     },
+     "password": {
+      "type": "string"
+     },
+     "displayName": {
+      "type": "string"
+     }
+    },
+    "required": [
+     "email",
+     "password",
+     "displayName"
+    ]
+   },
+   "SessionBody": {
+    "type": "object",
+    "properties": {
+     "email": {
+      "type": "string"
+     },
+     "password": {
+      "type": "string"
+     },
+     "deviceName": {
+      "type": "string",
+      "nullable": true
+     }
+    },
+    "required": [
+     "email",
+     "password"
+    ]
+   },
+   "RefreshBody": {
+    "type": "object",
+    "properties": {
+     "refreshToken": {
+      "type": "string"
+     }
+    },
+    "required": [
+     "refreshToken"
+    ]
+   },
+   "CourseSummary": {
+    "type": "object",
+    "properties": {
+     "id": {
+      "type": "string"
+     },
+     "title": {
+      "type": "string"
+     },
+     "subtitle": {
+      "type": "string"
+     },
+     "icon": {
+      "type": "string"
+     },
+     "tint": {
+      "type": "string"
+     },
+     "group": {
+      "type": "string"
+     },
+     "status": {
+      "type": "string"
+     },
+     "artifactURL": {
+      "type": "string",
+      "nullable": true
+     },
+     "note": {
+      "type": "string",
+      "nullable": true
+     },
+     "version": {
+      "type": "string"
+     },
+     "lessonCount": {
+      "type": "integer"
+     },
+     "questionCount": {
+      "type": "integer"
+     },
+     "quizCount": {
+      "type": "integer"
+     },
+     "minutes": {
+      "type": "integer"
+     },
+     "web": {
+      "type": "string",
+      "nullable": true
+     }
+    },
+    "required": [
+     "id",
+     "title",
+     "subtitle",
+     "icon",
+     "tint",
+     "group",
+     "status",
+     "version",
+     "lessonCount",
+     "questionCount",
+     "quizCount",
+     "minutes"
+    ]
+   },
+   "Catalog": {
+    "type": "object",
+    "properties": {
+     "schemaVersion": {
+      "type": "integer"
+     },
+     "courses": {
+      "type": "array",
+      "items": {
+       "$ref": "#/components/schemas/CourseSummary"
+      }
+     }
+    },
+    "required": [
+     "schemaVersion",
+     "courses"
+    ]
+   },
+   "Course": {
+    "type": "object",
+    "description": "Content schema v1, see kb/00-core/04-content-schema.md",
+    "additionalProperties": true
+   },
+   "ProgressRecord": {
+    "type": "object",
+    "properties": {
+     "courseId": {
+      "type": "string"
+     },
+     "kind": {
+      "type": "string",
+      "enum": [
+       "lesson",
+       "quiz",
+       "card",
+       "bookmark"
+      ]
+     },
+     "itemId": {
+      "type": "string"
+     },
+     "done": {
+      "type": "boolean"
+     },
+     "score": {
+      "type": "integer",
+      "nullable": true
+     },
+     "total": {
+      "type": "integer",
+      "nullable": true
+     },
+     "updatedAt": {
+      "type": "string",
+      "format": "date-time"
+     }
+    },
+    "required": [
+     "courseId",
+     "kind",
+     "itemId",
+     "done",
+     "updatedAt"
+    ]
+   },
+   "ProgressPush": {
+    "type": "object",
+    "properties": {
+     "records": {
+      "type": "array",
+      "items": {
+       "$ref": "#/components/schemas/ProgressRecord"
+      }
+     }
+    },
+    "required": [
+     "records"
+    ]
+   },
+   "ProgressPushResult": {
+    "type": "object",
+    "properties": {
+     "applied": {
+      "type": "integer"
+     },
+     "stale": {
+      "type": "integer"
+     },
+     "cursor": {
+      "type": "integer"
+     }
+    },
+    "required": [
+     "applied",
+     "stale",
+     "cursor"
+    ]
+   },
+   "Health": {
+    "type": "object",
+    "properties": {
+     "status": {
+      "type": "string"
+     },
+     "database": {
+      "type": "string"
+     },
+     "courses": {
+      "type": "integer"
+     }
+    },
+    "required": [
+     "status",
+     "database",
+     "courses"
+    ]
+   },
+   "AiUsage": {
+    "type": "object",
+    "properties": {
+     "enabled": {
+      "type": "boolean"
+     },
+     "requestsToday": {
+      "type": "integer"
+     },
+     "dailyLimit": {
+      "type": "integer"
+     },
+     "monthCostCents": {
+      "type": "integer"
+     },
+     "monthlyCapCents": {
+      "type": "integer"
+     }
+    },
+    "required": [
+     "enabled",
+     "requestsToday",
+     "dailyLimit",
+     "monthCostCents",
+     "monthlyCapCents"
+    ]
+   },
+   "SectionRef": {
+    "type": "object",
+    "properties": {
+     "blockIndex": {
+      "type": "integer"
+     },
+     "title": {
+      "type": "string"
+     }
+    },
+    "required": [
+     "blockIndex",
+     "title"
+    ]
+   },
+   "AskBody": {
+    "type": "object",
+    "properties": {
+     "courseId": {
+      "type": "string"
+     },
+     "lessonId": {
+      "type": "string"
+     },
+     "mode": {
+      "type": "string",
+      "enum": [
+       "tutor",
+       "explain"
+      ]
+     },
+     "question": {
+      "type": "string",
+      "nullable": true
+     },
+     "blockIndex": {
+      "type": "integer",
+      "nullable": true
+     },
+     "depth": {
+      "type": "string",
+      "nullable": true
+     }
+    },
+    "required": [
+     "courseId",
+     "lessonId",
+     "mode"
+    ]
+   },
+   "AskResult": {
+    "type": "object",
+    "properties": {
+     "answer": {
+      "type": "string"
+     },
+     "covered": {
+      "type": "boolean"
+     },
+     "sections": {
+      "type": "array",
+      "items": {
+       "$ref": "#/components/schemas/SectionRef"
+      }
+     },
+     "usage": {
+      "$ref": "#/components/schemas/AiUsage"
+     }
+    },
+    "required": [
+     "answer",
+     "covered",
+     "sections",
+     "usage"
+    ]
+   },
+   "QuizBody": {
+    "type": "object",
+    "properties": {
+     "courseId": {
+      "type": "string"
+     },
+     "lessonId": {
+      "type": "string"
+     },
+     "count": {
+      "type": "integer",
+      "nullable": true
+     }
+    },
+    "required": [
+     "courseId",
+     "lessonId"
+    ]
+   },
+   "QuizResult": {
+    "type": "object",
+    "properties": {
+     "questions": {
+      "type": "array",
+      "items": {
+       "type": "string"
+      }
+     },
+     "usage": {
+      "$ref": "#/components/schemas/AiUsage"
+     }
+    },
+    "required": [
+     "questions",
+     "usage"
+    ]
+   },
+   "MarkBody": {
+    "type": "object",
+    "properties": {
+     "courseId": {
+      "type": "string"
+     },
+     "kind": {
+      "type": "string",
+      "enum": [
+       "quiz",
+       "task",
+       "interview"
+      ]
+     },
+     "lessonId": {
+      "type": "string",
+      "nullable": true
+     },
+     "itemId": {
+      "type": "string",
+      "nullable": true
+     },
+     "question": {
+      "type": "string",
+      "nullable": true
+     },
+     "answer": {
+      "type": "string"
+     }
+    },
+    "required": [
+     "courseId",
+     "kind",
+     "answer"
+    ]
+   },
+   "MarkResult": {
+    "type": "object",
+    "properties": {
+     "score": {
+      "type": "integer"
+     },
+     "verdict": {
+      "type": "string"
+     },
+     "strengths": {
+      "type": "array",
+      "items": {
+       "type": "string"
+      }
+     },
+     "gaps": {
+      "type": "array",
+      "items": {
+       "type": "string"
+      }
+     },
+     "feedback": {
+      "type": "string"
+     },
+     "usage": {
+      "$ref": "#/components/schemas/AiUsage"
+     }
+    },
+    "required": [
+     "score",
+     "verdict",
+     "strengths",
+     "gaps",
+     "feedback",
+     "usage"
+    ]
+   },
+   "Error": {
+    "type": "object",
+    "required": [
+     "error"
+    ],
+    "properties": {
+     "error": {
+      "type": "object",
+      "required": [
+       "code",
+       "message",
+       "requestId"
+      ],
+      "properties": {
+       "code": {
+        "type": "string",
+        "enum": [
+         "VALIDATION_FAILED",
+         "UNAUTHENTICATED",
+         "INVALID_CREDENTIALS",
+         "TOKEN_REUSED",
+         "FORBIDDEN",
+         "NOT_FOUND",
+         "CONFLICT",
+         "RATE_LIMITED",
+         "NOT_IMPLEMENTED",
+         "INTERNAL",
+         "AI_DISABLED",
+         "LIMIT_REACHED",
+         "AI_FAILED"
+        ]
+       },
+       "message": {
+        "type": "string"
+       },
+       "requestId": {
+        "type": "string"
+       },
+       "fields": {
+        "type": "object",
+        "additionalProperties": {
+         "type": "string"
+        }
+       }
+      }
+     }
+    }
+   }
+  },
+  "securitySchemes": {
+   "bearer": {
+    "type": "http",
+    "scheme": "bearer",
+    "bearerFormat": "JWT"
+   },
+   "appKey": {
+    "type": "apiKey",
+    "in": "header",
+    "name": "X-App-Key"
+   }
+  }
+ }
+}

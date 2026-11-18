@@ -1,0 +1,1229 @@
+<!doctype html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"></head><body>
+<title>IDE Mastery Field Guide</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700&family=IBM+Plex+Sans:wght@400;500;600&family=JetBrains+Mono:wght@400;600&display=swap">
+<style>
+/* Layout: sticky tab rail on top, one reading column; every tool opens with a labelled screen, then keys, then breakpoints, then drills. */
+:root{
+  --bg:#F2F4F8; --surface:#FFFFFF; --sunk:#E8ECF3; --ink:#18202E; --muted:#566178; --line:#D3DAE6;
+  --bp:#CF2440; --bp-soft:#FBE4E8; --exec:#F4D35E; --exec-soft:#FFF4C2; --ok:#1E7F5C; --key:#F7F8FB;
+  --display:"Bricolage Grotesque","IBM Plex Sans",system-ui,sans-serif;
+  --body:"IBM Plex Sans",system-ui,-apple-system,"Segoe UI",sans-serif;
+  --mono:"JetBrains Mono",ui-monospace,Menlo,Consolas,monospace;
+}
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]){color-scheme:dark;
+    --bg:#11151D; --surface:#1A202D; --sunk:#141924; --ink:#E7EBF3; --muted:#9AA5BA; --line:#2D3648;
+    --bp:#FF6079; --bp-soft:#3A1C25; --exec:#E3B62C; --exec-soft:#3B3413; --ok:#57C79C; --key:#242C3D;}
+}
+:root[data-theme="dark"]{color-scheme:dark;
+  --bg:#11151D; --surface:#1A202D; --sunk:#141924; --ink:#E7EBF3; --muted:#9AA5BA; --line:#2D3648;
+  --bp:#FF6079; --bp-soft:#3A1C25; --exec:#E3B62C; --exec-soft:#3B3413; --ok:#57C79C; --key:#242C3D;
+}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font-family:var(--body);font-size:16px;line-height:1.6;margin:0}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:10;background:var(--bg)}
+.wrap{max-width:1060px;margin:0 auto;padding-block:28px 72px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+header.top{display:flex;flex-direction:column;gap:8px;margin-bottom:18px}
+h1{font-family:var(--display);font-size:clamp(30px,5vw,46px);line-height:1.05;margin:0;text-wrap:balance;letter-spacing:-.01em}
+h1 .dot{display:inline-block;width:.5em;height:.5em;border-radius:50%;background:var(--bp);margin-right:.28em;vertical-align:.08em}
+.lede{color:var(--muted);max-width:66ch;margin:0}
+h2{font-family:var(--display);font-size:26px;line-height:1.15;margin:0;text-wrap:balance}
+h3{font-family:var(--display);font-size:19px;margin:0;text-wrap:balance}
+h4{font-size:12px;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);margin:0;font-weight:600}
+p{margin:0;max-width:70ch}
+a{color:inherit}
+code,.mono{font-family:var(--mono);font-size:.86em}
+code{background:var(--sunk);padding:1px 5px;border-radius:4px}
+kbd{font-family:var(--mono);font-size:12.5px;background:var(--key);border:1px solid var(--line);border-bottom-width:2px;border-radius:5px;padding:1px 6px;white-space:nowrap;display:inline-block;line-height:1.5}
+.then{color:var(--muted);font-size:12px;margin:0 3px}
+.or{color:var(--muted);font-size:12px;margin:0 5px}
+nav.tabs{position:sticky;top:env(safe-area-inset-top,0px);z-index:9;background:var(--bg);border-bottom:1px solid var(--line);display:flex;gap:4px;overflow-x:auto;padding-block:8px;margin-bottom:26px}
+nav.tabs button{font:500 14px var(--body);color:var(--muted);background:none;border:1px solid transparent;border-radius:7px;padding:6px 11px;cursor:pointer;white-space:nowrap}
+nav.tabs button[aria-selected="true"]{color:var(--ink);background:var(--surface);border-color:var(--line);box-shadow:inset 0 -2px 0 var(--bp)}
+button:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid var(--bp);outline-offset:2px}
+section.panel{display:flex;flex-direction:column;gap:30px}
+section.panel[hidden]{display:none}
+.block{display:flex;flex-direction:column;gap:12px}
+.note{border-left:3px solid var(--exec);background:var(--exec-soft);padding:10px 14px;border-radius:0 8px 8px 0;max-width:78ch}
+.note.red{border-color:var(--bp);background:var(--bp-soft)}
+.note b{font-weight:600}
+ul.tight,ol.tight{margin:0;padding-left:20px;display:flex;flex-direction:column;gap:6px;max-width:76ch}
+.scroll{overflow-x:auto}
+table{border-collapse:collapse;width:100%;font-size:14.5px;background:var(--surface);border:1px solid var(--line);border-radius:8px}
+th,td{text-align:left;padding:8px 10px;border-bottom:1px solid var(--line);vertical-align:top}
+th{font-size:12px;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);font-weight:600;background:var(--sunk)}
+tr:last-child td{border-bottom:0}
+tr.grp td{background:var(--sunk);font-weight:600;font-size:13px}
+td.txt{color:var(--muted);font-size:13.5px}
+pre{margin:0;background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:12px 14px;overflow-x:auto;font-family:var(--mono);font-size:13px;line-height:1.6}
+pre .c{color:var(--muted)}
+/* screen mock-ups */
+figure{margin:0;display:flex;flex-direction:column;gap:10px}
+figcaption{color:var(--muted);font-size:14px;max-width:76ch}
+.win{min-width:600px;border:1px solid var(--line);border-radius:10px;background:var(--surface);overflow:hidden;display:grid;font-family:var(--mono);font-size:11px;line-height:1.5;color:var(--muted)}
+.rg{position:relative;border:1px solid var(--line);margin:-.5px;padding:8px 8px 8px 30px;min-height:34px}
+.rg b{color:var(--ink);font-weight:600}
+.n{position:absolute;left:6px;top:7px;width:18px;height:18px;border-radius:50%;background:var(--ink);color:var(--bg);font:600 11px/18px var(--body);text-align:center}
+.rg.code{min-height:150px}
+.ln{display:block;white-space:nowrap}
+.ln.x{background:var(--exec-soft);color:var(--ink)}
+.bpd{display:inline-block;width:8px;height:8px;border-radius:50%;background:var(--bp);margin-right:5px}
+.vs{grid-template:"ab sb ed" 1fr "ab sb pn" auto "st st st" auto/40px 150px 1fr}
+.cu{grid-template:"ab sb ed ag" 1fr "ab sb pn ag" auto "st st st st" auto/40px 130px 1fr 170px}
+.as{grid-template:"tb tb tb tb" auto "ls pj ed rs" 1fr "ls bt bt rs" auto "st st st st" auto/40px 150px 1fr 40px}
+.xc{grid-template:"tb tb tb" auto "nv ed in" 1fr "nv db in" auto/150px 1fr 130px}
+.cd{grid-template:"tb tb tb" auto "ft ed dg" 1fr "cs cs cs" auto/130px 1fr 170px}
+.fd{grid-template:"tb tb tb" auto "tg tg tg" auto "tr ex dt" 1fr/150px 1fr 170px}
+.pm{grid-template:"tb tb" auto "sd rq" auto "sd rs" 1fr "cs cs" auto/150px 1fr}
+.ij{grid-template:"tb tb tb" auto "pj ed db" 1fr "sv sv db" auto/130px 1fr 180px}
+details.qa{background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:0}
+details.qa summary{cursor:pointer;padding:10px 14px;font-weight:500;list-style-position:outside;margin-left:18px}
+details.qa summary small{font:600 11px var(--body);text-transform:uppercase;letter-spacing:.06em;color:var(--muted);margin-left:8px}
+details.qa p{padding:0 14px 12px 14px;max-width:none}
+#qaList{display:flex;flex-direction:column;gap:6px}
+.gen{grid-template:"tb tb tb" auto "sd ed ax" 1fr "sd bt ax" auto/140px 1fr 120px}
+ol.legend{margin:0;padding:0;list-style:none;display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:8px 22px;counter-reset:lg;font-size:14.5px}
+ol.legend li{counter-increment:lg;position:relative;padding-left:28px}
+ol.legend li::before{content:counter(lg);position:absolute;left:0;top:3px;width:18px;height:18px;border-radius:50%;background:var(--ink);color:var(--bg);font:600 11px/18px var(--body);text-align:center}
+/* command anatomy */
+.anat{display:flex;flex-wrap:wrap;gap:6px;font-family:var(--mono);font-size:14px}
+.anat span{display:flex;flex-direction:column;gap:4px;background:var(--surface);border:1px solid var(--line);border-radius:6px;padding:6px 9px}
+.anat small{font:500 11px var(--body);color:var(--muted);text-transform:uppercase;letter-spacing:.06em}
+/* debugger simulator */
+.sim{display:grid;grid-template-columns:minmax(0,1.5fr) minmax(0,1fr);gap:12px}
+@media (max-width:760px){.sim{grid-template-columns:1fr}}
+.pane{background:var(--surface);border:1px solid var(--line);border-radius:8px;overflow:hidden}
+.pane>h4{padding:8px 12px;border-bottom:1px solid var(--line);background:var(--sunk)}
+.src{font-family:var(--mono);font-size:13px;line-height:1.75;overflow-x:auto;padding-block:6px}
+.sl{display:flex;align-items:center;white-space:pre;min-width:max-content;padding-right:12px}
+.sl.cur{background:var(--exec-soft);box-shadow:inset 3px 0 0 var(--exec)}
+.sl .g{width:30px;height:23px;border:0;background:none;cursor:pointer;color:var(--bp);font:600 13px var(--mono);flex:none;padding:0}
+.sl .g:hover{background:var(--bp-soft)}
+.sl .no{width:26px;color:var(--muted);text-align:right;margin-right:12px;flex:none;user-select:none}
+.ctl{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.ctl button{font:500 13.5px var(--body);background:var(--surface);color:var(--ink);border:1px solid var(--line);border-bottom-width:2px;border-radius:7px;padding:6px 10px;cursor:pointer;display:flex;gap:7px;align-items:center}
+.ctl button:disabled{opacity:.45;cursor:default}
+.ctl button.go{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+.ctl button.go kbd{background:transparent;color:inherit;border-color:currentColor}
+select,input[type=search]{font:14px var(--body);color:var(--ink);background:var(--surface);border:1px solid var(--line);border-radius:7px;padding:7px 10px}
+input[type=search]{width:min(100%,420px)}
+.kv{font-family:var(--mono);font-size:13px;padding:8px 12px;display:flex;flex-direction:column;gap:3px;min-height:52px}
+.kv .chg{background:var(--exec-soft);color:var(--ink);border-radius:3px;padding:0 3px}
+.kv .dim{color:var(--muted)}
+.side{display:flex;flex-direction:column;gap:12px}
+/* drills */
+.drill{display:flex;flex-direction:column;gap:6px}
+.drill label{display:flex;gap:10px;align-items:flex-start;background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:9px 12px;cursor:pointer}
+.drill input{margin-top:5px;accent-color:var(--ok);flex:none}
+.drill input:checked+span{color:var(--muted);text-decoration:line-through}
+.count{font:600 13px var(--mono);color:var(--ok)}
+.cols{display:grid;grid-template-columns:repeat(auto-fit,minmax(290px,1fr));gap:22px}
+svg text{font-family:var(--body)}
+@media (prefers-reduced-motion:no-preference){section.panel{animation:in .18s ease-out}@keyframes in{from{transform:translateY(4px)}to{transform:none}}}
+</style>
+
+<div class="wrap">
+<header class="top">
+  <h1><span class="dot"></span>IDE Mastery Field Guide</h1>
+  <p class="lede">Cursor, VS Code, Android Studio, IntelliJ IDEA, Xcode, Flutter DevTools, the terminal, browser DevTools and Postman on your Mac. Each tool gets a labelled screen, the keys that matter, every kind of breakpoint, and drills to do with your hands on the keyboard.</p>
+</header>
+
+<nav class="tabs" role="tablist" aria-label="Sections" id="tabs"></nav>
+
+<!-- ===================== START ===================== -->
+<section class="panel" id="p-start" data-tab="Start here">
+  <div class="block">
+    <h2>Every IDE is the same six rooms</h2>
+    <p>Learn the rooms once. After that, a new IDE is only a matter of new names and new keys for things you already know.</p>
+    <figure>
+      <div class="scroll"><div class="win gen" role="img" aria-label="Generic IDE layout with six numbered areas">
+        <div class="rg" style="grid-area:tb"><span class="n">1</span><b>Toolbar</b> &nbsp; what to run · where to run it · ▶ run · 🐞 debug · ■ stop</div>
+        <div class="rg" style="grid-area:sd"><span class="n">2</span><b>Side bar</b><span class="ln">▾ lib</span><span class="ln">&nbsp;&nbsp;cart.dart</span><span class="ln">&nbsp;&nbsp;home.dart</span><span class="ln">▸ test</span></div>
+        <div class="rg code" style="grid-area:ed"><span class="n">3</span><b>Editor</b><span class="ln">&nbsp;8 &nbsp; sum += lineTotal(item);</span><span class="ln">&nbsp;9 &nbsp; }</span><span class="ln x"><span class="bpd"></span>10 &nbsp; discount = sum * pct;</span><span class="ln">11 &nbsp; return sum - discount;</span></div>
+        <div class="rg" style="grid-area:ax"><span class="n">4</span><b>Second side</b><span class="ln">inspector, AI chat,</span><span class="ln">devices, Gradle</span></div>
+        <div class="rg" style="grid-area:bt"><span class="n">5</span><b>Bottom area</b> &nbsp; terminal · console · problems · debugger variables</div>
+      </div></div>
+      <figcaption>The sixth room is the gutter: the thin strip left of the line numbers in the editor. You click it to set a breakpoint (the red dot on line 10). The yellow line is where the program is paused.</figcaption>
+    </figure>
+    <div class="scroll"><table>
+      <tr><th>Room</th><th>VS Code / Cursor</th><th>Android Studio / IntelliJ</th><th>Xcode</th></tr>
+      <tr><td>1 Toolbar</td><td>Run and Debug view, top debug bar</td><td>Main toolbar: run config, device, ▶ 🐞</td><td>Toolbar: ▶ ■, scheme, destination</td></tr>
+      <tr><td>2 Side bar</td><td>Activity Bar + Side Bar (Explorer)</td><td>Project tool window</td><td>Navigator area (9 navigators)</td></tr>
+      <tr><td>3 Editor</td><td>Editor groups, tabs, breadcrumbs</td><td>Editor, tabs, navigation bar</td><td>Source editor, jump bar, canvas</td></tr>
+      <tr><td>4 Second side</td><td>Secondary Side Bar (Cursor: Agent)</td><td>Right tool windows: Gradle, Device Manager</td><td>Inspector area</td></tr>
+      <tr><td>5 Bottom</td><td>Panel: Terminal, Problems, Debug Console</td><td>Bottom tool windows: Logcat, Debug, Terminal</td><td>Debug area: variables + console</td></tr>
+      <tr><td>6 Gutter</td><td>Glyph margin</td><td>Gutter</td><td>Gutter (line numbers)</td></tr>
+    </table></div>
+  </div>
+
+  <div class="block">
+    <h2>Which tool for which job</h2>
+    <div class="scroll"><table>
+      <tr><th>You are doing</th><th>Open</th><th>Why</th></tr>
+      <tr><td>Flutter / Dart (BigBasket <code>FlutterFrameworks</code>)</td><td>Android Studio</td><td>Flutter plugin: Flutter Attach, hot reload, Dart breakpoints, widget inspector</td></tr>
+      <tr><td>iOS native Swift / Obj-C, Live Activity, signing</td><td>Xcode</td><td>The only tool that builds, signs and debugs iOS; LLDB, view debugger, Instruments</td></tr>
+      <tr><td>Android native Kotlin / Java</td><td>Android Studio</td><td>Gradle sync, Logcat, Layout Inspector, Profiler</td></tr>
+      <tr><td>Java backend (Spring Boot)</td><td>IntelliJ IDEA</td><td>Same keys as Android Studio, plus Spring and database tools</td></tr>
+      <tr><td>Python, Node, TypeScript, web front end</td><td>VS Code or Cursor</td><td>Light, extension for every language, <code>launch.json</code> debugging</td></tr>
+      <tr><td>Changes across many files with AI</td><td>Cursor (or Claude Code in a terminal)</td><td>Agent reads the repo, edits, runs commands, shows a diff to review</td></tr>
+      <tr><td>A web page that looks or behaves wrong</td><td>Chrome DevTools</td><td>Live DOM, CSS, network requests, JavaScript breakpoints</td></tr>
+      <tr><td>A Flutter screen that is slow, overflowing or laid out wrong</td><td>Flutter DevTools</td><td>Widget inspector, frame timings, CPU and memory profilers, Dart network log</td></tr>
+      <tr><td>Calling or testing an API by hand</td><td>Postman</td><td>Saved requests, environments, scripted tests, collection runs</td></tr>
+      <tr><td>Looking inside a database</td><td>IntelliJ Database tool</td><td>Query console, row editor, explain plan</td></tr>
+      <tr><td>Git, builds, logs, devices, ports</td><td>Terminal</td><td>Works when an IDE is stuck; every IDE button runs a command underneath</td></tr>
+    </table></div>
+    <p class="note"><b>Visual Studio on a Mac.</b> The full Visual Studio IDE runs only on Windows (the Mac edition was retired in 2024). What is installed here is Visual Studio Code, a different and lighter product. Their debug keys match: <kbd>F5</kbd> start, <kbd>F9</kbd> breakpoint, <kbd>F10</kbd> step over, <kbd>F11</kbd> step into. If you sit at a Windows Visual Studio one day, add <kbd>Ctrl</kbd> <kbd>T</kbd> go to anything, <kbd>Ctrl</kbd> <kbd>.</kbd> quick fix, <kbd>F12</kbd> go to definition and <kbd>Ctrl</kbd> <kbd>K</kbd><span class="then">then</span><kbd>Ctrl</kbd> <kbd>D</kbd> format.</p>
+  </div>
+
+  <div class="block">
+    <h2>Reading the key symbols</h2>
+    <p><kbd>⌘</kbd> Command &nbsp; <kbd>⌥</kbd> Option &nbsp; <kbd>⌃</kbd> Control &nbsp; <kbd>⇧</kbd> Shift &nbsp; <kbd>⏎</kbd> Return &nbsp; <kbd>⌫</kbd> Delete &nbsp; <kbd>⎋</kbd> Escape. Two keycaps joined by "then" are a chord: press the first, release, press the second.</p>
+    <p class="note red"><b>Function keys need one setting.</b> On a Mac keyboard <kbd>F5</kbd> to <kbd>F12</kbd> change brightness and volume unless you hold <kbd>fn</kbd>. Debugging uses them all day, so turn on System Settings → Keyboard → Keyboard Shortcuts → Function Keys → "Use F1, F2, etc. keys as standard function keys". All keys in this guide are the macOS defaults; if one does nothing, look it up in that IDE's keymap screen, because a plugin or your own change may have taken it.</p>
+  </div>
+
+  <div class="block">
+    <h2>The five habits that make someone look fast</h2>
+    <ol class="tight">
+      <li><b>Open by name, never by clicking through folders.</b> One key, type three letters, Return.</li>
+      <li><b>Run commands by name.</b> You do not need to remember where a menu item lives if you can type its name in the command palette.</li>
+      <li><b>Jump through code, do not scroll.</b> Go to definition, find usages, go back. That is how you read a codebase you did not write.</li>
+      <li><b>Let the IDE edit.</b> Rename, extract, quick fix and multi-cursor change twenty places as safely as one.</li>
+      <li><b>Pause the program instead of guessing.</b> A breakpoint shows you the real values. A logpoint prints them without you touching the code.</li>
+    </ol>
+  </div>
+
+  <div class="block">
+    <h2>Seven-day plan</h2>
+    <div class="scroll"><table>
+      <tr><th>Day</th><th>Focus</th><th>Done when</th></tr>
+      <tr><td>1</td><td>Six rooms + open-by-name in all four IDEs</td><td>You open any file in each IDE without touching the mouse</td></tr>
+      <tr><td>2</td><td>Navigation: definition, usages, back, symbol in file</td><td>You trace one BigBasket button tap from widget to API call using only keys</td></tr>
+      <tr><td>3</td><td>Editing: multi-cursor, move line, rename, quick fix</td><td>You rename a symbol and reshape a list with multi-cursor</td></tr>
+      <tr><td>4</td><td>Debugging tab: simulator, then one real line breakpoint per IDE</td><td>You find the simulator bug and can explain over / into / out</td></tr>
+      <tr><td>5</td><td>Conditional breakpoints, logpoints, exception breakpoints</td><td>You print a value in a loop with a logpoint and no code change</td></tr>
+      <tr><td>6</td><td>Terminal: line editing, history, pipes, ports, device commands</td><td>You find and stop the process holding a port</td></tr>
+      <tr><td>7</td><td>Cursor agent workflow + browser DevTools</td><td>You let the agent make a change, review the diff, and debug a page in Chrome</td></tr>
+    </table></div>
+  </div>
+</section>
+
+<!-- ===================== CURSOR ===================== -->
+<section class="panel" id="p-cursor" data-tab="Cursor" hidden>
+  <div class="block">
+    <h2>Cursor: VS Code with an agent built in</h2>
+    <p>Cursor is built on VS Code, so everything in the VS Code tab works here: the same layout, extensions, <code>launch.json</code> and debug keys. What Cursor adds is three AI surfaces: Tab completion as you type, the Agent pane that edits many files, and inline edit on a selection. You have version 3.29 installed.</p>
+    <figure>
+      <div class="scroll"><div class="win cu" role="img" aria-label="Cursor window layout">
+        <div class="rg" style="grid-area:ab"><span class="n">1</span></div>
+        <div class="rg" style="grid-area:sb"><span class="n">2</span><b>Explorer</b><span class="ln">▾ src</span><span class="ln">&nbsp;&nbsp;cart.ts</span><span class="ln">&nbsp;&nbsp;api.ts</span></div>
+        <div class="rg code" style="grid-area:ed"><span class="n">3</span><b>cart.ts</b><span class="ln">10 &nbsp;const discount = sum * pct</span><span class="ln" style="opacity:.6">11 &nbsp;return sum - discount &nbsp;← grey Tab suggestion</span><span class="ln">&nbsp;</span><span class="ln">- old line (red)</span><span class="ln">+ new line (green) &nbsp; Keep · Undo</span></div>
+        <div class="rg" style="grid-area:ag"><span class="n">4</span><b>Agent</b><span class="ln">Mode: Agent ▾ &nbsp; model ▾</span><span class="ln">@cart.ts fix the</span><span class="ln">discount maths</span><span class="ln">▸ read 3 files</span><span class="ln">▸ edited cart.ts</span><span class="ln">Review changes</span></div>
+        <div class="rg" style="grid-area:pn"><span class="n">5</span><b>Terminal</b> &nbsp; the agent runs commands here after you allow them</div>
+        <div class="rg" style="grid-area:st"><span class="n">6</span>branch · problems · Cursor Tab on/off</div>
+      </div></div>
+      <figcaption>Cursor adds the Agent pane on the right (4) and shows proposed edits as red and green lines inside the editor (3) until you keep or undo them.</figcaption>
+    </figure>
+    <ol class="legend">
+      <li>Activity Bar: Explorer, Search, Source Control, Run and Debug, Extensions.</li>
+      <li>Side Bar: whichever view the Activity Bar selected.</li>
+      <li>Editor: grey text is a Tab suggestion; red/green blocks are an agent edit waiting for review.</li>
+      <li>Agent pane: your prompt, the mode and model pickers, each step the agent took, and the review button.</li>
+      <li>Panel: Terminal, Problems, Output, Debug Console.</li>
+      <li>Status bar: git branch, error count, Tab status.</li>
+    </ol>
+  </div>
+
+  <div class="block">
+    <h3>Cursor keys</h3>
+    <div class="scroll"><table>
+      <tr><th>Action</th><th>Keys</th><th>Use it for</th></tr>
+      <tr><td>Accept Tab suggestion</td><td><kbd>Tab</kbd></td><td>Take the whole grey suggestion; it often jumps to the next place that needs the same change</td></tr>
+      <tr><td>Accept one word</td><td><kbd>⌘</kbd> <kbd>→</kbd></td><td>When only the start of the suggestion is right</td></tr>
+      <tr><td>Open / close the Agent pane</td><td><kbd>⌘</kbd> <kbd>I</kbd><span class="or">or</span><kbd>⌘</kbd> <kbd>L</kbd></td><td>Start a task or ask a question</td></tr>
+      <tr><td>Add selected code to the chat</td><td><kbd>⌘</kbd> <kbd>⇧</kbd> <kbd>L</kbd></td><td>Point the agent at exactly these lines</td></tr>
+      <tr><td>Selection into a new chat / inline edit</td><td><kbd>⌘</kbd> <kbd>K</kbd></td><td>Change only what you selected</td></tr>
+      <tr><td>Mode menu (Agent, Ask, Plan…)</td><td><kbd>⌘</kbd> <kbd>.</kbd></td><td>Ask = read only. Plan = agree the steps first. Agent = edit and run</td></tr>
+      <tr><td>Rotate modes from the input</td><td><kbd>⇧</kbd> <kbd>Tab</kbd></td><td>Quick switch while typing</td></tr>
+      <tr><td>Switch model</td><td><kbd>⌘</kbd> <kbd>/</kbd></td><td>Cheaper model for simple edits, stronger for design</td></tr>
+      <tr><td>Accept all changes</td><td><kbd>⌘</kbd> <kbd>⏎</kbd></td><td>Only after you read the diff</td></tr>
+      <tr><td>Stop / reject all</td><td><kbd>⌘</kbd> <kbd>⇧</kbd> <kbd>⌫</kbd></td><td>The agent went the wrong way</td></tr>
+      <tr><td>New chat</td><td><kbd>⌘</kbd> <kbd>N</kbd></td><td>New task = new chat; old context confuses the model</td></tr>
+      <tr><td>Mention a file, folder, doc</td><td><kbd>@</kbd></td><td>Give exact context instead of hoping it searches well</td></tr>
+      <tr><td>Cursor settings</td><td><kbd>⌘</kbd> <kbd>⇧</kbd> <kbd>J</kbd></td><td>Rules, models, MCP servers, privacy</td></tr>
+      <tr><td>Full shortcut list</td><td><kbd>⌘</kbd> <kbd>R</kbd><span class="then">then</span><kbd>⌘</kbd> <kbd>S</kbd></td><td>The source of truth for your version</td></tr>
+    </table></div>
+    <p class="note"><b>One difference from VS Code.</b> Cursor uses <kbd>⌘</kbd> <kbd>K</kbd> for AI, so VS Code chords that start with <kbd>⌘</kbd> <kbd>K</kbd> start with <kbd>⌘</kbd> <kbd>R</kbd> in Cursor. Zen mode is <kbd>⌘</kbd> <kbd>R</kbd><span class="then">then</span><kbd>Z</kbd>. Cursor changes quickly between versions; when a key here does not match, trust the shortcut list above.</p>
+  </div>
+
+  <div class="block">
+    <h3>Working with the agent like a pro</h3>
+    <ul class="tight">
+      <li><b>Say where, what, and how you will check.</b> "In <code>@cart.ts</code>, the discount is applied as a multiplier instead of a percentage. Fix it and run the cart tests." beats "fix the bug".</li>
+      <li><b>Plan first for anything over one file.</b> Read the plan, correct it, then let it edit.</li>
+      <li><b>Read every diff.</b> Keep or undo block by block. An agent edit is a pull request from a fast junior, not a finished change.</li>
+      <li><b>Rules save repeating yourself.</b> Project rules live in <code>.cursor/rules</code>; your global ones are in Cursor Settings → Rules → User Rules. Yours already tell Cursor to read <code>~/ai-handoff</code> first.</li>
+      <li><b>Use checkpoints.</b> Each agent message has a restore point, so you can go back to the state before a bad turn.</li>
+      <li><b>Paste the error, not a description of it.</b> Stack trace and failing command go in as text.</li>
+      <li><b>Debugging with it.</b> Ask the agent where to put a breakpoint and what to look at, then run the debugger yourself. It reasons about the code; only the debugger knows the real values.</li>
+    </ul>
+  </div>
+  <div class="block"><h3>Editor keys (shared with VS Code)</h3><div data-keys="vs" data-cursor="1"></div></div>
+  <div class="block"><h3>Drills</h3><div class="drill" data-drill="cursor"></div></div>
+</section>
+
+<!-- ===================== VS CODE ===================== -->
+<section class="panel" id="p-vscode" data-tab="VS Code" hidden>
+  <div class="block">
+    <h2>Visual Studio Code</h2>
+    <p>An editor that becomes an IDE through extensions. Nothing is built in for Python, Dart or Java until you install that language's extension; after that you get completion, errors, and a debugger.</p>
+    <figure>
+      <div class="scroll"><div class="win vs" role="img" aria-label="VS Code window layout while debugging">
+        <div class="rg" style="grid-area:ab"><span class="n">1</span></div>
+        <div class="rg" style="grid-area:sb"><span class="n">2</span><b>Run and Debug</b><span class="ln">▾ VARIABLES</span><span class="ln">&nbsp;&nbsp;sum: 450</span><span class="ln">▾ WATCH</span><span class="ln">▾ CALL STACK</span><span class="ln">&nbsp;&nbsp;cartTotal</span><span class="ln">▾ BREAKPOINTS</span></div>
+        <div class="rg code" style="grid-area:ed"><span class="n">3</span><b>cart.js</b> &nbsp; src › cart.js › cartTotal &nbsp;&nbsp;&nbsp;&nbsp; ⏵ ⤼ ⤓ ⤒ ↻ ■<span class="ln">&nbsp;&nbsp;&nbsp;8 &nbsp; sum += lineTotal(item)</span><span class="ln">&nbsp;&nbsp;&nbsp;9 &nbsp;}</span><span class="ln x"><span class="bpd"></span>10 &nbsp; const discount = sum * pct</span><span class="ln">&nbsp;&nbsp;11 &nbsp; return sum - discount</span></div>
+        <div class="rg" style="grid-area:pn"><span class="n">4</span><b>Panel</b> &nbsp; PROBLEMS · OUTPUT · DEBUG CONSOLE · TERMINAL</div>
+        <div class="rg" style="grid-area:st"><span class="n">5</span>main* · 0 errors · Ln 10, Col 3 · JavaScript</div>
+      </div></div>
+      <figcaption>VS Code paused on line 10. The Side Bar (2) is showing the Run and Debug view, and the floating debug bar sits at the top of the editor (3).</figcaption>
+    </figure>
+    <ol class="legend">
+      <li>Activity Bar: switches the Side Bar between Explorer, Search, Source Control, Run and Debug, Extensions.</li>
+      <li>Side Bar in debug mode: Variables, Watch, Call Stack, Breakpoints.</li>
+      <li>Editor: tabs, breadcrumbs, gutter with breakpoints, and the debug bar (continue, step over, into, out, restart, stop).</li>
+      <li>Panel: the Debug Console is a live prompt; type any expression while paused.</li>
+      <li>Status bar: branch, errors, cursor position, language. It turns a different colour while debugging.</li>
+    </ol>
+  </div>
+  <div class="block"><h3>Keys</h3><div data-keys="vs"></div></div>
+  <div class="block">
+    <h3>Debugging: <code>launch.json</code></h3>
+    <p>VS Code needs to be told how to start or join your program. That lives in <code>.vscode/launch.json</code>. <b>launch</b> starts the program under the debugger; <b>attach</b> joins one that is already running.</p>
+<pre>{
+  "version": "0.2.0",
+  "configurations": [
+    { "name": "Node: this file", "type": "node", "request": "launch",
+      "program": "${file}", "skipFiles": ["&lt;node_internals&gt;/**"] },
+    { "name": "Python: FastAPI", "type": "debugpy", "request": "launch",
+      "module": "uvicorn", "args": ["app.main:app", "--reload"], "justMyCode": true },
+    { "name": "Attach to Node on 9229", "type": "node", "request": "attach", "port": 9229 }
+  ]
+}</pre>
+    <ul class="tight">
+      <li><kbd>F5</kbd> runs the configuration selected at the top of the Run and Debug view.</li>
+      <li><code>skipFiles</code> and <code>justMyCode</code> stop Step Into from diving into library code.</li>
+      <li>For Node without any config: open the command palette, run "Debug: JavaScript Debug Terminal", then start your app normally in that terminal. Breakpoints just work.</li>
+      <li>Right-click the gutter for Conditional Breakpoint, Logpoint and Hit Count. Logpoint text uses braces: <code>sum is {sum}</code>.</li>
+      <li>In the Call Stack, right-click a frame → Restart Frame to re-run a function without restarting the app (where the debugger supports it).</li>
+    </ul>
+  </div>
+  <div class="block">
+    <h3>Pro tricks</h3>
+    <ul class="tight">
+      <li><code>code .</code> in a terminal opens the current folder. Both <code>code</code> and <code>cursor</code> are already on your PATH.</li>
+      <li>In <kbd>⌘</kbd> <kbd>P</kbd>: type <code>@</code> for symbols in the file, <code>:42</code> for a line, <code>&gt;</code> for commands, <code>#</code> for symbols in the project.</li>
+      <li>Settings have two levels: User (all projects) and Workspace (<code>.vscode/settings.json</code>, shared with the team). Workspace wins.</li>
+      <li>Profiles keep separate extension sets, for example one for Python and one for web.</li>
+      <li>Useful extensions: Dart + Flutter, Python, ESLint, Prettier, GitLens, Error Lens, REST Client, Remote - SSH, Docker.</li>
+      <li><code>tasks.json</code> + <code>preLaunchTask</code> builds before each debug run.</li>
+      <li>Snippets: command palette → "Snippets: Configure Snippets". Type the prefix, press Tab.</li>
+      <li>AI in plain VS Code is GitHub Copilot: <kbd>⌘</kbd> <kbd>I</kbd> inline chat, <kbd>⌃</kbd> <kbd>⌘</kbd> <kbd>I</kbd> chat view.</li>
+    </ul>
+  </div>
+  <div class="block"><h3>Drills</h3><div class="drill" data-drill="vscode"></div></div>
+</section>
+
+<!-- ===================== ANDROID STUDIO ===================== -->
+<section class="panel" id="p-studio" data-tab="Android Studio" hidden>
+  <div class="block">
+    <h2>Android Studio and IntelliJ IDEA</h2>
+    <p>Android Studio is IntelliJ IDEA with Android tools added, so the keys and the debugger are identical in both. Learn one and you have Kotlin, Java, Flutter (through the plugin) and Spring Boot covered. You have Android Studio 2026.1 and IntelliJ IDEA installed.</p>
+    <figure>
+      <div class="scroll"><div class="win as" role="img" aria-label="Android Studio window layout while debugging">
+        <div class="rg" style="grid-area:tb"><span class="n">1</span>☰ &nbsp; <b>BB_APP</b> ▾ &nbsp; ⎇ release_8.45 ▾ &nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 📱 Pixel 8 ▾ &nbsp; main.dart ▾ &nbsp; ▶ &nbsp; 🐞 &nbsp; ⚡ hot reload &nbsp; ■ &nbsp;&nbsp; 🔍 ⚙</div>
+        <div class="rg" style="grid-area:ls"><span class="n">2</span></div>
+        <div class="rg" style="grid-area:pj"><span class="n">3</span><b>Project</b> ▾ Android<span class="ln">▾ app</span><span class="ln">&nbsp;&nbsp;▾ java</span><span class="ln">&nbsp;&nbsp;&nbsp;&nbsp;CartVM.kt</span><span class="ln">▸ Gradle Scripts</span></div>
+        <div class="rg code" style="grid-area:ed"><span class="n">4</span><b>CartVM.kt</b><span class="ln">&nbsp;&nbsp;&nbsp;8 &nbsp; sum += lineTotal(item) &nbsp;<i>sum: 150</i></span><span class="ln">&nbsp;&nbsp;&nbsp;9 &nbsp;}</span><span class="ln x"><span class="bpd"></span>10 &nbsp; val discount = sum * pct &nbsp;<i>sum: 450 &nbsp;pct: 10</i></span><span class="ln">&nbsp;&nbsp;11 &nbsp; return sum - discount</span></div>
+        <div class="rg" style="grid-area:rs"><span class="n">5</span></div>
+        <div class="rg" style="grid-area:bt"><span class="n">6</span><b>Debug</b> &nbsp; ⏵ ⤼ ⤓ ⤒ &nbsp;|&nbsp; Frames: cartTotal:10 › onPay:42 &nbsp;|&nbsp; Variables: sum = 450, pct = 10 &nbsp;|&nbsp; Console · Logcat · Terminal</div>
+        <div class="rg" style="grid-area:st"><span class="n">7</span>Gradle sync finished · 10:5 · UTF-8 · memory</div>
+      </div></div>
+      <figcaption>Android Studio paused on line 10. Grey italic values at the end of each line are the debugger showing variables inline, which Xcode and VS Code do not do by default.</figcaption>
+    </figure>
+    <ol class="legend">
+      <li>Toolbar: project and branch on the left; device, run configuration, Run, Debug and Stop on the right. With Flutter you also get hot reload.</li>
+      <li>Left stripe: buttons that open tool windows (Project, Commit, Structure, Pull Requests; at the bottom Terminal, Logcat, Problems, Git).</li>
+      <li>Project window: use the dropdown to switch between the Android view (tidy) and the Project view (real folders).</li>
+      <li>Editor with gutter. Inline values appear only while paused.</li>
+      <li>Right stripe: Gradle, Device Manager, Running Devices, Flutter Inspector, Gemini.</li>
+      <li>Debug window: step buttons, Frames (the call stack), Variables, and a Console tab.</li>
+      <li>Status bar: Gradle sync and indexing progress. If completion is missing, look here; the IDE is probably still indexing.</li>
+    </ol>
+  </div>
+  <div class="block"><h3>Keys</h3><div data-keys="jb"></div></div>
+  <div class="block">
+    <h3>More keys worth learning here</h3>
+    <div class="scroll"><table>
+      <tr><th>Action</th><th>Keys</th><th>Note</th></tr>
+      <tr><td>Recent locations (with code preview)</td><td><kbd>⌘</kbd> <kbd>⇧</kbd> <kbd>E</kbd></td><td>"Where was I five minutes ago"</td></tr>
+      <tr><td>Complete the statement</td><td><kbd>⌘</kbd> <kbd>⇧</kbd> <kbd>⏎</kbd></td><td>Adds brackets, semicolon, moves to next line</td></tr>
+      <tr><td>Generate (constructor, getters, toString)</td><td><kbd>⌘</kbd> <kbd>N</kbd></td><td></td></tr>
+      <tr><td>Surround with (if, try, loop)</td><td><kbd>⌘</kbd> <kbd>⌥</kbd> <kbd>T</kbd></td><td></td></tr>
+      <tr><td>Parameter info</td><td><kbd>⌘</kbd> <kbd>P</kbd></td><td>Inside the brackets of a call</td></tr>
+      <tr><td>Paste from clipboard history</td><td><kbd>⌘</kbd> <kbd>⇧</kbd> <kbd>V</kbd></td><td></td></tr>
+      <tr><td>Git popup (branches, pull, stash…)</td><td><kbd>⌃</kbd> <kbd>V</kbd></td><td></td></tr>
+      <tr><td>Choose run / debug configuration</td><td><kbd>⌃</kbd> <kbd>⌥</kbd> <kbd>R</kbd><span class="or">/</span><kbd>⌃</kbd> <kbd>⌥</kbd> <kbd>D</kbd></td><td></td></tr>
+      <tr><td>Flutter hot reload / hot restart</td><td><kbd>⌘</kbd> <kbd>\</kbd><span class="or">/</span><kbd>⌘</kbd> <kbd>⇧</kbd> <kbd>\</kbd></td><td>Flutter plugin</td></tr>
+      <tr><td>Logcat</td><td><span class="txt" style="color:var(--muted);font-size:13.5px">View → Tool Windows → Logcat</span></td><td>No default key (<kbd>⌘</kbd> <kbd>6</kbd> opens Problems). Filter: <code>package:mine level:error</code></td></tr>
+      <tr><td>Problems · Debug · Run · Structure windows</td><td><kbd>⌘</kbd> <kbd>6</kbd> · <kbd>⌘</kbd> <kbd>5</kbd> · <kbd>⌘</kbd> <kbd>4</kbd> · <kbd>⌘</kbd> <kbd>7</kbd></td><td>Press again to hide</td></tr>
+    </table></div>
+  </div>
+  <div class="block">
+    <h3>Debugging here</h3>
+    <ul class="tight">
+      <li><b>Debug an app that is already running:</b> Run → Attach Debugger to Android Process. No rebuild needed.</li>
+      <li><b>Right-click the red dot</b> for Condition, and to untick Suspend and tick "Evaluate and log" (that is this IDE's logpoint). <kbd>⇧</kbd> click on the gutter creates a non-suspending one directly.</li>
+      <li><b>Suspend: Thread, not All.</b> In the same popup. With All, every thread freezes and the app may show "not responding".</li>
+      <li><b>Exception breakpoint:</b> <kbd>⇧</kbd> <kbd>⌘</kbd> <kbd>F8</kbd> → + → Java Exception Breakpoints. The app pauses at the line that throws, before the stack unwinds.</li>
+      <li><b>Evaluate</b> <kbd>⌥</kbd> <kbd>F8</kbd> runs any expression while paused, including calling your own functions.</li>
+      <li><b>Reset Frame</b> (the arrow beside a frame in Frames; older versions call it Drop Frame) rewinds to the start of the current function.</li>
+      <li><b>Other inspectors:</b> Layout Inspector (live view tree), App Inspection (database and network), Profiler (CPU, memory).</li>
+    </ul>
+    <p class="note red"><b>Your BigBasket Flutter setup.</b> Every BB repo is a Flutter module inside a separate Xcode app. For iOS never press ▶ or 🐞 on <code>main.dart</code>. Start Run → Flutter Attach first and wait for "Waiting for a connection…", then run BigBasket (Debug) from Xcode. Dart breakpoints you set here then work. Keep one attach session at a time. Most reliable: copy the "Dart VM service is listening on …" line from the Xcode console and run <code>flutter attach --debug-url &lt;that url&gt;</code>.</p>
+    <p class="note"><b>Gradle sync on 2026.1.</b> If sync fails, do not switch the Gradle JDK to the bundled JBR 25, and remember the IDE syncs the <code>FlutterFrameworks</code> root, not <code>android/</code>. Details are in your handoff notes.</p>
+  </div>
+  <div class="block"><h3>Drills</h3><div class="drill" data-drill="studio"></div></div>
+</section>
+
+<!-- ===================== INTELLIJ BACKEND ===================== -->
+<section class="panel" id="p-idea" data-tab="IntelliJ: Spring & DB" hidden>
+  <div class="block">
+    <h2>IntelliJ IDEA for Spring Boot and databases</h2>
+    <p>Everything in the Android Studio tab (keys, breakpoints, Evaluate) works here unchanged. This tab covers what IntelliJ adds for backend work: Spring awareness, the Services window, an HTTP client, and a full database tool. You have IntelliJ IDEA 2025.3.3 with the Spring and Database plugins bundled.</p>
+    <p class="note"><b>Licence check.</b> Spring support, the HTTP Client and the Database tool are paid (Ultimate) features. If you do not see the Database tool window or the green bean icons in the gutter, the subscription is not active. The "Works without Ultimate" section below still gets you debugging and database access.</p>
+    <figure>
+      <div class="scroll"><div class="win ij" role="img" aria-label="IntelliJ IDEA layout for a Spring Boot project">
+        <div class="rg" style="grid-area:tb"><span class="n">1</span>☰ &nbsp; <b>shop-service</b> ▾ &nbsp; ⎇ main ▾ &nbsp;&nbsp;&nbsp;&nbsp; ShopServiceApplication ▾ &nbsp; ▶ &nbsp; 🐞 &nbsp; ■</div>
+        <div class="rg" style="grid-area:pj"><span class="n">2</span><b>Project</b><span class="ln">▾ src/main/java</span><span class="ln">&nbsp;&nbsp;OrderController</span><span class="ln">&nbsp;&nbsp;OrderService</span><span class="ln">▾ resources</span><span class="ln">&nbsp;&nbsp;application.yml</span></div>
+        <div class="rg code" style="grid-area:ed"><span class="n">3</span><b>OrderController.java</b><span class="ln">🌐 12 &nbsp;@GetMapping("/orders/{id}")</span><span class="ln">&nbsp;&nbsp;&nbsp;13 &nbsp;Order get(@PathVariable long id) {</span><span class="ln x"><span class="bpd"></span>14 &nbsp; return service.find(id); &nbsp;<i>id: 42</i></span><span class="ln">&nbsp;&nbsp;&nbsp;15 &nbsp;}</span><span class="ln">🫘 18 &nbsp;private final OrderService service;</span></div>
+        <div class="rg" style="grid-area:db"><span class="n">4</span><b>Database</b><span class="ln">▾ shop@localhost</span><span class="ln">&nbsp;&nbsp;▾ public</span><span class="ln">&nbsp;&nbsp;&nbsp;&nbsp;▸ orders</span><span class="ln">&nbsp;&nbsp;&nbsp;&nbsp;▸ products</span><span class="ln">console ▶</span><span class="ln">select * from orders</span></div>
+        <div class="rg" style="grid-area:sv"><span class="n">5</span><b>Services</b> &nbsp; ▾ Spring Boot › ShopServiceApplication :8080 &nbsp;|&nbsp; Console · Beans · Health · Mappings · Debugger</div>
+      </div></div>
+      <figcaption>A Spring Boot app paused inside a controller. The globe icon (line 12) opens that endpoint in the HTTP client; the bean icon (line 18) jumps to where the bean is defined.</figcaption>
+    </figure>
+    <ol class="legend">
+      <li>Toolbar: the Spring Boot run configuration is created for you from the <code>@SpringBootApplication</code> class.</li>
+      <li>Project window. <code>application.yml</code> has completion and jump-to-code for every property.</li>
+      <li>Editor with Spring gutter icons: endpoints, beans, autowired candidates, and scheduled or transactional methods.</li>
+      <li>Database tool window: data sources, schemas, tables, and query consoles.</li>
+      <li>Services window <kbd>⌘</kbd> <kbd>8</kbd>: every running app, with its console, beans, health and URL mappings (needs Spring Boot Actuator on the classpath for the live tabs).</li>
+    </ol>
+  </div>
+  <div class="block">
+    <h3>Spring tools</h3>
+    <div class="scroll"><table>
+      <tr><th>Tool</th><th>Where</th><th>Use it for</th></tr>
+      <tr><td>New project from Spring Initializr</td><td>File → New → Project → Spring Boot</td><td>Pick dependencies (Web, JPA, Validation) from a list instead of writing the build file</td></tr>
+      <tr><td>Bean navigation</td><td>Gutter icons; View → Tool Windows → Beans</td><td>"Which implementation gets injected here?"</td></tr>
+      <tr><td>Endpoints</td><td>View → Tool Windows → Endpoints</td><td>Every URL the app serves, searchable; jump to its method</td></tr>
+      <tr><td>HTTP Client</td><td>Globe icon → "Generate request in HTTP Client", or a <code>.http</code> file</td><td>Send a request from the editor with <kbd>⌃</kbd> <kbd>⏎</kbd>; keep the file in git as living API examples</td></tr>
+      <tr><td>Services</td><td><kbd>⌘</kbd> <kbd>8</kbd></td><td>Start, stop, debug and watch several services at once</td></tr>
+      <tr><td>Maven / Gradle</td><td>Right stripe</td><td>Reload after editing <code>pom.xml</code>; run a lifecycle step; see the dependency tree</td></tr>
+      <tr><td>Reload changed classes</td><td>Build <kbd>⌘</kbd> <kbd>F9</kbd> while debugging</td><td>Hot-swap a method body without restarting (signature changes still need a restart)</td></tr>
+    </table></div>
+<pre><span class="c">### orders.http — run a request with ⌃⏎, switch environments in the dropdown</span>
+GET {{host}}/orders/42
+Accept: application/json
+
+###
+POST {{host}}/orders
+Content-Type: application/json
+
+{ "productId": 7, "qty": 2 }</pre>
+  </div>
+  <div class="block">
+    <h3>Debugging a request end to end</h3>
+    <ol class="tight">
+      <li>Start the app with 🐞, not ▶.</li>
+      <li>Put a breakpoint on the first line of the controller method.</li>
+      <li>Right-click the red dot and set <b>Suspend: Thread</b>. A server handles many requests at once; with All, every other request freezes too.</li>
+      <li>Send the request from the HTTP client, Postman or <code>curl</code>. The app pauses.</li>
+      <li>Step into the service, then the repository. Use Evaluate <kbd>⌥</kbd> <kbd>F8</kbd> to call <code>repository.findById(42)</code> on the spot.</li>
+      <li>Read the Frames list from the bottom: filter chain → dispatcher → your controller. That is the path every Spring request takes.</li>
+    </ol>
+    <ul class="tight">
+      <li><b>Only one bad request?</b> Add a condition: <code>id == 42</code>.</li>
+      <li><b>A 500 with no clue?</b> Add a Java Exception Breakpoint for the exception class named in the log.</li>
+      <li><b>Stream pipeline wrong?</b> While paused on a <code>.stream()</code> chain, press "Trace Current Stream Chain" in the Debug toolbar to see the data after each step.</li>
+      <li><b>SQL looks wrong?</b> Set <code>spring.jpa.show-sql=true</code> and watch the console while stepping.</li>
+    </ul>
+  </div>
+  <div class="block">
+    <h3>Database tool</h3>
+    <div class="scroll"><table>
+      <tr><th>Action</th><th>How</th><th>Note</th></tr>
+      <tr><td>Add a database</td><td>Database window → + → Data Source → PostgreSQL / MySQL / H2</td><td>Click "Download Driver Files" once, then Test Connection</td></tr>
+      <tr><td>Open a query console</td><td>Select the data source, <kbd>⌘</kbd> <kbd>⇧</kbd> <kbd>L</kbd></td><td>Completion knows your tables and columns</td></tr>
+      <tr><td>Run the statement under the cursor</td><td><kbd>⌘</kbd> <kbd>⏎</kbd></td><td>Select several to run them together</td></tr>
+      <tr><td>Browse and edit rows</td><td>Double-click a table</td><td>Edits are held locally until you submit with <kbd>⌘</kbd> <kbd>⏎</kbd></td></tr>
+      <tr><td>See a table's definition</td><td><kbd>⌘</kbd> <kbd>B</kbd> on its name</td><td>Columns, keys and indexes as DDL</td></tr>
+      <tr><td>Explain a slow query</td><td>Right-click the query → Explain Plan</td><td>Look for sequential scans on large tables</td></tr>
+      <tr><td>Draw the schema</td><td>Right-click schema → Diagrams → Show Diagram</td><td>Tables and foreign keys as a picture</td></tr>
+      <tr><td>Export results</td><td>Export button above the result grid</td><td>CSV, JSON, SQL inserts</td></tr>
+    </table></div>
+    <p class="note red"><b>Two switches before you touch a shared database.</b> In the data source settings tick <b>Read-only</b>, and set the console's transaction mode to <b>Manual</b> so nothing is saved until you press Commit. Never keep a production password in a shared project file.</p>
+    <p>Your practice target: <code>~/android-mastery-academy/examples/spring/shop-service</code>. It uses an in-memory H2 database (<code>jdbc:h2:mem:shop</code>), which exists only inside the running app, so the Database tool can reach it only through the app's H2 console or after you point <code>APP_DB_URL</code> at a file or PostgreSQL database.</p>
+  </div>
+  <div class="block">
+    <h3>Works without Ultimate</h3>
+    <ul class="tight">
+      <li><b>Run and debug:</b> open the main class and press 🐞 on its <code>main</code> method. Breakpoints, Evaluate and conditions are all free features.</li>
+      <li><b>Attach to an app started elsewhere</b> (terminal, Docker): start it with the line below, then Run → Edit Configurations → + → Remote JVM Debug, port 5005.</li>
+      <li><b>Requests:</b> Postman or <code>curl</code>. <b>Database:</b> <code>psql</code>, the H2 web console, or DBeaver.</li>
+    </ul>
+<pre>java -agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:5005 -jar target/shop-service.jar
+./mvnw spring-boot:run -Dspring-boot.run.jvmArguments="-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:5005"</pre>
+  </div>
+  <div class="block"><h3>Drills</h3><div class="drill" data-drill="idea"></div></div>
+</section>
+
+<!-- ===================== XCODE ===================== -->
+<section class="panel" id="p-xcode" data-tab="Xcode" hidden>
+  <div class="block">
+    <h2>Xcode</h2>
+    <p>Xcode builds, signs, runs and debugs anything for Apple devices. Its debugger is LLDB, and the console at the bottom is a real LLDB prompt. You have Xcode 26.0.1.</p>
+    <figure>
+      <div class="scroll"><div class="win xc" role="img" aria-label="Xcode window layout while debugging">
+        <div class="rg" style="grid-area:tb"><span class="n">1</span>▶ &nbsp; ■ &nbsp;&nbsp; <b>BigBasket</b> › iPhone 14 Plus &nbsp;&nbsp;&nbsp;&nbsp; Running BigBasket on iPhone 14 Plus &nbsp;&nbsp;&nbsp;&nbsp; ＋ &nbsp; ◧ ◨</div>
+        <div class="rg" style="grid-area:nv"><span class="n">2</span><b>Navigator</b><span class="ln">📁 ⎇ 🔖 🔍 ⚠ ◇ ☰ ⬣ ≡</span><span class="ln">▾ Thread 1</span><span class="ln">&nbsp;&nbsp;0 cartTotal</span><span class="ln">&nbsp;&nbsp;1 onPayTapped</span><span class="ln">&nbsp;&nbsp;2 UIKit…</span></div>
+        <div class="rg code" style="grid-area:ed"><span class="n">3</span>◀ ▶ &nbsp; BigBasket › Cart › <b>Cart.swift</b> › cartTotal(_:)<span class="ln">&nbsp;&nbsp;&nbsp;8 &nbsp; sum += lineTotal(item)</span><span class="ln">&nbsp;&nbsp;&nbsp;9 &nbsp;}</span><span class="ln x"><span class="bpd" style="border-radius:2px;width:14px"></span>10 &nbsp; let discount = sum * pct &nbsp;&nbsp; Thread 1: breakpoint 1.1</span><span class="ln">&nbsp;&nbsp;11 &nbsp; return sum - discount</span></div>
+        <div class="rg" style="grid-area:in"><span class="n">4</span><b>Inspector</b><span class="ln">File · History</span><span class="ln">· Quick Help</span></div>
+        <div class="rg" style="grid-area:db"><span class="n">5</span>⏵ ⤼ ⤓ ⤒ &nbsp; ⧉ view &nbsp; ⌬ memory &nbsp;|&nbsp; <b>Variables</b> sum = 450, pct = 10 &nbsp;|&nbsp; <b>Console</b> (lldb) po sum</div>
+      </div></div>
+      <figcaption>Xcode paused on line 10. Xcode's breakpoint is a blue arrow shape in the gutter, not a red dot. The Navigator (2) has switched itself to the Debug navigator and shows the call stack.</figcaption>
+    </figure>
+    <ol class="legend">
+      <li>Toolbar: Run, Stop, the scheme (what to build) and destination (which device), the activity view with build status, and buttons to hide the side areas.</li>
+      <li>Navigator: nine tabs, <kbd>⌘</kbd> <kbd>1</kbd> to <kbd>⌘</kbd> <kbd>9</kbd>: Project, Source Control, Bookmarks, Find, Issues, Tests, Debug, Breakpoints, Reports. In Xcode 26, <kbd>⌘</kbd> <kbd>0</kbd> opens the Coding Assistant here.</li>
+      <li>Editor: back/forward arrows and the jump bar on top (click any part to jump). SwiftUI files can show a live preview canvas beside the code.</li>
+      <li>Inspector: file details, history, and Quick Help for whatever the cursor is on.</li>
+      <li>Debug area: step buttons, Debug View Hierarchy, Memory Graph, then Variables on the left and the LLDB console on the right.</li>
+    </ol>
+  </div>
+  <div class="block"><h3>Keys</h3><div data-keys="xc"></div></div>
+  <div class="block">
+    <h3>More keys worth learning here</h3>
+    <div class="scroll"><table>
+      <tr><th>Action</th><th>Keys</th><th>Note</th></tr>
+      <tr><td>Clean build folder</td><td><kbd>⌘</kbd> <kbd>⇧</kbd> <kbd>K</kbd></td><td>First thing to try when a build error makes no sense</td></tr>
+      <tr><td>Run without building</td><td><kbd>⌃</kbd> <kbd>⌘</kbd> <kbd>R</kbd></td><td>Relaunch the last build quickly</td></tr>
+      <tr><td>Profile in Instruments</td><td><kbd>⌘</kbd> <kbd>I</kbd></td><td>Time Profiler, Leaks, Allocations</td></tr>
+      <tr><td>Reveal current file in navigator</td><td><kbd>⌘</kbd> <kbd>⇧</kbd> <kbd>J</kbd></td><td></td></tr>
+      <tr><td>Devices and Simulators</td><td><kbd>⌘</kbd> <kbd>⇧</kbd> <kbd>2</kbd></td><td>Device logs, installed apps, pairing</td></tr>
+      <tr><td>Show / hide SwiftUI canvas</td><td><kbd>⌘</kbd> <kbd>⌥</kbd> <kbd>⏎</kbd></td><td>Resume preview: <kbd>⌘</kbd> <kbd>⌥</kbd> <kbd>P</kbd></td></tr>
+      <tr><td>Focus console / clear console</td><td><kbd>⌘</kbd> <kbd>⇧</kbd> <kbd>C</kbd><span class="or">/</span><kbd>⌘</kbd> <kbd>K</kbd></td><td></td></tr>
+      <tr><td>Developer documentation</td><td><kbd>⌘</kbd> <kbd>⇧</kbd> <kbd>0</kbd></td><td></td></tr>
+      <tr><td>Edit scheme</td><td><kbd>⌘</kbd> <kbd>&lt;</kbd></td><td>Launch arguments, environment variables, sanitizers</td></tr>
+    </table></div>
+  </div>
+  <div class="block">
+    <h3>Breakpoints in Xcode</h3>
+    <ul class="tight">
+      <li><b>Edit a breakpoint:</b> double-click it. You get Condition, Ignore (skip the first N hits), Action, and "Automatically continue after evaluating actions".</li>
+      <li><b>Logpoint:</b> Action → Log Message, text like <code>sum is @sum@</code>, and tick Automatically continue. It prints and never stops.</li>
+      <li><b>Breakpoint navigator</b> <kbd>⌘</kbd> <kbd>8</kbd> → + gives the special kinds: Swift Error, Exception (Obj-C crashes pause at the throwing line), Symbolic (stop in any function by name, even one you have no source for, such as <code>-[UIViewController viewDidAppear:]</code>), Runtime Issue, Test Failure.</li>
+      <li><b>Share one:</b> right-click → Share Breakpoint puts it in the project for the team. Move to User to have it in every project.</li>
+      <li><b>Watchpoint:</b> right-click a variable in the Variables view → Watch. The app pauses when the value changes, whoever changed it.</li>
+    </ul>
+  </div>
+  <div class="block">
+    <h3>LLDB console: the ten commands</h3>
+<pre>po cart.items.count          <span class="c"># print an object the way its description says</span>
+p sum                        <span class="c"># print with type information</span>
+v sum                        <span class="c"># fastest; reads memory, runs no code</span>
+expr sum = 0                 <span class="c"># change a value while paused, then continue</span>
+bt                           <span class="c"># backtrace: the call stack as text</span>
+frame select 1               <span class="c"># look at the caller's variables</span>
+thread list                  <span class="c"># every thread and where it is</span>
+br set -n viewDidLoad        <span class="c"># breakpoint by function name</span>
+watchpoint set variable sum  <span class="c"># pause when sum changes</span>
+c    n    s    finish        <span class="c"># continue, step over, step into, step out</span></pre>
+    <p>Change UI without rebuilding: <code>expr view.backgroundColor = .red</code> then <code>c</code>.</p>
+  </div>
+  <div class="block">
+    <h3>Pro tricks</h3>
+    <ul class="tight">
+      <li><b>Debug View Hierarchy</b> explodes the screen into 3D layers. Use it for "why is this view hidden / the wrong size".</li>
+      <li><b>Memory Graph</b> shows what is keeping an object alive: the fastest way to find a retain cycle.</li>
+      <li><b>Scheme → Run → Diagnostics:</b> Address Sanitizer, Thread Sanitizer, Main Thread Checker.</li>
+      <li><b>Environment Overrides</b> (button in the debug bar) switches dark mode, text size and accessibility on the running app.</li>
+      <li><b>Simulator from the terminal:</b> <code>xcrun simctl list devices</code>, <code>xcrun simctl openurl booted "bigbasket://…"</code>, <code>xcrun simctl io booted screenshot shot.png</code>.</li>
+      <li><b>Stale build problems:</b> clean build folder, then delete <code>~/Library/Developer/Xcode/DerivedData</code> for that project only.</li>
+      <li>Xcode 26 has a built-in coding assistant in the left side bar. Where it is and which models it offers depends on your settings; treat its edits like any agent's and read the diff.</li>
+    </ul>
+    <p class="note red"><b>Your BigBasket setup.</b> Open <code>BigBasket/BigBasket.xcworkspace</code>, never the <code>.xcodeproj</code>. For Flutter code, start Flutter Attach in Android Studio first, then <kbd>⌘</kbd> <kbd>R</kbd> here. Swift breakpoints stop in Xcode; Dart breakpoints stop in Android Studio, both on the same running app.</p>
+  </div>
+  <div class="block"><h3>Drills</h3><div class="drill" data-drill="xcode"></div></div>
+</section>
+
+<!-- ===================== FLUTTER DEVTOOLS ===================== -->
+<section class="panel" id="p-flutter" data-tab="Flutter DevTools" hidden>
+  <div class="block">
+    <h2>Flutter DevTools</h2>
+    <p>A set of inspectors that connect to a running Flutter app. The IDE debugger answers "what is the value on this line"; DevTools answers "why is this widget this size", "why is this screen slow" and "what did the app send over the network". You have Flutter 3.41.4.</p>
+    <figure>
+      <div class="scroll"><div class="win fd" role="img" aria-label="Flutter DevTools Inspector layout">
+        <div class="rg" style="grid-area:tb"><span class="n">1</span><b>Inspector</b> · Performance · CPU Profiler · Memory · Debugger · Network · Logging · App Size · Deep Links</div>
+        <div class="rg" style="grid-area:tg"><span class="n">2</span>⌖ Select widget mode &nbsp;·&nbsp; Slow animations &nbsp;·&nbsp; Show guidelines &nbsp;·&nbsp; Highlight repaints &nbsp;·&nbsp; Highlight oversized images</div>
+        <div class="rg" style="grid-area:tr"><span class="n">3</span><b>Widget tree</b><span class="ln">▾ Scaffold</span><span class="ln">&nbsp;▾ Column</span><span class="ln x">&nbsp;&nbsp;▾ Row</span><span class="ln">&nbsp;&nbsp;&nbsp;&nbsp;Text</span><span class="ln">&nbsp;&nbsp;&nbsp;&nbsp;Icon</span></div>
+        <div class="rg code" style="grid-area:ex"><span class="n">4</span><b>Layout explorer</b> &nbsp; Row<span class="ln">main axis → &nbsp; start ▾ &nbsp;&nbsp; cross axis ↓ &nbsp; center ▾</span><span class="ln">┌─ Text ──────────────┐┌ Icon ┐</span><span class="ln">│ w 412 (overflow 52) ││ w 24 │</span><span class="ln">└─────────────────────┘└──────┘</span><span class="ln">total width available: 384</span></div>
+        <div class="rg" style="grid-area:dt"><span class="n">5</span><b>Properties</b><span class="ln">constraints:</span><span class="ln">&nbsp;0≤w≤384</span><span class="ln">size: 384 × 48</span><span class="ln">flex: null</span></div>
+      </div></div>
+      <figcaption>The Inspector on a Row whose Text is 52 pixels too wide. The layout explorer (4) shows the sizes and constraints that produce the yellow-and-black overflow stripes on the device.</figcaption>
+    </figure>
+    <ol class="legend">
+      <li>Tool tabs. The set depends on the app type and build mode.</li>
+      <li>Inspector toggles that draw on the device itself.</li>
+      <li>Widget tree. Select widget mode lets you tap a widget on the device to find it here.</li>
+      <li>Layout explorer for the selected Row, Column or Flex: change alignment and flex live to test a fix.</li>
+      <li>Properties of the selected widget, including the constraints it received and the size it chose.</li>
+    </ol>
+  </div>
+  <div class="block">
+    <h3>How to open it</h3>
+    <ul class="tight">
+      <li><b>Android Studio:</b> once Run or Flutter Attach is connected, click the DevTools button in the Run / Debug window toolbar, or open the Flutter Inspector tool window on the right.</li>
+      <li><b>Terminal:</b> <code>flutter attach</code> prints a line with a DevTools link. Open it in Chrome.</li>
+      <li><b>Standalone:</b> run <code>dart devtools</code>, then paste the "Dart VM service is listening on …" URL into its connect box.</li>
+      <li><b>VS Code / Cursor:</b> command palette → "Flutter: Open DevTools".</li>
+    </ul>
+    <p class="note red"><b>Your BigBasket setup.</b> For iOS the path is the same as for breakpoints: Flutter Attach first, then run from Xcode, then open DevTools from the attach session. If DevTools will not connect, an old attach is usually still holding the port: <code>pkill -f flutter_tools</code>, then check <code>lsof -nP -iTCP -sTCP:LISTEN | grep dart</code>.</p>
+  </div>
+  <div class="block">
+    <h3>Tool by tool</h3>
+    <div class="scroll"><table>
+      <tr><th>Tool</th><th>Question it answers</th><th>How to use it</th></tr>
+      <tr><td><b>Inspector</b></td><td>Why is this widget here, this size, or overflowing?</td><td>Select widget mode → tap on device → read constraints and size; try alignment in the layout explorer</td></tr>
+      <tr><td><b>Performance</b></td><td>Which frames are slow, and is it build or paint?</td><td>Each bar is a frame with a UI part (your Dart code) and a Raster part (drawing). At 60 fps the budget is 16 ms. Click a red bar to see its timeline</td></tr>
+      <tr><td><b>CPU Profiler</b></td><td>Which function is using the time?</td><td>Record, do the slow action, stop. Read Bottom Up for the most expensive functions</td></tr>
+      <tr><td><b>Memory</b></td><td>Is something leaking?</td><td>Snapshot, do the action and come back, snapshot again, then diff. Classes whose count keeps growing are suspects</td></tr>
+      <tr><td><b>Network</b></td><td>What did the app send and get back?</td><td>Lists requests made through Dart's HTTP stack (Dio included) with headers, body and timing. Native-side requests do not appear</td></tr>
+      <tr><td><b>Logging</b></td><td>What happened, in order?</td><td><code>print</code>, <code>debugPrint</code>, <code>log()</code> from <code>dart:developer</code>, plus framework and garbage-collection events; filter by text</td></tr>
+      <tr><td><b>Debugger</b></td><td>Breakpoints without an IDE</td><td>Works, but the IDE debugger is more comfortable; use this when only a browser is available</td></tr>
+      <tr><td><b>App Size</b></td><td>What makes the build large?</td><td>Build with <code>--analyze-size</code> and load the JSON it writes</td></tr>
+      <tr><td><b>Deep Links</b></td><td>Are the app's links set up correctly?</td><td>Validates Android and iOS deep-link configuration for a project</td></tr>
+    </table></div>
+    <p class="note"><b>Measure performance in profile mode.</b> A debug build is several times slower than what users get, so frame times from it mean little. Use debug for the Inspector and breakpoints; use a profile build on a real device for Performance and CPU numbers.</p>
+  </div>
+  <div class="block">
+    <h3>Dart debugging tricks that pair with it</h3>
+    <ul class="tight">
+      <li><code>debugger()</code> from <code>dart:developer</code> is a breakpoint written in code; <code>debugger(when: cart.isEmpty)</code> is a conditional one.</li>
+      <li><b>Hot reload</b> keeps state and breakpoints; <b>hot restart</b> resets state. If a change does not show, it was probably in <code>initState</code> or a global, which need a restart.</li>
+      <li>Performance → "Track widget builds" shows which widgets rebuild each frame. A whole screen rebuilding on every tap is the most common cause of jank.</li>
+      <li>"Highlight repaints" draws a colour-cycling border around anything that repaints. A list that flashes while only one item changed needs a <code>RepaintBoundary</code> or a narrower rebuild.</li>
+      <li><code>debugDumpApp()</code> prints the widget tree to the console when you cannot open the Inspector.</li>
+      <li>Exception breakpoints work for Dart too: in Android Studio tick "Break on exceptions" in the Flutter debug settings, or use the Breakpoints dialog.</li>
+    </ul>
+  </div>
+  <div class="block"><h3>Drills</h3><div class="drill" data-drill="flutter"></div></div>
+</section>
+
+<!-- ===================== TERMINAL ===================== -->
+<section class="panel" id="p-terminal" data-tab="Terminal" hidden>
+  <div class="block">
+    <h2>Terminal</h2>
+    <p>You use Terminal.app with zsh. The terminal is the window; zsh is the program inside it that reads what you type. Every IDE also has this same shell in its bottom panel.</p>
+    <figure>
+      <div class="anat" role="img" aria-label="Anatomy of a shell command">
+        <span>satyajit@mac ~/proj %<small>prompt: who, where</small></span>
+        <span>grep<small>command</small></span>
+        <span>-rn<small>flags</small></span>
+        <span>"discount"<small>argument</small></span>
+        <span>lib/<small>argument</small></span>
+        <span>|<small>pipe: output → next</small></span>
+        <span>head -20<small>second command</small></span>
+        <span>&gt; out.txt<small>redirect to file</small></span>
+      </div>
+      <figcaption>One line, read left to right: search <code>lib/</code> for "discount" with line numbers, pass the result to <code>head</code> to keep 20 lines, save that to <code>out.txt</code>.</figcaption>
+    </figure>
+  </div>
+  <div class="block">
+    <h3>Editing the line you are typing</h3>
+    <div class="scroll"><table>
+      <tr><th>Action</th><th>Keys</th><th>Action</th><th>Keys</th></tr>
+      <tr><td>Start / end of line</td><td><kbd>⌃</kbd> <kbd>A</kbd><span class="or">/</span><kbd>⌃</kbd> <kbd>E</kbd></td><td>Search command history</td><td><kbd>⌃</kbd> <kbd>R</kbd>, again for older</td></tr>
+      <tr><td>Back / forward one word</td><td><kbd>⌥</kbd> <kbd>←</kbd><span class="or">/</span><kbd>⌥</kbd> <kbd>→</kbd></td><td>Previous command</td><td><kbd>↑</kbd></td></tr>
+      <tr><td>Delete word before cursor</td><td><kbd>⌃</kbd> <kbd>W</kbd></td><td>Complete a name</td><td><kbd>Tab</kbd>, twice for the list</td></tr>
+      <tr><td>Delete the whole line</td><td><kbd>⌃</kbd> <kbd>U</kbd></td><td>Stop the running program</td><td><kbd>⌃</kbd> <kbd>C</kbd></td></tr>
+      <tr><td>Delete to end of line</td><td><kbd>⌃</kbd> <kbd>K</kbd></td><td>Pause it (resume with <code>fg</code>)</td><td><kbd>⌃</kbd> <kbd>Z</kbd></td></tr>
+      <tr><td>Paste back what you deleted</td><td><kbd>⌃</kbd> <kbd>Y</kbd></td><td>End input / close shell</td><td><kbd>⌃</kbd> <kbd>D</kbd></td></tr>
+      <tr><td>Clear screen</td><td><kbd>⌃</kbd> <kbd>L</kbd><span class="or">or</span><kbd>⌘</kbd> <kbd>K</kbd></td><td>New tab / split pane</td><td><kbd>⌘</kbd> <kbd>T</kbd><span class="or">/</span><kbd>⌘</kbd> <kbd>D</kbd></td></tr>
+    </table></div>
+    <p>History shortcuts you type: <code>!!</code> repeats the last command (<code>sudo !!</code>), <code>!$</code> is its last argument, <code>cd -</code> returns to the previous folder.</p>
+  </div>
+  <div class="block">
+    <h3>Commands by job</h3>
+<pre><span class="c"># find things</span>
+grep -rn "getAddressText" lib/        <span class="c"># text inside files, with line numbers</span>
+find . -name "*.dart" -mtime -1       <span class="c"># files changed in the last day</span>
+which flutter                         <span class="c"># which program actually runs</span>
+
+<span class="c"># watch things</span>
+tail -f app.log                       <span class="c"># follow a log as it grows</span>
+ps aux | grep -i dart                 <span class="c"># is it running?</span>
+lsof -nP -iTCP -sTCP:LISTEN           <span class="c"># who is listening on which port</span>
+kill 12345        kill -9 12345       <span class="c"># ask it to stop / force it</span>
+
+<span class="c"># talk to APIs</span>
+curl -i https://example.com/health    <span class="c"># status line, headers and body</span>
+curl -s https://example.com/x | jq .  <span class="c"># pretty-print JSON (jq is installed)</span>
+
+<span class="c"># Mac glue</span>
+open .            pbcopy &lt; file.txt   pbpaste | jq .
+
+<span class="c"># mobile</span>
+adb devices       adb logcat | grep -i bigbasket      adb reverse tcp:8080 tcp:8080
+xcrun simctl list devices             idevice_id -l
+flutter devices   flutter analyze --no-pub lib/x.dart
+flutter attach --debug-url http://127.0.0.1:PORT/TOKEN=/</pre>
+  </div>
+  <div class="block">
+    <h3>Breakpoints without an IDE</h3>
+    <div class="scroll"><table>
+      <tr><th>Language</th><th>Start</th><th>Set a breakpoint</th><th>Continue · over · into · out</th><th>Look</th></tr>
+      <tr><td>Python</td><td><code>python -m pdb app.py</code> or put <code>breakpoint()</code> in the code</td><td><code>b file.py:10</code>, condition: <code>b 10, sum &gt; 100</code></td><td><code>c</code> · <code>n</code> · <code>s</code> · <code>r</code></td><td><code>p sum</code>, <code>w</code> (stack), <code>l</code> (code)</td></tr>
+      <tr><td>Node</td><td><code>node inspect app.js</code>, or <code>node --inspect-brk app.js</code> then open <code>chrome://inspect</code></td><td><code>sb(10)</code> or write <code>debugger;</code></td><td><code>c</code> · <code>n</code> · <code>s</code> · <code>o</code></td><td><code>repl</code>, <code>bt</code></td></tr>
+      <tr><td>Swift / C / Obj-C</td><td><code>lldb ./app</code> then <code>run</code></td><td><code>br set -f main.swift -l 10</code></td><td><code>c</code> · <code>n</code> · <code>s</code> · <code>finish</code></td><td><code>po x</code>, <code>bt</code></td></tr>
+    </table></div>
+  </div>
+  <div class="block">
+    <h3>Make it yours</h3>
+    <ul class="tight">
+      <li><code>~/.zshrc</code> runs every time a shell opens. Aliases go there: <code>alias gs="git status"</code>. After editing run <code>source ~/.zshrc</code>.</li>
+      <li>A function takes arguments: <code>port() { lsof -nP -iTCP:$1 -sTCP:LISTEN; }</code> then <code>port 8080</code>.</li>
+      <li>To make <kbd>⌥</kbd> <kbd>←</kbd> word jumps reliable in Terminal.app: Settings → Profiles → Keyboard → "Use Option as Meta key".</li>
+      <li>Tools pros add, none installed on this Mac yet. Install only the ones you want:</li>
+    </ul>
+    <div class="scroll"><table>
+      <tr><th>Tool</th><th>What it replaces</th><th>Install</th></tr>
+      <tr><td><code>fzf</code></td><td>Fuzzy search for history (<kbd>⌃</kbd> <kbd>R</kbd>) and files</td><td><code>brew install fzf</code></td></tr>
+      <tr><td><code>rg</code> (ripgrep)</td><td>Much faster <code>grep -r</code>, respects .gitignore</td><td><code>brew install ripgrep</code></td></tr>
+      <tr><td><code>bat</code></td><td><code>cat</code> with colours and line numbers</td><td><code>brew install bat</code></td></tr>
+      <tr><td><code>zoxide</code></td><td><code>cd</code> that remembers: <code>z bb_app</code></td><td><code>brew install zoxide</code></td></tr>
+      <tr><td><code>lazygit</code></td><td>Full-screen Git UI in the terminal</td><td><code>brew install lazygit</code></td></tr>
+      <tr><td><code>tmux</code></td><td>Panes and sessions that survive a closed window</td><td><code>brew install tmux</code></td></tr>
+      <tr><td><code>htop</code></td><td>Live process and memory view</td><td><code>brew install htop</code></td></tr>
+    </table></div>
+  </div>
+  <div class="block"><h3>Drills</h3><div class="drill" data-drill="terminal"></div></div>
+</section>
+
+<!-- ===================== DEBUGGING ===================== -->
+<section class="panel" id="p-debug" data-tab="Breakpoints & debugging" hidden>
+  <div class="block">
+    <h2>Breakpoints and debugging</h2>
+    <p>A debugger does three things in every IDE: it pauses your program at a line, shows you every value at that moment, and lets you move forward one step at a time. Practise here first, then do the same in a real IDE.</p>
+    <figure>
+      <div class="scroll"><svg viewBox="0 0 860 130" role="img" aria-label="The debugging loop: reproduce, guess, set breakpoint, inspect, step, fix, verify, and back to guess if wrong" style="min-width:640px;width:100%;height:auto;color:var(--ink)">
+        <defs><marker id="ar" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0L10 5L0 10z" fill="currentColor"/></marker></defs>
+        <g fill="none" stroke="currentColor" stroke-width="1.3">
+          <rect x="4" y="20" width="104" height="44" rx="6"/><rect x="128" y="20" width="104" height="44" rx="6"/><rect x="252" y="20" width="104" height="44" rx="6"/><rect x="376" y="20" width="104" height="44" rx="6"/><rect x="500" y="20" width="104" height="44" rx="6"/><rect x="624" y="20" width="104" height="44" rx="6"/><rect x="748" y="20" width="104" height="44" rx="6"/>
+          <path d="M108 42H126M232 42H250M356 42H374M480 42H498M604 42H622M728 42H746" marker-end="url(#ar)"/>
+          <path d="M552 64V104H180V66" marker-end="url(#ar)" stroke-dasharray="4 3"/>
+        </g>
+        <g fill="currentColor" font-size="13" text-anchor="middle">
+          <text x="56" y="47">1 Reproduce</text><text x="180" y="47">2 Guess</text><text x="304" y="47">3 Breakpoint</text><text x="428" y="47">4 Inspect</text><text x="552" y="47">5 Step</text><text x="676" y="47">6 Fix</text><text x="800" y="47">7 Verify</text>
+          <text x="366" y="121" font-size="12">values did not match the guess → make a new guess</text>
+        </g>
+      </svg></div>
+      <figcaption>The loop. Most time is lost by skipping step 2: decide what you expect to see before you pause, so that the real value can prove you right or wrong.</figcaption>
+    </figure>
+  </div>
+
+  <div class="block">
+    <h3>Debugger simulator</h3>
+    <p><b>The bug:</b> a cart of 3 apples at ₹50 and 5 milk at ₹60 with a 10% discount should total ₹405. The program prints −4050. Click the gutter to place breakpoints, then run. Clicking the same gutter spot again changes its kind.</p>
+    <div class="ctl">
+      <label for="simIde" class="mono" style="color:var(--muted)">Show keys for</label>
+      <select id="simIde"><option value="vs">VS Code / Cursor</option><option value="jb">Android Studio / IntelliJ</option><option value="xc">Xcode</option><option value="ch">Chrome DevTools</option><option value="tm">Terminal (lldb / pdb)</option></select>
+    </div>
+    <div class="ctl" id="simCtl">
+      <button class="go" id="bRun">Start / Continue <kbd></kbd></button>
+      <button id="bOver">Step over <kbd></kbd></button>
+      <button id="bInto">Step into <kbd></kbd></button>
+      <button id="bOut">Step out <kbd></kbd></button>
+      <button id="bReset">Restart</button>
+    </div>
+    <div class="sim">
+      <div class="pane"><h4>cart.js · click left of a line number</h4><div class="src" id="simSrc"></div></div>
+      <div class="side">
+        <div class="pane"><h4>Variables</h4><div class="kv" id="simVars"></div></div>
+        <div class="pane"><h4>Call stack</h4><div class="kv" id="simStack"></div></div>
+        <div class="pane"><h4>Console</h4><div class="kv" id="simCon" aria-live="polite"></div></div>
+      </div>
+    </div>
+    <p style="color:var(--muted);font-size:14.5px"><span style="color:var(--bp)" class="mono">●</span> line breakpoint: always pauses &nbsp;·&nbsp; <span style="color:var(--bp)" class="mono">◐</span> conditional: pauses only when <code>sum &gt; 100</code> &nbsp;·&nbsp; <span style="color:var(--bp)" class="mono">◆</span> logpoint: prints <code>sum</code> and keeps running</p>
+    <h4>Missions</h4>
+    <ol class="tight">
+      <li>Put ● on line 10, press Start. Read <code>discountPct</code> in Variables. Step over once and read <code>discount</code>. What should line 10 have been?</li>
+      <li>Restart. Put ● on line 8 and press Step over, then Step into, at the same point. Watch the Call stack to see the difference.</li>
+      <li>While inside <code>lineTotal</code>, press Step out. Where do you land?</li>
+      <li>Change line 8 to ◐. Continue now skips the first pass through the loop. Why?</li>
+      <li>Change line 8 to ◆ and remove everything else. Press Start: the program never pauses, yet the console shows <code>sum</code> on each pass.</li>
+    </ol>
+  </div>
+
+  <div class="block">
+    <h3>The four step buttons</h3>
+    <div class="scroll"><table>
+      <tr><th>Button</th><th>What it does</th><th>Use when</th><th>VS Code / Cursor</th><th>Android Studio</th><th>Xcode</th><th>Chrome</th></tr>
+      <tr><td>Continue</td><td>Run until the next breakpoint</td><td>You have seen enough here</td><td><kbd>F5</kbd></td><td><kbd>⌥</kbd> <kbd>⌘</kbd> <kbd>R</kbd></td><td><kbd>⌃</kbd> <kbd>⌘</kbd> <kbd>Y</kbd></td><td><kbd>F8</kbd></td></tr>
+      <tr><td>Step over</td><td>Run this line, including any function it calls, stop on the next line</td><td>You trust the function being called</td><td><kbd>F10</kbd></td><td><kbd>F8</kbd></td><td><kbd>F6</kbd></td><td><kbd>F10</kbd></td></tr>
+      <tr><td>Step into</td><td>Go inside the function this line calls</td><td>You suspect that function</td><td><kbd>F11</kbd></td><td><kbd>F7</kbd></td><td><kbd>F7</kbd></td><td><kbd>F11</kbd></td></tr>
+      <tr><td>Step out</td><td>Finish this function, stop back in the caller</td><td>You stepped in too far</td><td><kbd>⇧</kbd> <kbd>F11</kbd></td><td><kbd>⇧</kbd> <kbd>F8</kbd></td><td><kbd>F8</kbd></td><td><kbd>⇧</kbd> <kbd>F11</kbd></td></tr>
+    </table></div>
+    <p class="note"><b>Careful: <kbd>F8</kbd> means three different things.</b> Step over in Android Studio, step out in Xcode, continue in Chrome.</p>
+  </div>
+
+  <div class="block">
+    <h3>Every kind of breakpoint, in every tool</h3>
+    <div class="scroll"><table>
+      <tr><th>Kind</th><th>Pauses when</th><th>VS Code / Cursor</th><th>Android Studio / IntelliJ</th><th>Xcode</th><th>Chrome DevTools</th></tr>
+      <tr><td><b>Line</b></td><td>Execution reaches the line</td><td>Click gutter or <kbd>F9</kbd></td><td>Click gutter or <kbd>⌘</kbd> <kbd>F8</kbd></td><td>Click gutter or <kbd>⌘</kbd> <kbd>\</kbd></td><td>Click the line number in Sources</td></tr>
+      <tr><td><b>Conditional</b></td><td>The line is reached and your expression is true</td><td>Right-click gutter → Add Conditional Breakpoint</td><td>Right-click the dot → Condition</td><td>Double-click → Condition</td><td>Right-click line number → Add conditional breakpoint</td></tr>
+      <tr><td><b>Logpoint</b></td><td>Never. Prints a message and continues</td><td>Right-click gutter → Add Logpoint, <code>{expr}</code></td><td><kbd>⇧</kbd> click gutter, or untick Suspend + "Evaluate and log"</td><td>Action → Log Message + Automatically continue</td><td>Right-click line number → Add logpoint</td></tr>
+      <tr><td><b>Hit count</b></td><td>After the line has been reached N times</td><td>Right-click → Hit Count</td><td>Dot → More → Pass count</td><td>Double-click → Ignore N times</td><td>Use a condition with your own counter</td></tr>
+      <tr><td><b>Exception</b></td><td>An error is thrown, at the line that throws</td><td>Breakpoints view: tick Uncaught / Caught Exceptions</td><td><kbd>⇧</kbd> <kbd>⌘</kbd> <kbd>F8</kbd> → + → Exception Breakpoints</td><td><kbd>⌘</kbd> <kbd>8</kbd> → + → Swift Error / Exception Breakpoint</td><td>Sources → Breakpoints: Pause on uncaught / caught exceptions</td></tr>
+      <tr><td><b>Function / symbolic</b></td><td>A named function starts, wherever it lives</td><td>Breakpoints view → + → Function Breakpoint</td><td>Click gutter on the method signature (slow; use sparingly)</td><td><kbd>⌘</kbd> <kbd>8</kbd> → + → Symbolic Breakpoint</td><td>Console: <code>debug(functionName)</code></td></tr>
+      <tr><td><b>Data / watchpoint</b></td><td>A value changes, whoever changes it</td><td>Variables → right-click → Break on Value Change (language-dependent)</td><td>Click gutter on a field declaration</td><td>Variables → right-click → Watch</td><td>Elements → right-click node → Break on (DOM changes)</td></tr>
+      <tr><td><b>Network</b></td><td>A request to a matching URL is sent</td><td>—</td><td>—</td><td>Symbolic on the networking call</td><td>Sources → XHR/fetch Breakpoints</td></tr>
+      <tr><td><b>Mute all</b></td><td>Keep them but ignore them for now</td><td>Breakpoints view → Toggle Activate</td><td>Mute Breakpoints in the Debug window</td><td><kbd>⌘</kbd> <kbd>Y</kbd></td><td><kbd>⌘</kbd> <kbd>F8</kbd></td></tr>
+    </table></div>
+  </div>
+
+  <div class="block">
+    <h3>Which one to reach for</h3>
+    <div class="scroll"><table>
+      <tr><th>Situation</th><th>Use</th></tr>
+      <tr><td>"What is the value here?"</td><td>Line breakpoint, read Variables</td></tr>
+      <tr><td>The line runs 500 times and only one pass is wrong</td><td>Conditional, e.g. <code>item.id == 4021</code></td></tr>
+      <tr><td>Pausing changes the behaviour (animations, timers, races)</td><td>Logpoint</td></tr>
+      <tr><td>You want a print but must not commit one</td><td>Logpoint</td></tr>
+      <tr><td>The app crashes and you do not know where</td><td>Exception breakpoint</td></tr>
+      <tr><td>"Who is changing this value?"</td><td>Watchpoint / data breakpoint</td></tr>
+      <tr><td>"Is this framework method even called?"</td><td>Symbolic / function breakpoint</td></tr>
+      <tr><td>"How did we get to this line?"</td><td>Any breakpoint, then read the call stack bottom to top</td></tr>
+    </table></div>
+  </div>
+
+  <div class="block">
+    <h3>Reading the paused screen</h3>
+    <ul class="tight">
+      <li><b>Call stack (Frames):</b> the top line is where you are; each line below is who called it. Click a lower frame to see that caller's variables at the moment it made the call.</li>
+      <li><b>Variables:</b> everything in scope. Values that just changed are highlighted.</li>
+      <li><b>Watch:</b> expressions you pin so they stay visible as you step, such as <code>items.length</code>.</li>
+      <li><b>Evaluate / console:</b> run any expression against the paused program. You can call functions and change values to test a fix before writing it.</li>
+      <li><b>Threads:</b> mobile apps have many. UI work must be on the main thread; the stack tells you which one you are on.</li>
+    </ul>
+    <p class="note red"><b>When a breakpoint is ignored.</b> Check, in order: you pressed Debug and not Run; breakpoints are not muted; the build is Debug, not Release; the running app was built from the code you are looking at; the debugger is attached to the right process (for BB Flutter that means Flutter Attach was waiting before the app started).</p>
+  </div>
+</section>
+
+<!-- ===================== WEB ===================== -->
+<section class="panel" id="p-web" data-tab="Browser DevTools" hidden>
+  <div class="block">
+    <h2>Chrome DevTools</h2>
+    <p>The debugger for anything that runs in a browser. Open it on any page with <kbd>⌘</kbd> <kbd>⌥</kbd> <kbd>I</kbd>. Safari and Firefox have the same panels under slightly different names.</p>
+    <figure>
+      <div class="scroll"><div class="win cd" role="img" aria-label="Chrome DevTools Sources panel layout">
+        <div class="rg" style="grid-area:tb"><span class="n">1</span>⬚ 📱 &nbsp; Elements · Console · <b>Sources</b> · Network · Performance · Application · Lighthouse</div>
+        <div class="rg" style="grid-area:ft"><span class="n">2</span><b>Page</b><span class="ln">▾ localhost:5173</span><span class="ln">&nbsp;&nbsp;▾ src</span><span class="ln">&nbsp;&nbsp;&nbsp;&nbsp;cart.js</span></div>
+        <div class="rg code" style="grid-area:ed"><span class="n">3</span><b>cart.js</b><span class="ln">&nbsp;&nbsp;&nbsp;8 &nbsp; sum += lineTotal(item)</span><span class="ln x"><span class="bpd" style="border-radius:2px;width:16px;background:var(--ink)"></span>10 &nbsp; const discount = sum * pct</span><span class="ln">&nbsp;&nbsp;11 &nbsp; return sum - discount</span></div>
+        <div class="rg" style="grid-area:dg"><span class="n">4</span>⏵ ⤼ ⤓ ⤒<span class="ln">▾ Watch</span><span class="ln">▾ Breakpoints</span><span class="ln">▾ Scope: sum 450</span><span class="ln">▾ Call Stack</span><span class="ln">▾ XHR/fetch</span><span class="ln">▾ DOM</span></div>
+        <div class="rg" style="grid-area:cs"><span class="n">5</span><b>Console</b> &nbsp; &gt; sum * pct / 100</div>
+      </div></div>
+      <figcaption>The Sources panel paused on line 10. Press <kbd>⎋</kbd> in any panel to open the Console drawer (5) underneath it.</figcaption>
+    </figure>
+    <ol class="legend">
+      <li>Panel tabs. The two icons on the left are "pick an element on the page" and "phone / tablet view".</li>
+      <li>File tree of everything the page loaded. <kbd>⌘</kbd> <kbd>P</kbd> opens a file by name.</li>
+      <li>Code view. Click a line number to set a breakpoint.</li>
+      <li>Debugger side: step buttons, Watch, Scope (the variables), Call Stack, and the special breakpoint lists.</li>
+      <li>Console: works against the paused scope, like the Debug Console in an IDE.</li>
+    </ol>
+  </div>
+  <div class="block">
+    <h3>Keys</h3>
+    <div class="scroll"><table>
+      <tr><th>Action</th><th>Keys</th><th>Action</th><th>Keys</th></tr>
+      <tr><td>Open DevTools</td><td><kbd>⌘</kbd> <kbd>⌥</kbd> <kbd>I</kbd></td><td>Open file by name</td><td><kbd>⌘</kbd> <kbd>P</kbd></td></tr>
+      <tr><td>Straight to Console</td><td><kbd>⌘</kbd> <kbd>⌥</kbd> <kbd>J</kbd></td><td>Run any DevTools command</td><td><kbd>⌘</kbd> <kbd>⇧</kbd> <kbd>P</kbd></td></tr>
+      <tr><td>Pick an element</td><td><kbd>⌘</kbd> <kbd>⇧</kbd> <kbd>C</kbd></td><td>Search all loaded files</td><td><kbd>⌘</kbd> <kbd>⌥</kbd> <kbd>F</kbd></td></tr>
+      <tr><td>Phone / tablet view</td><td><kbd>⌘</kbd> <kbd>⇧</kbd> <kbd>M</kbd></td><td>Hard reload, ignoring cache</td><td><kbd>⌘</kbd> <kbd>⇧</kbd> <kbd>R</kbd></td></tr>
+      <tr><td>Resume · over · into · out</td><td><kbd>F8</kbd> · <kbd>F10</kbd> · <kbd>F11</kbd> · <kbd>⇧</kbd> <kbd>F11</kbd></td><td>Toggle Console drawer</td><td><kbd>⎋</kbd></td></tr>
+    </table></div>
+  </div>
+  <div class="block">
+    <h3>Panel by panel</h3>
+    <ul class="tight">
+      <li><b>Elements:</b> the live page structure and its CSS. Edit a style and see it instantly; the Computed tab shows which rule won. Tick <code>:hov</code> to force hover or focus states.</li>
+      <li><b>Console:</b> <code>$0</code> is the element you last selected. <code>console.table(list)</code> prints a list as a table. <code>copy(obj)</code> puts it on the clipboard.</li>
+      <li><b>Sources:</b> all the breakpoint kinds from the Debugging tab. Writing <code>debugger;</code> in your code is a breakpoint that works even when you cannot find the file.</li>
+      <li><b>Network:</b> every request with status, timing, headers and response. Tick Preserve log to keep it across page loads, Disable cache while developing, and use the throttle dropdown to feel a slow phone connection. Right-click a request → Copy as cURL to replay it in the terminal.</li>
+      <li><b>Application:</b> cookies, localStorage, service workers. "Clear site data" resets everything.</li>
+      <li><b>Performance and Lighthouse:</b> record a slow interaction to see where the time went; Lighthouse scores load speed and accessibility.</li>
+    </ul>
+    <p class="note"><b>Debugging a front end from the editor.</b> VS Code and Cursor can drive Chrome: a <code>launch.json</code> entry with <code>"type": "chrome"</code> and your dev-server URL lets you set breakpoints in the editor for code running in the browser.</p>
+  </div>
+  <div class="block"><h3>Drills</h3><div class="drill" data-drill="web"></div></div>
+</section>
+
+<!-- ===================== POSTMAN ===================== -->
+<section class="panel" id="p-postman" data-tab="Postman" hidden>
+  <div class="block">
+    <h2>Postman</h2>
+    <p>The workbench for calling APIs by hand: build a request, read the response, save it, and run a whole set as a test. It is to backend work what the debugger is to code. You have Postman 12.36.</p>
+    <figure>
+      <div class="scroll"><div class="win pm" role="img" aria-label="Postman window layout">
+        <div class="rg" style="grid-area:tb"><span class="n">1</span>Home · <b>Workspaces</b> ▾ &nbsp;&nbsp; 🔍 Search &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Environment: <b>qa</b> ▾ &nbsp; ⚙</div>
+        <div class="rg" style="grid-area:sd"><span class="n">2</span><b>Items</b> · Services · History<span class="ln">▾ Collections</span><span class="ln">&nbsp;&nbsp;▾ Shop API</span><span class="ln">&nbsp;&nbsp;&nbsp;&nbsp;GET order</span><span class="ln">&nbsp;&nbsp;&nbsp;&nbsp;POST order</span><span class="ln">▸ Environments</span><span class="ln">▸ Flows</span></div>
+        <div class="rg" style="grid-area:rq"><span class="n">3</span><b>GET</b> ▾ &nbsp; {{baseUrl}}/orders/{{orderId}} &nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <b>Send</b> ▾ &nbsp; Save<span class="ln">Params · Authorization · Headers (7) · Body · Scripts · Settings</span><span class="ln">Key: include &nbsp;&nbsp; Value: items</span></div>
+        <div class="rg code" style="grid-area:rs"><span class="n">4</span><b>Body</b> · Cookies · Headers (9) · Test Results (2/2) &nbsp;&nbsp;&nbsp;&nbsp; <b>200 OK</b> · 84 ms · 1.2 KB<span class="ln">{</span><span class="ln">&nbsp;&nbsp;"id": 42,</span><span class="ln">&nbsp;&nbsp;"status": "PACKED",</span><span class="ln">&nbsp;&nbsp;"items": [ … ]</span><span class="ln">}</span></div>
+        <div class="rg" style="grid-area:cs"><span class="n">5</span><b>Console</b> &nbsp; ▸ GET https://qa.example.com/orders/42 &nbsp; 200 &nbsp; 84 ms &nbsp;|&nbsp; Globals · Vault · Tools (Runner, Cookies, Trash)</div>
+      </div></div>
+      <figcaption>One request in Postman. Text in double braces is a variable, filled in from the environment chosen at the top right.</figcaption>
+    </figure>
+    <ol class="legend">
+      <li>Header: workspace switcher, search, and the active environment.</li>
+      <li>Sidebar tabs in Postman 12: Items (Collections, Environments, Specs, Flows), Services, History of everything you sent, and Local Files.</li>
+      <li>Request builder: method, URL, Send, and tabs for query params, auth, headers, body and scripts.</li>
+      <li>Response: body with status, time and size; tabs for cookies, headers and test results.</li>
+      <li>Footer: the Console shows the exact request that left your machine, after variables were filled in. Globals, Vault and Tools (Runner, Cookies, Trash) also live here.</li>
+    </ol>
+  </div>
+  <div class="block">
+    <h3>Keys</h3>
+    <div class="scroll"><table>
+      <tr><th>Action</th><th>Keys</th><th>Action</th><th>Keys</th></tr>
+      <tr><td>Send request</td><td><kbd>⌘</kbd> <kbd>⏎</kbd></td><td>Open Console</td><td><kbd>⌥</kbd> <kbd>⌘</kbd> <kbd>C</kbd></td></tr>
+      <tr><td>Save</td><td><kbd>⌘</kbd> <kbd>S</kbd></td><td>Search everything</td><td><kbd>⌘</kbd> <kbd>K</kbd></td></tr>
+      <tr><td>New tab</td><td><kbd>⌘</kbd> <kbd>T</kbd></td><td>Show / hide sidebar</td><td><kbd>⌘</kbd> <kbd>\</kbd></td></tr>
+      <tr><td>Close tab</td><td><kbd>⌘</kbd> <kbd>W</kbd></td><td>Import (file, link, cURL)</td><td><kbd>⌘</kbd> <kbd>O</kbd></td></tr>
+      <tr><td>Tidy the JSON body</td><td><kbd>⌘</kbd> <kbd>B</kbd></td><td>Request and response side by side</td><td><kbd>⌥</kbd> <kbd>⌘</kbd> <kbd>V</kbd></td></tr>
+      <tr><td>All shortcuts</td><td><kbd>⌘</kbd> <kbd>/</kbd></td><td>Settings</td><td><kbd>⌘</kbd> <kbd>,</kbd></td></tr>
+      <tr><td>Jump to the URL box</td><td><kbd>⌘</kbd> <kbd>L</kbd></td><td>Command palette</td><td><kbd>⌘</kbd> <kbd>⇧</kbd> <kbd>P</kbd></td></tr>
+      <tr><td>Save request as</td><td><kbd>⌘</kbd> <kbd>⇧</kbd> <kbd>S</kbd></td><td>Send and download the response</td><td><kbd>⌥</kbd> <kbd>⌘</kbd> <kbd>⏎</kbd></td></tr>
+    </table></div>
+  </div>
+  <div class="block">
+    <h3>Variables: write a request once, run it anywhere</h3>
+    <div class="scroll"><table>
+      <tr><th>Scope</th><th>Lives in</th><th>Use for</th></tr>
+      <tr><td>Environment</td><td>The environment picked at top right (local, qa, prod)</td><td><code>baseUrl</code>, test user id: the things that differ per server</td></tr>
+      <tr><td>Collection</td><td>The collection's Variables tab</td><td>Values every request in that collection shares, such as an API version</td></tr>
+      <tr><td>Global</td><td>The workspace</td><td>Rarely; easy to lose track of</td></tr>
+      <tr><td>Local</td><td>Set by a script, gone after the run</td><td>A value passed from one request to the next</td></tr>
+      <tr><td>Vault</td><td>Your machine only, encrypted</td><td>Passwords and tokens: <code>{{vault:name}}</code></td></tr>
+    </table></div>
+    <p>When two scopes define the same name, the narrower one wins: local, then environment, then collection, then global. Hover a <code>{{variable}}</code> in the URL to see which value it resolved to.</p>
+    <p class="note red"><b>Tokens.</b> A variable's value syncs to the Postman cloud and to anyone in a shared workspace unless you mark it sensitive or keep it in the Vault. Put real tokens in the Vault, never in a collection you export or share.</p>
+  </div>
+  <div class="block">
+    <h3>Scripts: turning a request into a test</h3>
+    <p>The Scripts tab has two slots. <b>Pre-request</b> runs before sending; <b>Post-response</b> runs after and is where tests go. Both are JavaScript with a <code>pm</code> helper.</p>
+<pre><span class="c">// Post-response on "POST /login": check, then save the token for later requests</span>
+pm.test("status is 200", () =&gt; pm.response.to.have.status(200));
+const body = pm.response.json();
+pm.test("has a token", () =&gt; pm.expect(body.token).to.be.a("string"));
+pm.environment.set("token", body.token);
+
+<span class="c">// Pre-request anywhere: a fresh value on every send</span>
+pm.variables.set("requestId", crypto.randomUUID());
+console.log("sending with", pm.variables.get("requestId"));</pre>
+    <ul class="tight">
+      <li><b>Auth once, not per request:</b> set Authorization on the collection (Bearer <code>{{token}}</code>) and leave each request on "Inherit auth from parent".</li>
+      <li><b>Run them all:</b> right-click a collection → Run. Requests go in order, tests are counted, and a CSV or JSON data file repeats the run once per row.</li>
+      <li><b>From the terminal or CI:</b> the Postman CLI runs the same collection without the app.</li>
+    </ul>
+  </div>
+  <div class="block">
+    <h3>Debugging a request</h3>
+    <p>Postman has no breakpoints. Its debugger is the Console <kbd>⌥</kbd> <kbd>⌘</kbd> <kbd>C</kbd>, which shows the real URL, headers and body that were sent, plus every <code>console.log</code> from your scripts.</p>
+    <div class="scroll"><table>
+      <tr><th>You see</th><th>Check</th></tr>
+      <tr><td><code>{{baseUrl}}</code> in red, or the request goes to a literal "{{baseUrl}}"</td><td>No environment is selected, or the variable name is misspelt</td></tr>
+      <tr><td>401</td><td>Console → request headers: is Authorization there, and is the token current?</td></tr>
+      <tr><td>400 / 422</td><td>Body tab is on raw + JSON, and Content-Type is <code>application/json</code>; read the response body for the field name</td></tr>
+      <tr><td>404</td><td>The resolved URL in the Console: a doubled or missing <code>/</code>, or the wrong environment</td></tr>
+      <tr><td>Works in Postman, fails in the app</td><td>Compare the two requests header by header; use Code (the <code>&lt;/&gt;</code> button) to copy Postman's as cURL</td></tr>
+      <tr><td>Works in the app, fails in Postman</td><td>Copy the app's request as cURL (Chrome Network, or a proxy) and import it with <kbd>⌘</kbd> <kbd>O</kbd></td></tr>
+      <tr><td>"Could not get response"</td><td>Server not running, wrong port, VPN off, or a self-signed certificate (Settings → SSL verification, local servers only)</td></tr>
+    </table></div>
+  </div>
+  <div class="block">
+    <h3>Pro tricks</h3>
+    <ul class="tight">
+      <li>Paste a whole <code>curl …</code> command into the URL box; Postman turns it into a request.</li>
+      <li>Code in the right sidebar (the <code>&lt;/&gt;</code> icon) gives the request as cURL, Swift, Kotlin, Dart, Python or JavaScript code.</li>
+      <li>Save a response as an Example; a Mock Server can then return it, so the app can be built before the backend is ready.</li>
+      <li>Import an OpenAPI file to get a full collection with every endpoint.</li>
+      <li>Fork a shared collection before you experiment, so teammates' copy is untouched.</li>
+      <li>Claude and Cursor can read your Postman workspace through the Postman connector you already have set up.</li>
+    </ul>
+  </div>
+  <div class="block"><h3>Drills</h3><div class="drill" data-drill="postman"></div></div>
+</section>
+
+<!-- ===================== FINDER ===================== -->
+<section class="panel" id="p-keys" data-tab="Key finder" hidden>
+  <div class="block">
+    <h2>Key finder</h2>
+    <p>The same action in each IDE, side by side. Type what you want to do.</p>
+    <input type="search" id="q" placeholder="Try: rename, breakpoint, definition, split" aria-label="Filter actions">
+    <div data-keys="all" id="allKeys"></div>
+    <p style="color:var(--muted);font-size:14.5px">In Cursor, VS Code chords that begin <kbd>⌘</kbd> <kbd>K</kbd> begin <kbd>⌘</kbd> <kbd>R</kbd>. A dash means there is no default key; grey text tells you where to click.</p>
+  </div>
+</section>
+
+<!-- ===================== DRILLS ===================== -->
+<section class="panel" id="p-drills" data-tab="Practice" hidden>
+  <div class="block">
+    <h2>Practice board <span class="count" id="total"></span></h2>
+    <p>Reading keys does not build speed; doing them does. Tick a drill only after you did it without the mouse where the drill says so. Ticks are remembered in this browser.</p>
+    <div class="cols" id="allDrills"></div>
+  </div>
+</section>
+
+<!-- ===================== INTERVIEW ===================== -->
+<section class="panel" id="p-qa" data-tab="Interview Q&A" hidden>
+  <div class="block">
+    <h2>Interview Q&amp;A <span class="count" id="qaCount"></span></h2>
+    <p>Questions interviewers ask about tools and debugging, with answers short enough to say aloud. Try to answer before you open one.</p>
+    <div class="ctl">
+      <input type="search" id="qaq" placeholder="Try: breakpoint, LLDB, hot reload, 401" aria-label="Filter questions">
+      <select id="qac" aria-label="Category"></select>
+    </div>
+    <div id="qaList"></div>
+  </div>
+</section>
+</div>
+
+<script>
+const QA=[
+["Debugging","Walk me through how you debug a problem you have never seen before.","Reproduce it reliably first. Then state one guess about the cause and what value would prove it. Put a breakpoint or logpoint where that value is visible, compare what I see with what I expected, and narrow the area by halves. Fix the cause, not the symptom, then re-run the original steps and one nearby case to confirm nothing else broke."],
+["Debugging","When do you use a debugger and when do you use logs?","A debugger when I can reproduce the problem locally and need to explore values I did not think to print. Logs when pausing changes the behaviour (timing, animations, races), when the problem only happens on a user's device or in production, or when I need a history across many events."],
+["Debugging","What is the difference between step over, step into and step out?","Step over runs the current line, including any function it calls, and stops on the next line. Step into enters the function being called. Step out finishes the current function and stops in the caller. I step over code I trust and step into code I suspect."],
+["Debugging","What is a call stack and how do you read it?","The chain of function calls that led to the current line. The top frame is where execution is now; each frame below is its caller. I read downwards until I reach the first frame of my own code, and I click frames to see the variables each caller had."],
+["Debugging","A bug disappears when you attach the debugger. What does that tell you?","It depends on timing. Pausing or slowing one thread hides a race condition, or a debug build initialises memory differently from release. I switch to logpoints or plain logs with timestamps and thread names, and run a thread sanitizer if the platform has one."],
+["Debugging","How do you find a bug that appeared sometime in the last 200 commits?","git bisect. Mark a known good commit and a known bad one; Git checks out the middle, I test, and mark it good or bad. About eight rounds find the exact commit."],
+["Debugging","Why would a breakpoint not be hit?","The app was started with Run instead of Debug, breakpoints are muted, the build is release with optimisation, the running binary was built from older code, the debugger is attached to a different process, or the line genuinely never executes."],
+["Debugging","What is the difference between launch and attach?","Launch starts the program under the debugger. Attach connects the debugger to a process that is already running, which is needed when something else starts it: a native app hosting Flutter, a server in Docker, or a browser."],
+["Breakpoints","What is a conditional breakpoint and when is it worth using?","A breakpoint that pauses only when an expression is true, for example item.id == 4021. It is worth it when the line runs many times and only one pass is wrong. The condition is evaluated on every pass, so in a very hot loop it slows the program."],
+["Breakpoints","What is a logpoint?","A breakpoint that prints a message and continues without pausing. It gives me print debugging with no code change, nothing to remove afterwards and no rebuild. Xcode calls it a Log Message action with auto-continue; IntelliJ calls it a non-suspending breakpoint with Evaluate and log."],
+["Breakpoints","What is an exception breakpoint?","It pauses at the line that throws, before the stack unwinds, so I see the state that caused the error instead of the crash report afterwards. I keep one on for uncaught errors all the time and enable caught ones when an error is being swallowed."],
+["Breakpoints","What is a watchpoint or data breakpoint?","It pauses when a variable's value changes, whichever code changes it. I use it for the question 'who is modifying this?'. It is implemented with hardware support, so only a few can be active at once."],
+["Breakpoints","What is a symbolic breakpoint?","A breakpoint on a function name instead of a file and line. It works for code I have no source for, such as UIViewController viewDidAppear, and tells me whether and from where a framework method is called."],
+["Breakpoints","A breakpoint in a server pauses and every other request hangs. Why?","The breakpoint suspended all threads. Setting it to suspend only the current thread lets the rest of the server keep handling requests."],
+["Xcode / iOS","What is the difference between po, p and v in LLDB?","v reads the variable straight from memory without running code, so it is fastest and safest. p compiles and evaluates an expression and prints it with its type. po does the same and then calls the object's debug description, which is the most readable but runs the most code."],
+["Xcode / iOS","How do you find a retain cycle?","Reproduce the screen, dismiss it, then open the Memory Graph debugger. Objects that should be gone are still listed, and the graph shows the strong references keeping them alive. The fix is usually a weak or unowned capture in a closure or a weak delegate. Instruments Leaks confirms it over time."],
+["Xcode / iOS","A view is not visible on screen. How do you investigate?","Debug View Hierarchy. It shows every view in 3D with its frame, so I can see whether the view exists, has zero size, is off screen, is hidden or transparent, or is covered by another view. Then I check constraints in the size inspector."],
+["Xcode / iOS","How do you change behaviour while paused without rebuilding?","In the LLDB console, expr sets a variable or calls a method, for example expr view.backgroundColor = .red or expr isPremium = true, then continue. A breakpoint action can do the same automatically on every hit."],
+["Xcode / iOS","What do the sanitizers do?","Address Sanitizer catches memory errors such as use after free and buffer overflow. Thread Sanitizer catches data races. Main Thread Checker flags UI work done off the main thread. They are switched on in the scheme's Diagnostics tab and slow the app, so they are for debug runs."],
+["Xcode / iOS","What is a dSYM and why does it matter?","The file that maps addresses in a release binary back to function names and line numbers. Without the matching dSYM a crash report is only hexadecimal addresses; with it the report is symbolicated into a readable stack."],
+["Android Studio","How do you debug an app that is already running?","Run → Attach Debugger to Android Process and choose the process. No rebuild or reinstall is needed, and it works at any point, which helps for bugs that take a long setup to reach."],
+["Android Studio","What is Logcat and how do you filter it?","The device's combined log stream. I filter by package:mine to see only my app, by level:error for severity, and by tag: for a class. Crashes appear as a FATAL EXCEPTION block with the stack."],
+["Android Studio","What is an ANR and how do you investigate one?","Application Not Responding: the main thread was blocked for about five seconds. I look at the main thread's stack in the ANR trace or pause the debugger and read the main thread's frames. The usual cause is disk, network or a lock on the main thread."],
+["Android Studio","Gradle sync fails. What do you check?","The exact error in the Build window, then the Gradle version against the Android Gradle Plugin version, the JDK that Gradle is using, and whether a dependency could not be downloaded. Invalidating caches is the last step, not the first."],
+["Android Studio","What does the Layout Inspector show?","The live view or Compose tree of the running screen with each node's properties and bounds, and for Compose how many times each composable recomposed. I use it for wrong sizes, overlaps and unnecessary recomposition."],
+["Flutter","What is the difference between hot reload and hot restart?","Hot reload injects changed code into the running Dart VM and rebuilds widgets while keeping state. Hot restart reloads the code and starts the app again from main, losing state. Changes to initState, global variables or enum definitions need a restart."],
+["Flutter","How do you debug Dart code inside a native iOS or Android app?","Attach rather than run. I start flutter attach so it waits, launch the native app in debug from Xcode or Android Studio, and the attach session connects to the Dart VM. Dart breakpoints then stop in the Flutter IDE while native breakpoints stop in the native IDE."],
+["Flutter","A screen is janky. How do you find the cause?","Run a profile build on a real device and open DevTools Performance. Slow frames show whether the UI thread (build and layout in Dart) or the raster thread (painting) is over budget. For UI I track widget rebuilds and profile the CPU; for raster I look for large images, clipping, opacity layers and shader compilation."],
+["Flutter","How do you debug a RenderFlex overflow?","Select the widget in the Inspector and read the layout explorer: it shows the constraints the Row or Column received and the sizes its children asked for. The fix is usually Expanded or Flexible on the child that should shrink, or making the content scrollable."],
+["Flutter","Why measure performance in profile mode and not debug?","Debug mode runs with assertions and a JIT compiler and is several times slower than what users get. Profile mode is compiled like release but keeps the hooks DevTools needs, so its numbers are realistic."],
+["VS Code / Cursor","What is launch.json?","The file in .vscode that tells VS Code how to start or attach to a program for debugging: the debugger type, launch or attach, the program or port, arguments and environment variables. It is checked into the repo so the team shares the same setup."],
+["VS Code / Cursor","How do you work safely with an AI coding agent?","Give it a narrow task with the files named and a way to verify. Ask for a plan before edits on anything large. Read every diff before accepting it, run the tests myself, and keep changes in small commits so a bad turn is easy to undo. I never paste secrets, and I treat its output as a draft from a colleague."],
+["VS Code / Cursor","Where do you keep project conventions for an AI assistant?","In a rules file that the tool reads automatically, such as .cursor/rules or CLAUDE.md, checked into the repo. It holds build commands, patterns to copy and things never to touch, so they are not repeated in every prompt."],
+["VS Code / Cursor","What is the difference between user and workspace settings?","User settings apply to every project on my machine. Workspace settings live in the repo's .vscode folder, apply to that project only, are shared with the team and override user settings."],
+["Terminal","How do you find out what is using port 8080?","lsof -nP -iTCP:8080 -sTCP:LISTEN prints the process and its PID. Then kill PID asks it to stop, and kill -9 PID forces it if it does not."],
+["Terminal","What is the difference between | and > ?","A pipe sends one command's output into another command as its input. A redirect sends output to a file: > overwrites, >> appends. 2>&1 sends error output to the same place as normal output."],
+["Terminal","What is the difference between kill and kill -9?","kill sends SIGTERM, which asks the process to shut down and lets it clean up. kill -9 sends SIGKILL, which the process cannot catch, so it stops immediately without cleanup. I try the first before the second."],
+["Terminal","What does PATH do?","It is the list of folders the shell searches, in order, to find a program when I type its name. 'command not found' usually means the tool's folder is missing from PATH, and which name shows which copy would run."],
+["Web / API","An API call fails in the browser. Where do you look?","The Network panel. I check the status code, the request URL and headers, the request payload and the response body. A CORS error shows in the Console with the header that is missing. Copy as cURL lets me replay it outside the browser to separate a client problem from a server one."],
+["Web / API","What is the difference between 401 and 403?","401 means the server does not know who I am: the credentials are missing, expired or invalid. 403 means it knows who I am and I am not allowed to do this."],
+["Web / API","What are Postman environments for?","They hold the values that differ between servers, such as base URL and test account, so one saved request works against local, QA and production by switching a dropdown. Secrets belong in the vault or as sensitive values, not in a shared collection."],
+["Web / API","How do you test that an API still works after a change?","Tests on each request that assert status and the fields I depend on, grouped in a collection that runs in order: log in, save the token, create, read, clean up. The same collection runs from the command line in CI on every build."],
+["Backend","How do you debug a Spring Boot request?","Start the app in debug, put a thread-suspending breakpoint on the controller method, send the request and step from controller to service to repository. I evaluate repository calls while paused and turn on SQL logging to see the query that actually ran."],
+["Backend","How do you debug a service running in Docker or on a remote machine?","Start the JVM with the JDWP agent listening on a port, publish or forward that port, and connect from the IDE with a Remote JVM Debug configuration. The IDE needs the same source version as the running build."],
+["Backend","A query is slow. How do you investigate?","Run EXPLAIN (or EXPLAIN ANALYZE on a safe copy) and read the plan. I look for sequential scans on large tables, a missing index on the filter or join column, and row estimates that are far from the real counts. Then I check how often the app runs it, because many fast queries in a loop is the other common cause."],
+["Backend","What precautions do you take when connecting a tool to a production database?","A read-only user and a read-only connection, manual transactions so nothing commits by accident, a row limit on every exploratory query, and credentials kept in a secret store rather than a project file."]
+];
+/* ---------- key matrix: [group, action, VS Code, JetBrains, Xcode]; "~" = plain text ---------- */
+const K=[
+["Find and open","Run any command by name","⌘ ⇧ P","⌘ ⇧ A","⌘ ⇧ /"],
+["Find and open","Open file by name","⌘ P","⌘ ⇧ O","⌘ ⇧ O"],
+["Find and open","Search everything","⌘ P","⇧, ⇧","⌘ ⇧ O"],
+["Find and open","Go to class or symbol in project","⌘ T","⌘ O / ⌘ ⌥ O","⌘ ⇧ O"],
+["Find and open","Symbol in this file","⌘ ⇧ O","⌘ F12","⌃ 6"],
+["Find and open","Go to line","⌃ G","⌘ L","⌘ L"],
+["Find and open","Recent files","⌃ Tab","⌘ E","⌃ 2"],
+["Find and open","Find in project","⌘ ⇧ F","⌘ ⇧ F","⌘ ⇧ F"],
+["Find and open","Replace in project","⌘ ⇧ H","⌘ ⇧ R","⌘ ⇧ ⌥ F"],
+["Move through code","Go to definition","F12 / ⌘ click","⌘ B / ⌘ click","⌃ ⌘ J / ⌃ ⌘ click"],
+["Move through code","Peek definition without leaving","⌥ F12","⌥ Space","⌥ click"],
+["Move through code","Find usages / references","⇧ F12","⌥ F7","⌃ ⇧ ⌘ F"],
+["Move through code","Go to implementation","⌘ F12","⌘ ⌥ B","~jump bar ◇ Related Items"],
+["Move through code","Call hierarchy","⇧ ⌥ H","⌃ ⌥ H","⌃ ⇧ ⌘ H"],
+["Move through code","Go back / forward","⌃ - / ⌃ ⇧ -","⌘ [ / ⌘ ]","⌃ ⌘ ← / ⌃ ⌘ →"],
+["Move through code","Next error","F8","F2","⌘ '"],
+["Move through code","Show documentation","⌘ K, ⌘ I","F1","⌥ click"],
+["Edit","Quick fix / suggested actions","⌘ .","⌥ ⏎","⌘ ⇧ A"],
+["Edit","Rename symbol everywhere","F2","⇧ F6","~right-click → Refactor → Rename"],
+["Edit","Refactor menu (extract…)","⌃ ⇧ R","⌃ T","~right-click → Refactor"],
+["Edit","Extract method / variable","⌘ .","⌘ ⌥ M / ⌘ ⌥ V","~Refactor → Extract"],
+["Edit","Format / re-indent","⇧ ⌥ F","⌘ ⌥ L","⌃ I"],
+["Edit","Comment line","⌘ /","⌘ /","⌘ /"],
+["Edit","Move line up / down","⌥ ↑ / ⌥ ↓","⇧ ⌥ ↑ / ⇧ ⌥ ↓","⌘ ⌥ [ / ⌘ ⌥ ]"],
+["Edit","Duplicate line","⇧ ⌥ ↓","⌘ D","⌘ D"],
+["Edit","Delete line","⌘ ⇧ K","⌘ ⌫","⌃ ⇧ K"],
+["Edit","Select next occurrence (multi-cursor)","⌘ D","⌃ G","⌘ ⌥ E"],
+["Edit","Select all occurrences","⌘ ⇧ L","⌃ ⌘ G","⌃ ⌘ E"],
+["Edit","Add a cursor by clicking","⌥ click","⇧ ⌥ click","⌃ ⇧ click"],
+["Edit","Grow selection outward","⌃ ⇧ ⌘ →","⌥ ↑",""],
+["Edit","Fold / unfold","⌘ ⌥ [ / ⌘ ⌥ ]","⌘ - / ⌘ =","⌘ ⌥ ← / ⌘ ⌥ →"],
+["Window","Show / hide left side","⌘ B","⌘ 1","~toolbar ◧ button (⌘0 opens the Coding Assistant in Xcode 26)"],
+["Window","Show / hide bottom area","⌘ J","⇧ ⌘ F12","⌘ ⇧ Y"],
+["Window","Terminal","⌃ `","⌥ F12","~none built in"],
+["Window","Split editor","⌘ \\","~right-click tab → Split Right","⌃ ⌘ T"],
+["Window","Settings","⌘ ,","⌘ ,","⌘ ,"],
+["Window","List of all shortcuts","⌘ K, ⌘ S","~Settings → Keymap","~Settings → Key Bindings"],
+["Run and debug","Run without debugger","⌃ F5","⌃ R","~Edit Scheme → untick Debug executable"],
+["Run and debug","Run with debugger","F5","⌃ D","⌘ R"],
+["Run and debug","Stop","⇧ F5","⌘ F2","⌘ ."],
+["Run and debug","Build","⌘ ⇧ B","⌘ F9","⌘ B"],
+["Run and debug","Run tests","~Testing view ▶","⌃ ⇧ R","⌘ U"],
+["Run and debug","Toggle breakpoint on this line","F9","⌘ F8","⌘ \\"],
+["Run and debug","See all breakpoints","⌘ ⇧ D","⇧ ⌘ F8","⌘ 8"],
+["Run and debug","Continue","F5","⌥ ⌘ R","⌃ ⌘ Y"],
+["Run and debug","Step over","F10","F8","F6"],
+["Run and debug","Step into","F11","F7","F7"],
+["Run and debug","Step out","⇧ F11","⇧ F8","F8"],
+["Run and debug","Run to the cursor line","~right-click → Run to Cursor","⌥ F9","~hover gutter → Continue to here"],
+["Run and debug","Evaluate an expression","~Debug Console","⌥ F8","~console: po expression"],
+["Run and debug","Mute all breakpoints","~Breakpoints view toggle","~Mute button in Debug window","⌘ Y"],
+["Git","Source control view","⌃ ⇧ G","⌘ 9","⌘ 2"],
+["Git","Commit","~⌘ ⏎ in the message box","⌘ K","⌘ ⌥ C"],
+["Git","Push","~⋯ menu → Push","⇧ ⌘ K","~Integrate → Push"],
+["Git","Who changed this line","~GitLens extension","~right-click gutter → Annotate","⌃ ⇧ ⌘ A"]
+];
+const esc=s=>s.replace(/&/g,"&amp;").replace(/</g,"&lt;");
+function keys(s){
+  if(!s) return '<span class="then">—</span>';
+  if(s[0]==="~") return '<span class="txt" style="color:var(--muted);font-size:13.5px">'+esc(s.slice(1))+'</span>';
+  return s.split(" / ").map(alt=>alt.split(", ").map(ch=>ch.split(" ").map(k=>"<kbd>"+esc(k)+"</kbd>").join(" ")).join('<span class="then">then</span>')).join('<span class="or">/</span>');
+}
+const COL={vs:2,jb:3,xc:4};
+function tableFor(which,filter,cursor){
+  let h='<div class="scroll"><table>',g="";
+  h+= which==="all" ? "<tr><th>Action</th><th>VS Code / Cursor</th><th>Android Studio / IntelliJ</th><th>Xcode</th></tr>" : "<tr><th>Action</th><th>Keys</th></tr>";
+  let n=0;
+  for(const r of K){
+    if(filter && !(r[0]+" "+r[1]).toLowerCase().includes(filter)) continue;
+    if(r[0]!==g){g=r[0];h+='<tr class="grp"><td colspan="'+(which==="all"?4:2)+'">'+g+"</td></tr>";}
+    const fix=s=>cursor?s.replace(/⌘ K, /g,"⌘ R, "):s;
+    h+="<tr><td>"+r[1]+"</td>"+(which==="all"?"<td>"+keys(r[2])+"</td><td>"+keys(r[3])+"</td><td>"+keys(r[4])+"</td>":"<td>"+keys(fix(r[COL[which]]))+"</td>")+"</tr>";n++;
+  }
+  if(!n) h+='<tr><td colspan="4" class="txt">No action matches. Try a simpler word, such as "find" or "step".</td></tr>';
+  return h+"</table></div>";
+}
+document.querySelectorAll("[data-keys]").forEach(el=>{el.innerHTML=tableFor(el.dataset.keys,"",el.dataset.cursor);});
+document.getElementById("q").addEventListener("input",e=>{document.getElementById("allKeys").innerHTML=tableFor("all",e.target.value.trim().toLowerCase());});
+
+/* ---------- tabs ---------- */
+const panels=[...document.querySelectorAll("section.panel")], nav=document.getElementById("tabs");
+function show(id){panels.forEach(p=>p.hidden=p.id!==id);[...nav.children].forEach(b=>b.setAttribute("aria-selected",b.dataset.id===id));}
+panels.forEach(p=>{const b=document.createElement("button");b.textContent=p.dataset.tab;b.dataset.id=p.id;b.setAttribute("role","tab");b.onclick=()=>{show(p.id);history.replaceState(null,"","#"+p.id.slice(2));window.scrollTo({top:0});};nav.appendChild(b);});
+show(document.getElementById("p-"+location.hash.slice(1))?"p-"+location.hash.slice(1):"p-start");
+
+/* ---------- drills ---------- */
+const D={
+cursor:["Cursor","Open a project with `cursor .` from the terminal","Accept a Tab suggestion, then accept only one word of the next one","Select a function, add it to chat, and ask what it does in Ask mode","Use Plan mode for a two-file change and correct one step of the plan before it edits","Review an agent diff and undo one block while keeping the rest","Restore a checkpoint to undo a whole agent turn","Open the full shortcut list and find the key for inline edit in your version"],
+vscode:["VS Code","Open three files by name without the mouse","Jump to a function with symbol-in-file, then go to its definition and come back","Rename a variable with F2 and check every use changed","Put a cursor on five lines at once and edit them together","Create a launch.json and pause on a breakpoint in a small Node or Python script","Add a logpoint inside a loop and read its output in the Debug Console","Tick Uncaught Exceptions, throw an error on purpose, and see where it pauses"],
+studio:["Android Studio / IntelliJ","Open a class with search everywhere (double Shift)","Find all usages of one method and walk through them","Extract three lines into a new method with the refactor key","Start the debugger and pause on a line breakpoint; read the inline values","Add a condition to that breakpoint so it pauses on one item only","Make a non-suspending breakpoint that logs a value","Evaluate an expression while paused and call one of your own functions","Flutter: start Flutter Attach, run from Xcode, and hit a Dart breakpoint"],
+xcode:["Xcode","Open a file with Open Quickly and jump to a method with the jump bar","Use all nine navigators once with ⌘1 to ⌘9","Pause on a breakpoint and print a value with po, p and v","Change a value with expr while paused, then continue","Add a Swift Error or Exception breakpoint in the breakpoint navigator","Make a breakpoint that logs and auto-continues","Add a symbolic breakpoint on viewDidAppear and see who calls it in the stack","Open Debug View Hierarchy on a running screen and find one view"],
+terminal:["Terminal","Jump to the start and end of a long command, then delete one word backwards","Find an old command with ⌃R","List what is listening on your ports and identify one process","Follow a log with tail -f and stop it with ⌃C","Pipe a curl response into jq","Add one alias to ~/.zshrc and reload it","Pause a script in pdb or lldb and step through three lines"],
+idea:["IntelliJ: Spring & DB","Open shop-service and start it with the debug button","Pause on a controller breakpoint set to suspend only its thread, then send a request","Evaluate a repository or service call while paused","Add an exception breakpoint for one exception class and trigger it","Write a two-request .http file (or use curl) and run both","Start the jar with the JDWP line and connect with Remote JVM Debug","Add a data source, run a query with ⌘⏎, and open Explain Plan"],
+flutter:["Flutter DevTools","Open DevTools from a running or attached Flutter app","Use Select widget mode to find a widget from the device","Read a Row or Column's constraints in the layout explorer and change its alignment live","Turn on Highlight repaints and find something that repaints too often","Find one API call in the Network tab and read its response","Record a CPU profile of one slow action and name the top function","Add debugger(when: …) to code and hit it"],
+postman:["Postman","Create local and qa environments with a baseUrl variable and switch between them","Save a token from a login response into a variable with a script","Set auth on the collection and make requests inherit it","Write two tests on one request and see them pass","Run a collection with the Runner","Open the Console and read the exact headers that were sent","Import a cURL command, then export a request as cURL"],
+web:["Browser DevTools","Pick an element and change its colour live in Elements","Set a line breakpoint in Sources and read Scope","Add a logpoint and a conditional breakpoint","Turn on Pause on uncaught exceptions and trigger one","Find one API call in Network and copy it as cURL","Throttle the network to Slow 4G and reload","Add an XHR/fetch breakpoint for a URL fragment"]
+};
+let done={};try{done=JSON.parse(localStorage.getItem("ide-drills")||"{}");}catch(e){}
+function drillHTML(k,withTitle){const a=D[k];let h=withTitle?'<div class="block"><h3>'+a[0]+' <span class="count" data-c="'+k+'"></span></h3><div class="drill">':"";
+  a.slice(1).forEach((t,i)=>{const id=k+"-"+i;h+='<label><input type="checkbox" id="'+(withTitle?"b-":"t-")+id+'" data-d="'+id+'"'+(done[id]?" checked":"")+"><span>"+esc(t).replace(/`([^`]+)`/g,"<code>$1</code>")+"</span></label>";});
+  return h+(withTitle?"</div></div>":"");}
+document.querySelectorAll("[data-drill]").forEach(el=>el.innerHTML=drillHTML(el.dataset.drill,false));
+document.getElementById("allDrills").innerHTML=Object.keys(D).map(k=>drillHTML(k,true)).join("");
+function counts(){let t=0,n=0;for(const k in D){const m=D[k].length-1;let c=0;for(let i=0;i<m;i++)if(done[k+"-"+i])c++;t+=m;n+=c;const el=document.querySelector('[data-c="'+k+'"]');if(el)el.textContent=c+"/"+m;}document.getElementById("total").textContent=n+" / "+t+" done";}
+document.addEventListener("change",e=>{const d=e.target.dataset&&e.target.dataset.d;if(!d)return;done[d]=e.target.checked;document.querySelectorAll('[data-d="'+d+'"]').forEach(c=>c.checked=e.target.checked);try{localStorage.setItem("ide-drills",JSON.stringify(done));}catch(x){}counts();});
+counts();
+
+/* ---------- interview Q&A ---------- */
+(function(){const cats=[...new Set(QA.map(q=>q[0]))],sel=document.getElementById("qac"),inp=document.getElementById("qaq");
+  sel.innerHTML='<option value="">All categories</option>'+cats.map(c=>"<option>"+esc(c)+"</option>").join("");
+  function draw(){const f=inp.value.trim().toLowerCase(),c=sel.value;const rows=QA.filter(q=>(!c||q[0]===c)&&(!f||(q[1]+" "+q[2]).toLowerCase().includes(f)));
+    document.getElementById("qaList").innerHTML=rows.length?rows.map(q=>'<details class="qa"><summary>'+esc(q[1])+"<small>"+esc(q[0])+"</small></summary><p>"+esc(q[2])+"</p></details>").join(""):'<p style="color:var(--muted)">No question matches. Try a shorter word.</p>';
+    document.getElementById("qaCount").textContent=rows.length+" of "+QA.length;}
+  inp.addEventListener("input",draw);sel.addEventListener("change",draw);draw();})();
+
+/* ---------- debugger simulator ---------- */
+const SRC=["function lineTotal(item) {","  return item.price * item.qty;","}","","function cartTotal(items, discountPct) {","  let sum = 0;","  for (const item of items) {","    sum += lineTotal(item);","  }","  const discount = sum * discountPct;","  return sum - discount;","}","","const total = cartTotal(cart, 10);","console.log(total);  // expected 405"];
+const A="{apple, price 50, qty 3}",M="{milk, price 60, qty 5}",C="[apple ×3, milk ×5]";
+const S1=["cartTotal","(top level)"],S2=["lineTotal","cartTotal","(top level)"];
+const TR=[
+{l:14,d:0,st:["(top level)"],v:{cart:C}},
+{l:6,d:1,st:S1,v:{items:C,discountPct:10}},
+{l:7,d:1,st:S1,v:{items:C,discountPct:10,sum:0}},
+{l:8,d:1,st:S1,v:{items:C,discountPct:10,sum:0,item:A}},
+{l:2,d:2,st:S2,v:{item:A}},
+{l:7,d:1,st:S1,v:{items:C,discountPct:10,sum:150,item:A}},
+{l:8,d:1,st:S1,v:{items:C,discountPct:10,sum:150,item:M}},
+{l:2,d:2,st:S2,v:{item:M}},
+{l:7,d:1,st:S1,v:{items:C,discountPct:10,sum:450,item:M}},
+{l:10,d:1,st:S1,v:{items:C,discountPct:10,sum:450}},
+{l:11,d:1,st:S1,v:{items:C,discountPct:10,sum:450,discount:4500}},
+{l:15,d:0,st:["(top level)"],v:{cart:C,total:-4050}}
+];
+const KEYS={vs:["F5","F10","F11","⇧F11"],jb:["⌥⌘R","F8","F7","⇧F8"],xc:["⌃⌘Y","F6","F7","F8"],ch:["F8","F10","F11","⇧F11"],tm:["c","n","s","finish / r"]};
+const bp={};let pos=-1,prev={},log=[];
+const $=id=>document.getElementById(id);
+const GL={bp:"●",cond:"◐",log:"◆"},NAME={bp:"line breakpoint",cond:"conditional breakpoint, sum > 100",log:"logpoint"};
+function stops(i){const k=bp[TR[i].l];if(k==="log"){log.push("[logpoint] line "+TR[i].l+": sum = "+(TR[i].v.sum===undefined?"undefined":TR[i].v.sum));return false;}
+  if(k==="bp")return true;if(k==="cond")return TR[i].v.sum>100;return false;}
+function finish(){pos=TR.length;log.push("-4050");log.push("Program finished. Press Restart to run again.");}
+function advance(test){ // move forward until a breakpoint stops us or test(step) is true
+  if(pos>=TR.length)return;const from=pos<0?null:TR[pos];prev=from?from.v:{};
+  for(let i=pos+1;i<TR.length;i++){const hit=stops(i);if(hit||(from&&test&&test(TR[i],from))){pos=i;return render();}}
+  finish();render();}
+$("bRun").onclick=()=>advance(null);
+$("bOver").onclick=()=>advance((s,f)=>s.d<=f.d);
+$("bInto").onclick=()=>advance(()=>true);
+$("bOut").onclick=()=>advance((s,f)=>s.d<f.d);
+$("bReset").onclick=()=>{pos=-1;prev={};log=[];render();};
+function render(){
+  const src=$("simSrc");src.innerHTML="";const cur=pos>=0&&pos<TR.length?TR[pos]:null;
+  SRC.forEach((t,i)=>{const n=i+1,row=document.createElement("div");row.className="sl"+(cur&&cur.l===n?" cur":"");
+    const g=document.createElement("button");g.className="g";g.textContent=bp[n]?GL[bp[n]]:"";g.setAttribute("aria-label","Line "+n+": "+(bp[n]?NAME[bp[n]]:"no breakpoint")+". Click to change.");
+    g.onclick=()=>{const o=[undefined,"bp","cond","log"];const nx=o[(o.indexOf(bp[n])+1)%4];if(nx)bp[n]=nx;else delete bp[n];render();};
+    if(!t.trim()||t.trim()==="}")g.disabled=true,g.style.cursor="default";
+    const no=document.createElement("span");no.className="no";no.textContent=n;const c=document.createElement("span");c.textContent=t;
+    row.append(g,no,c);src.appendChild(row);});
+  const paused=!!cur;$("bOver").disabled=$("bInto").disabled=$("bOut").disabled=!paused;$("bRun").disabled=pos>=TR.length;
+  $("simVars").innerHTML=cur?Object.keys(cur.v).map(k=>{const ch=pos>0&&String(prev[k])!==String(cur.v[k]);return "<span>"+k+" = <span"+(ch?' class="chg"':"")+">"+esc(String(cur.v[k]))+"</span></span>";}).join(""):'<span class="dim">'+(pos<0?"Not running. Set a breakpoint, then press Start.":"Program ended.")+"</span>";
+  $("simStack").innerHTML=cur?cur.st.map((f,i)=>"<span"+(i?' class="dim"':"")+">"+(i?"&nbsp;&nbsp;":"▸ ")+f+(i?"":" : line "+cur.l)+"</span>").join(""):'<span class="dim">—</span>';
+  $("simCon").innerHTML=log.length?log.map(x=>"<span>"+esc(x)+"</span>").join(""):'<span class="dim">Output appears here.</span>';
+}
+function labels(){const k=KEYS[$("simIde").value];["bRun","bOver","bInto","bOut"].forEach((id,i)=>$(id).querySelector("kbd").textContent=k[i]);}
+$("simIde").onchange=labels;labels();render();
+</script>
+
+</body></html>

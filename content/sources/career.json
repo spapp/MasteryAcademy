@@ -1,0 +1,1897 @@
+{
+ "modules": [
+  {
+   "id": "career-guide",
+   "title": "Mobile engineering playbook",
+   "summary": "",
+   "tag": "",
+   "lessons": [
+    {
+     "id": "career-the-three-roles-at-a-glance",
+     "title": "The three roles at a glance",
+     "minutes": 3,
+     "level": 0,
+     "blocks": [
+      {
+       "type": "text",
+       "text": "The job changes from writing the best code to making the best decisions, and then to making other people's decisions better."
+      },
+      {
+       "type": "table",
+       "headers": [
+        "",
+        "Senior Software Engineer",
+        "Tech Lead",
+        "Principal Engineer",
+        "Engineering Manager"
+       ],
+       "rows": [
+        [
+         "Scope",
+         "A feature or module",
+         "One team and its roadmap (4–8 engineers)",
+         "All of mobile, plus the backend and platform contracts it depends on",
+         "One or more teams, then the whole mobile org (8–40+ people)"
+        ],
+        [
+         "Accountable for",
+         "Quality and delivery of your own work",
+         "The team's delivery, quality and technical health",
+         "Technical direction, architecture and engineering standards",
+         "People, hiring, performance, delivery commitments and team structure"
+        ],
+        [
+         "Time horizon",
+         "Sprint to quarter",
+         "Quarter to half-year",
+         "One to three years",
+         "Quarter to two years, plus each person's career"
+        ],
+        [
+         "Hands-on coding",
+         "80–90%",
+         "40–60%",
+         "20–40%, mostly prototypes, critical paths and reviews",
+         "0–20%, never on the critical path"
+        ],
+        [
+         "Main output",
+         "Code, reviews",
+         "Plans, design decisions, unblocked engineers",
+         "Strategy docs, RFCs, cross-team alignment",
+         "Strong teams, hires, promotions, plans that are met"
+        ],
+        [
+         "Authority",
+         "Expertise",
+         "Technical ownership of a team",
+         "Persuasion without authority",
+         "Formal: reporting line, ratings, headcount"
+        ],
+        [
+         "Success looks like",
+         "Features ship well",
+         "The team ships predictably without heroics",
+         "The org ships faster and safer because of choices you drove",
+         "The org delivers, people grow and stay, and leaders trust your commitments"
+        ]
+       ]
+      },
+      {
+       "type": "text",
+       "text": "Principal Engineer and Engineering Manager are parallel tracks in most ladders, not rungs of one ladder. PE is the senior individual-contributor path; EM is the people-management path. Moving from PE to EM is a change of job, usually at the same level. Confirm your company's own ladder document with your manager: titles and expectations differ between companies."
+      }
+     ],
+     "quiz": []
+    },
+    {
+     "id": "career-sse-to-tech-lead-what-to-start-doing-now",
+     "title": "SSE to Tech Lead: what to start doing now",
+     "minutes": 3,
+     "level": 0,
+     "blocks": [
+      {
+       "type": "text",
+       "text": "You get the TL role by doing the TL job on a small scale before the title arrives. Ask your manager directly what gap they see between you and TL, and get it in writing."
+      },
+      {
+       "type": "text",
+       "text": "**Take ownership of an outcome, not a ticket**"
+      },
+      {
+       "type": "list",
+       "ordered": false,
+       "items": [
+        "Volunteer to lead one multi-sprint project end to end: scoping, design doc, task breakdown, risk tracking, release and post-launch metrics.",
+        "Own one area fully, for example checkout and payments, so that product and QA come to you first.",
+        "Report status before anyone asks. A weekly three-line update (done, next, risks) builds more trust than any single feature."
+       ]
+      },
+      {
+       "type": "text",
+       "text": "**Make other engineers faster**"
+      },
+      {
+       "type": "list",
+       "ordered": false,
+       "items": [
+        "Review code for design and risk, and explain the reasoning so the author learns.",
+        "Mentor one or two engineers with a regular 1:1 and a concrete growth goal for each.",
+        "Write down what only you know: onboarding notes, architecture overview, method-channel conventions between Flutter and native iOS."
+       ]
+      },
+      {
+       "type": "text",
+       "text": "**Think in trade-offs**"
+      },
+      {
+       "type": "list",
+       "ordered": false,
+       "items": [
+        "Write a design doc for every non-trivial change: problem, options considered, decision, risks, rollout and rollback.",
+        "Estimate with ranges and state assumptions. Flag slippage early with a proposed fix.",
+        "Learn the business numbers your features move: conversion, order value, crash-free sessions, app start time."
+       ]
+      },
+      {
+       "type": "text",
+       "text": "**Evidence to collect for the promotion case**"
+      },
+      {
+       "type": "table",
+       "headers": [
+        "Evidence",
+        "Example"
+       ],
+       "rows": [
+        [
+         "Led a project with other engineers",
+         "Three-person feature delivered on the planned date with a staged rollout"
+        ],
+        [
+         "Technical decision you drove",
+         "Design doc adopted by the team, with the measured result"
+        ],
+        [
+         "People you grew",
+         "An engineer who now owns a module independently"
+        ],
+        [
+         "Quality or speed you improved",
+         "Crash rate, build time or release cycle before and after"
+        ],
+        [
+         "Cross-functional trust",
+         "Feedback from product, design, QA and backend partners"
+        ]
+       ]
+      }
+     ],
+     "quiz": []
+    },
+    {
+     "id": "career-running-a-mobile-team-as-tech-lead",
+     "title": "Running a mobile team as Tech Lead",
+     "minutes": 3,
+     "level": 0,
+     "blocks": [
+      {
+       "type": "text",
+       "text": "A Tech Lead's week has four jobs: keep delivery predictable, keep the codebase healthy, grow the people, and protect release quality."
+      },
+      {
+       "type": "text",
+       "text": "**Delivery**"
+      },
+      {
+       "type": "list",
+       "ordered": false,
+       "items": [
+        "Break every project into milestones of two weeks or less, each with something demonstrable.",
+        "Keep a visible risk list with an owner and a date for each item.",
+        "Put new behaviour behind feature flags and remote config so that a release never depends on one unfinished feature.",
+        "Reserve 15–20% of each sprint for tech debt and tooling, agreed with product in advance."
+       ]
+      },
+      {
+       "type": "text",
+       "text": "**Technical health**"
+      },
+      {
+       "type": "list",
+       "ordered": false,
+       "items": [
+        "Set the team's conventions once and automate them: lint rules, state management pattern, module boundaries, PR template.",
+        "Record significant decisions as short Architecture Decision Records so that the reasoning survives team changes.",
+        "Delegate design work on purpose. Your job is to review designs, not to write all of them."
+       ]
+      },
+      {
+       "type": "text",
+       "text": "**People**"
+      },
+      {
+       "type": "list",
+       "ordered": false,
+       "items": [
+        "Hold a 1:1 with each engineer every one to two weeks. Cover blockers, growth and feedback in both directions.",
+        "Match work to growth: give stretch tasks with a safety net, and avoid giving the hardest work to yourself.",
+        "Give feedback within a few days, specific to one behaviour and its effect.",
+        "Take part in hiring: interview, calibrate, and own onboarding for new joiners."
+       ]
+      },
+      {
+       "type": "text",
+       "text": "**Release quality**"
+      },
+      {
+       "type": "list",
+       "ordered": false,
+       "items": [
+        "Own the release train: fixed cadence, branch cut, regression, staged rollout (for example 1% → 10% → 50% → 100%), and clear halt criteria.",
+        "Watch crash-free rate, ANRs, app start time and key funnel conversion for each release before widening the rollout.",
+        "Run a blameless review after every production incident and track the actions to closure."
+       ]
+      }
+     ],
+     "quiz": []
+    },
+    {
+     "id": "career-tech-lead-to-principal-engineer-org-wide-leverag",
+     "title": "Tech Lead to Principal Engineer: org-wide leverage",
+     "minutes": 3,
+     "level": 0,
+     "blocks": [
+      {
+       "type": "text",
+       "text": "A Principal Engineer is judged on problems solved across teams that no single team would have solved alone. A strong TL who only makes one team excellent stays a TL."
+      },
+      {
+       "type": "text",
+       "text": "**Find the org-level problems**"
+      },
+      {
+       "type": "list",
+       "ordered": false,
+       "items": [
+        "Look for pain that repeats in several teams: slow builds, flaky tests, duplicated UI components, inconsistent networking and caching, painful Flutter–native bridging, release delays.",
+        "Rank them by cost to the business, in engineer-hours lost, incidents or revenue at risk.",
+        "Pick one or two. Depth on a few large problems counts more than a long list of small fixes."
+       ]
+      },
+      {
+       "type": "text",
+       "text": "**Set direction in writing**"
+      },
+      {
+       "type": "list",
+       "ordered": false,
+       "items": [
+        "Write a mobile technical strategy of two to four pages: where the apps are today, the main problems, the target state in 12–24 months, and the order of work.",
+        "Run an RFC process so that decisions that affect several teams get reviewed by those teams.",
+        "Take clear positions on the questions that keep returning: Flutter versus native for a given surface, modularisation, design system ownership, server-driven UI, offline behaviour."
+       ]
+      },
+      {
+       "type": "text",
+       "text": "**Influence without authority**"
+      },
+      {
+       "type": "list",
+       "ordered": false,
+       "items": [
+        "Meet each mobile lead and the backend, QA, design and product heads regularly. Know their top two problems.",
+        "Build agreement one conversation at a time before the review meeting.",
+        "Sponsor other engineers to lead parts of your initiatives. Their growth is part of your result."
+       ]
+      },
+      {
+       "type": "text",
+       "text": "**Stay technical**"
+      },
+      {
+       "type": "list",
+       "ordered": false,
+       "items": [
+        "Keep writing code on the hardest and riskiest parts: proofs of concept, performance investigations, migration tooling.",
+        "Lead the response to the worst incidents and the deep investigations that follow.",
+        "Track platform changes early: new iOS and Android releases, Flutter stable releases, store policy changes, and what they cost the org."
+       ]
+      },
+      {
+       "type": "text",
+       "text": "**Business sense**"
+      },
+      {
+       "type": "list",
+       "ordered": false,
+       "items": [
+        "Tie every proposal to a business measure: conversion, retention, order frequency, delivery cost or engineering cost.",
+        "Present options with cost, benefit and risk so that leadership can choose."
+       ]
+      }
+     ],
+     "quiz": []
+    },
+    {
+     "id": "career-principal-engineer-to-engineering-manager-the-tr",
+     "title": "Principal Engineer to Engineering Manager: the track change",
+     "minutes": 3,
+     "level": 0,
+     "blocks": [
+      {
+       "type": "text",
+       "text": "Moving to EM means giving up technical ownership in exchange for responsibility for people. It is a new job that you start as a beginner, and your PE-level credibility is what makes the team accept you in it."
+      },
+      {
+       "type": "text",
+       "text": "**Two routes to EM**"
+      },
+      {
+       "type": "table",
+       "headers": [
+        "Route",
+        "Typical time from SSE",
+        "Strength",
+        "Risk"
+       ],
+       "rows": [
+        [
+         "SSE → TL → EM",
+         "2–4 years",
+         "Fastest; most EM openings are filled this way",
+         "Less technical depth; harder to lead senior engineers and argue architecture"
+        ],
+        [
+         "SSE → TL → PE → EM",
+         "4–6 years",
+         "Deep credibility; you can manage PEs and own technical strategy as a senior EM or head of mobile",
+         "Longer; PE roles are few; you must unlearn solving problems yourself"
+        ]
+       ]
+      },
+      {
+       "type": "text",
+       "text": "Both are valid. If EM is the fixed goal, tell your manager now so that people-management opportunities come to you during the TL years, whichever route you take."
+      },
+      {
+       "type": "text",
+       "text": "**What changes**"
+      },
+      {
+       "type": "table",
+       "headers": [
+        "As PE",
+        "As EM"
+       ],
+       "rows": [
+        [
+         "You make or shape the technical decision",
+         "You make sure a good decision gets made, by the right owner"
+        ],
+        [
+         "Success is visible in designs and systems",
+         "Success is visible in other people's results, months later"
+        ],
+        [
+         "Long blocks of focus time",
+         "A calendar of 1:1s, reviews, planning and hiring"
+        ],
+        [
+         "You can say what you think of a design",
+         "Your opinion carries rating power, so you speak last"
+        ],
+        [
+         "Peers are other senior engineers",
+         "Peers are other managers, product heads and HR partners"
+        ]
+       ]
+      },
+      {
+       "type": "text",
+       "text": "**Test before you commit**"
+      },
+      {
+       "type": "list",
+       "ordered": true,
+       "items": [
+        "Manage two to four people for at least two review cycles while still TL or PE.",
+        "Run a full hiring loop: write the job description, screen, interview, debrief, close the offer.",
+        "Handle one hard people situation with your manager's coaching: underperformance, a conflict or a resignation.",
+        "Shadow your manager in planning, calibration and headcount discussions.",
+        "Ask yourself after six months whether a day with no code and a solved people problem felt like a good day. If not, PE is the better destination."
+       ]
+      },
+      {
+       "type": "text",
+       "text": "**First 90 days as EM**"
+      },
+      {
+       "type": "list",
+       "ordered": false,
+       "items": [
+        "Days 1–30: listen. Hold a long 1:1 with every report. Ask what is working, what is broken and what they want from their career. Change nothing large.",
+        "Days 31–60: name a technical owner (TL or PE) for everything you used to own. Fix two or three small things people asked for. Share your operating rhythm in writing.",
+        "Days 61–90: publish team goals for the next two quarters, a hiring plan, and a growth plan for each person."
+       ]
+      }
+     ],
+     "quiz": []
+    },
+    {
+     "id": "career-running-the-mobile-org-as-engineering-manager",
+     "title": "Running the mobile org as Engineering Manager",
+     "minutes": 3,
+     "level": 0,
+     "blocks": [
+      {
+       "type": "text",
+       "text": "An EM's output is the output of the organisation. The work falls into seven areas."
+      },
+      {
+       "type": "text",
+       "text": "**1. People and 1:1s**"
+      },
+      {
+       "type": "list",
+       "ordered": false,
+       "items": [
+        "Hold a 30–45 minute 1:1 with every direct report weekly or fortnightly. Their agenda comes first.",
+        "Keep a private note per person: goals, feedback given, commitments made, signs of low morale.",
+        "Agree a written growth plan with each person every half-year: target level, two or three gaps, the projects that will close them.",
+        "Keep direct reports to about five to eight. Above that, add a lead layer."
+       ]
+      },
+      {
+       "type": "text",
+       "text": "**2. Performance**"
+      },
+      {
+       "type": "list",
+       "ordered": false,
+       "items": [
+        "Set expectations in writing against the ladder at the start of each cycle.",
+        "Give feedback continuously so that the review contains no surprises.",
+        "Prepare for calibration with evidence: scope, results, peer feedback, comparison with the level definition.",
+        "Act on underperformance within weeks: name the gap, agree a dated improvement plan, review weekly, involve HR early.",
+        "Build promotion cases six months ahead and find the missing evidence with the person."
+       ]
+      },
+      {
+       "type": "text",
+       "text": "**3. Hiring and retention**"
+      },
+      {
+       "type": "list",
+       "ordered": false,
+       "items": [
+        "Own the headcount plan: which roles, which levels, which quarter, and the justification.",
+        "Design a consistent loop: coding, mobile system design, platform depth (Flutter, iOS or Android), and a values and collaboration round.",
+        "Train interviewers and hold a debrief with written feedback submitted before discussion.",
+        "Run a 30-60-90 day onboarding plan with a buddy and a first production change in week one.",
+        "Watch retention signals: stalled growth, pay gaps, repeated on-call load, loss of a close colleague. Hold stay conversations before exit conversations."
+       ]
+      },
+      {
+       "type": "text",
+       "text": "**4. Delivery and planning**"
+      },
+      {
+       "type": "list",
+       "ordered": false,
+       "items": [
+        "Run quarterly planning with product: capacity, committed items, stretch items, and a tech-investment share of 15–25%.",
+        "Track commitments made against commitments met, and explain misses with causes.",
+        "Manage dependencies with backend, design, QA and other mobile teams in a single visible plan.",
+        "Protect the team from mid-sprint changes; route new requests through a known intake."
+       ]
+      },
+      {
+       "type": "text",
+       "text": "**5. Org design**"
+      },
+      {
+       "type": "list",
+       "ordered": false,
+       "items": [
+        "Shape teams around business areas (for example discovery, cart and checkout, payments, orders and delivery) with a platform team for shared code.",
+        "Give each team a TL, a clear charter and named module ownership.",
+        "Decide where Flutter, iOS and Android specialists sit, and how native expertise is shared.",
+        "Plan succession: every lead, including you, has a named person being prepared."
+       ]
+      },
+      {
+       "type": "text",
+       "text": "**6. Technical stewardship**"
+      },
+      {
+       "type": "list",
+       "ordered": false,
+       "items": [
+        "Stay able to read designs, ask the hard question and judge risk. You do not need to be the best engineer.",
+        "Pair with your PE or senior TLs: they own the technical strategy, you fund it and remove obstacles.",
+        "Review operational health monthly: crashes, incidents, release cadence, tech-debt list."
+       ]
+      },
+      {
+       "type": "text",
+       "text": "**7. Managing up and across**"
+      },
+      {
+       "type": "list",
+       "ordered": false,
+       "items": [
+        "Send leadership a short monthly report: delivery, quality, people, risks, requests.",
+        "Bring options with a recommendation, never a bare problem.",
+        "Build working relationships with product, design, QA, backend, data and HR heads.",
+        "Represent mobile in budget discussions: tooling, device labs, CI capacity, vendor SDK costs."
+       ]
+      },
+      {
+       "type": "text",
+       "text": "**EM pitfalls**"
+      },
+      {
+       "type": "list",
+       "ordered": false,
+       "items": [
+        "Continuing to act as the TL and taking critical-path code.",
+        "Becoming a message relay with no opinion of your own.",
+        "Avoiding the underperformance conversation until the team loses trust.",
+        "Hiring in a hurry and lowering the bar.",
+        "Promising dates to leadership without the team's estimate."
+       ]
+      }
+     ],
+     "quiz": []
+    },
+    {
+     "id": "career-handling-the-lead-role-situations-at-each-level",
+     "title": "Handling the lead role: situations at each level",
+     "minutes": 4,
+     "level": 0,
+     "blocks": [
+      {
+       "type": "text",
+       "text": "The same situation calls for a different response at each level: the TL acts inside the team, the PE acts through the leads, and the EM acts on people and structure."
+      },
+      {
+       "type": "text",
+       "text": "**The first months as a new TL**"
+      },
+      {
+       "type": "list",
+       "ordered": false,
+       "items": [
+        "You are now leading former peers. Say openly what changes (you decide priorities and technical direction) and what does not (you still code and still take review comments).",
+        "Ask each engineer what they want from a lead and what frustrates them today.",
+        "Earn authority through fairness and consistency: the same review standard for everyone, including yourself.",
+        "Delegate real ownership within the first month. Hand over a module, state the outcome you expect, and let the owner choose the approach.",
+        "Decide how decisions are made: discuss openly, then you decide if there is no agreement, and everyone commits."
+       ]
+      },
+      {
+       "type": "text",
+       "text": "**Situations and responses**"
+      },
+      {
+       "type": "table",
+       "headers": [
+        "Situation",
+        "As Tech Lead",
+        "As Principal Engineer",
+        "As Engineering Manager"
+       ],
+       "rows": [
+        [
+         "Two engineers disagree on a design",
+         "Ask each for a short written comparison against agreed criteria; decide within days; record the decision",
+         "Step in only if it affects several teams; supply the principle or standard that settles it",
+         "Stay out of the technical choice; act if the disagreement becomes personal"
+        ],
+        [
+         "A project is going to miss its date",
+         "Raise it at once with options: cut scope, add time, or phase the release",
+         "Check whether the cause is systemic (architecture, dependency, tooling) and fix that",
+         "Renegotiate the commitment with product and leadership; shield the team from blame"
+        ],
+        [
+         "A senior engineer resists your direction",
+         "Listen for the valid point; adopt it if it is right; otherwise explain the reasoning and ask for commitment",
+         "Convince with data and a prototype; you have no authority to rely on",
+         "Treat persistent refusal as a performance topic in 1:1s"
+        ],
+        [
+         "An engineer is underperforming",
+         "Give specific feedback, pair, reduce task size; tell the EM early with examples",
+         "Offer mentoring if the gap is technical; give honest input to the EM",
+         "Own it: expectations, improvement plan, weekly review, outcome"
+        ],
+        [
+         "Product pushes a risky shortcut",
+         "State the risk and its cost; offer a safer option with a date; record the debt if overruled",
+         "Set the rule for what may never be shortcut: payments, data loss, security",
+         "Back the TL; escalate if risk acceptance is above the team's authority"
+        ],
+        [
+         "Too many meetings, no coding time",
+         "Block focus hours; delegate meetings to engineers as growth opportunities",
+         "Choose the few forums where your presence changes the outcome",
+         "Fix the meeting load for the whole team"
+        ],
+        [
+         "A strong engineer wants to leave",
+         "Tell the EM at once; find out the real reason",
+         "Offer a harder technical problem or mentorship",
+         "Hold a stay conversation; act on growth, scope or pay where you can"
+        ],
+        [
+         "A new joiner arrives",
+         "Assign a buddy, a starter task and a first production change in week one",
+         "Give the architecture overview session",
+         "Own the 30-60-90 plan and check in at each mark"
+        ]
+       ]
+      },
+      {
+       "type": "text",
+       "text": "**How a PE works with Tech Leads**"
+      },
+      {
+       "type": "list",
+       "ordered": false,
+       "items": [
+        "Treat TLs as your primary customers. Your standards succeed only if TLs adopt them.",
+        "Hold a monthly mobile leads forum: review RFCs, share incidents, agree standards.",
+        "Coach TLs on design and on writing; review their design docs early, before positions harden.",
+        "Let the TL decide inside the team. Intervene only on cross-team impact or serious risk, and explain why."
+       ]
+      },
+      {
+       "type": "text",
+       "text": "**How an EM manages Tech Leads**"
+      },
+      {
+       "type": "list",
+       "ordered": false,
+       "items": [
+        "Agree the split in writing: the TL owns how the work is built; the EM owns who, when and why.",
+        "Give TLs context from leadership early so that they can plan.",
+        "Review each TL on team outcomes: delivery, quality, growth of their engineers.",
+        "Coach first-time TLs on delegation and feedback, the two skills they most often lack.",
+        "Never overrule a TL in front of their team. Disagree in private."
+       ]
+      }
+     ],
+     "quiz": []
+    },
+    {
+     "id": "career-the-mobile-organisation-in-the-bigger-picture",
+     "title": "The mobile organisation in the bigger picture",
+     "minutes": 3,
+     "level": 0,
+     "blocks": [
+      {
+       "type": "text",
+       "text": "A mobile org at scale rests on eight pillars. As TL you run them for one team; as PE you set the standard for all teams and find the weakest one."
+      },
+      {
+       "type": "table",
+       "headers": [
+        "Pillar",
+        "What good looks like",
+        "Measure to track"
+       ],
+       "rows": [
+        [
+         "Architecture",
+         "Modular codebase with clear feature boundaries; teams can work without colliding; a defined Flutter–native boundary",
+         "Build time, module coupling, merge conflicts per week"
+        ],
+        [
+         "Platform and shared code",
+         "A small platform group owns networking, analytics, design system, navigation and the app shell",
+         "Number of teams reusing shared modules, duplicated components removed"
+        ],
+        [
+         "CI/CD and developer experience",
+         "Every PR is built and tested automatically; signing and store upload are scripted",
+         "PR-to-merge time, CI duration, flaky test rate"
+        ],
+        [
+         "Release management",
+         "Fixed release train, staged rollouts, feature flags, a tested rollback and hotfix path",
+         "Release frequency, hotfixes per release, lead time from merge to production"
+        ],
+        [
+         "Quality",
+         "Test pyramid with unit, widget and a small end-to-end suite on critical flows; device coverage for the real user base",
+         "Crash-free users and sessions, ANR rate, escaped defects"
+        ],
+        [
+         "Performance",
+         "Budgets for app start, frame rendering, app size and network use, checked in CI",
+         "Cold start time, slow and frozen frames, app download size"
+        ],
+        [
+         "Observability",
+         "Crash reporting, performance monitoring, structured logs and funnel analytics, with alerts and an on-call owner",
+         "Time to detect and time to resolve incidents"
+        ],
+        [
+         "Security and compliance",
+         "Secure storage, certificate handling, payment SDK hygiene, privacy and store policy compliance, dependency updates",
+         "Open vulnerabilities, outdated dependencies, store rejections"
+        ]
+       ]
+      },
+      {
+       "type": "text",
+       "text": "Three cross-cutting concerns sit on top of the pillars:"
+      },
+      {
+       "type": "list",
+       "ordered": false,
+       "items": [
+        "**Team shape.** Feature teams aligned to business areas, supported by a platform team. Decide who owns each module and write it down.",
+        "**Contracts with backend.** API versioning, backward compatibility for old app versions, and a forced-upgrade policy. Old app versions stay in users' hands for months.",
+        "**Cost of low-end devices and poor networks.** A large share of Indian users are on budget Android phones and variable connectivity. Design and test for them first."
+       ]
+      }
+     ],
+     "quiz": []
+    },
+    {
+     "id": "career-technical-depth-to-master",
+     "title": "Technical depth to master",
+     "minutes": 3,
+     "level": 0,
+     "blocks": [
+      {
+       "type": "text",
+       "text": "A TL needs working depth in every area below for one app; a PE needs to set the standard in each and be the expert in two or three; an EM needs enough to judge risk and ask the right question."
+      },
+      {
+       "type": "table",
+       "headers": [
+        "Area",
+        "What to know"
+       ],
+       "rows": [
+        [
+         "App architecture",
+         "Layering (presentation, domain, data); feature modules and package boundaries; dependency injection; unidirectional state (BLoC, Riverpod, or MVVM and TCA on iOS); navigation and deep-link routing as a shared service"
+        ],
+        [
+         "Flutter internals",
+         "Widget, element and render trees; build, layout and paint phases; isolates and the event loop; platform channels, Pigeon and FFI; Impeller rendering; add-to-app and multiple engines"
+        ],
+        [
+         "iOS native",
+         "Swift concurrency, UIKit and SwiftUI lifecycle, memory management and retain cycles, background execution limits, App Store review rules, signing and provisioning"
+        ],
+        [
+         "Android native",
+         "Activity and process lifecycle, coroutines, Gradle build variants, ANR causes, background limits, vendor-specific behaviour on budget devices"
+        ],
+        [
+         "Hybrid boundaries",
+         "Which screens are Flutter and which are native, and why; one contract for channels; shared session, analytics and navigation across both sides"
+        ],
+        [
+         "Networking and data",
+         "API client with retries, timeouts and idempotency; caching layers; pagination; offline queue and sync; local storage choice and schema migration"
+        ],
+        [
+         "Backend contracts",
+         "API versioning, backward compatibility with old app versions, backend-for-frontend, server-driven UI for fast-changing surfaces, forced and soft upgrade"
+        ],
+        [
+         "Design system",
+         "Token-based theming, shared component library, accessibility, localisation, one owner and a contribution process"
+        ],
+        [
+         "Performance",
+         "Cold and warm start, frame budget (16 ms at 60 Hz), jank sources, image decoding and caching, list virtualisation, memory limits, app size and deferred loading"
+        ],
+        [
+         "Reliability",
+         "Crash and non-fatal reporting, feature flags and kill switches, graceful degradation when a service fails, payment and order idempotency"
+        ],
+        [
+         "Testing",
+         "Unit, widget and golden tests; integration tests on critical flows; contract tests with backend; device farm coverage; flaky test quarantine"
+        ],
+        [
+         "CI/CD",
+         "Reproducible builds, caching, parallel test shards, automated signing, Fastlane or equivalent, automated store upload, build-time tracking"
+        ],
+        [
+         "Security and privacy",
+         "Keychain and Keystore, certificate pinning trade-offs, obfuscation, jailbreak and root handling, third-party SDK review, data minimisation, consent"
+        ],
+        [
+         "Experimentation and analytics",
+         "Event schema with ownership, A/B test framework, guardrail metrics, attribution and deep-link analytics"
+        ],
+        [
+         "System design beyond mobile",
+         "Service architecture, queues, caches, databases, CDNs and consistency, enough to design end to end with backend teams"
+        ]
+       ]
+      },
+      {
+       "type": "text",
+       "text": "**How to build the depth**"
+      },
+      {
+       "type": "list",
+       "ordered": false,
+       "items": [
+        "Pick one area per quarter. Read the primary documentation, build a small proof, and present it to the team.",
+        "Take the incidents nobody understands. Root-causing them teaches more than feature work.",
+        "Read other teams' design docs and code, including backend.",
+        "Write one internal technical article per quarter. Explaining exposes the gaps."
+       ]
+      }
+     ],
+     "quiz": []
+    },
+    {
+     "id": "career-release-process-in-detail",
+     "title": "Release process in detail",
+     "minutes": 3,
+     "level": 0,
+     "blocks": [
+      {
+       "type": "text",
+       "text": "A fixed release train with objective gates removes most release-day stress. The cadence below is a common pattern for a weekly or fortnightly train; adjust the days to your own."
+      },
+      {
+       "type": "list",
+       "ordered": true,
+       "items": [
+        "**Continuous merge.** Features merge to main behind flags, off by default. Main is always releasable.",
+        "**Branch cut.** On a fixed day, cut the release branch. Anything not merged waits for the next train. No exceptions for features.",
+        "**Stabilisation.** Only fixes for regressions enter the branch, each approved by the release owner and merged to main first.",
+        "**Regression.** Automated suite plus manual passes on critical flows: login, search, cart, checkout, payment, order tracking.",
+        "**Internal and beta.** Distribute to employees and a beta group for at least one to two days.",
+        "**Submission.** Submit to App Store and Play with release notes and phased release enabled.",
+        "**Staged rollout.** Widen in steps such as 1% → 5% → 20% → 50% → 100%, holding at each step long enough to gather meaningful data.",
+        "**Flag ramp.** Turn new features on by percentage, separately from the binary rollout.",
+        "**Close.** Tag the release, record the metrics, and note anything to improve."
+       ]
+      },
+      {
+       "type": "text",
+       "text": "**Gates for widening the rollout**"
+      },
+      {
+       "type": "table",
+       "headers": [
+        "Check",
+        "Halt when"
+       ],
+       "rows": [
+        [
+         "Crash-free users and sessions",
+         "Below the previous release by more than the agreed margin"
+        ],
+        [
+         "ANR rate (Android)",
+         "Above the previous release or approaching the store's bad-behaviour threshold"
+        ],
+        [
+         "App start time",
+         "Regression beyond the performance budget"
+        ],
+        [
+         "Checkout and payment success",
+         "Any statistically clear drop"
+        ],
+        [
+         "API error rate from the new version",
+         "Above baseline"
+        ],
+        [
+         "Support tickets and store reviews",
+         "A new repeated complaint"
+        ]
+       ]
+      },
+      {
+       "type": "text",
+       "text": "**Release roles**"
+      },
+      {
+       "type": "list",
+       "ordered": false,
+       "items": [
+        "Release owner: rotates among engineers each train; runs the checklist and decides on gates.",
+        "TL: approves cherry-picks and accepts the risk for the team's features.",
+        "PE: owns the process design, the tooling and the gate definitions for all teams.",
+        "EM: makes sure the rotation is staffed and fair, and that the train is respected by product."
+       ]
+      },
+      {
+       "type": "text",
+       "text": "**Things specific to mobile**"
+      },
+      {
+       "type": "list",
+       "ordered": false,
+       "items": [
+        "You cannot roll back a binary. Protection comes from flags, kill switches, server-side config and a fast hotfix path.",
+        "Store review adds delay. Keep an expedited-review request ready for emergencies on iOS.",
+        "Old versions live for months. Backend changes must keep supporting them or trigger a forced upgrade."
+       ]
+      }
+     ],
+     "quiz": []
+    },
+    {
+     "id": "career-critical-bug-fix-playbook",
+     "title": "Critical bug fix playbook",
+     "minutes": 3,
+     "level": 0,
+     "blocks": [
+      {
+       "type": "text",
+       "text": "In a production incident the order is fixed: stop the damage first, find the cause second, prevent the repeat third. Most incidents go badly because people start debugging before they mitigate."
+      },
+      {
+       "type": "text",
+       "text": "**Severity levels**"
+      },
+      {
+       "type": "table",
+       "headers": [
+        "Level",
+        "Meaning",
+        "Example",
+        "Response"
+       ],
+       "rows": [
+        [
+         "SEV1",
+         "Users cannot order or pay, data loss, security breach, or crash on launch for many users",
+         "Checkout fails on the new version",
+         "Immediate, all hours; incident commander named; leadership informed"
+        ],
+        [
+         "SEV2",
+         "A major feature is broken or a large segment is affected, with a workaround",
+         "One payment method fails; offers not applied",
+         "Same day; fix or mitigation within hours"
+        ],
+        [
+         "SEV3",
+         "Limited impact or cosmetic on a key screen",
+         "Wrong label on one device type",
+         "Next planned release"
+        ]
+       ]
+      },
+      {
+       "type": "text",
+       "text": "**The steps**"
+      },
+      {
+       "type": "list",
+       "ordered": true,
+       "items": [
+        "**Detect and confirm.** Check the alert against a second source: crash dashboard, funnel metrics, support tickets, your own device.",
+        "**Declare.** Assign a severity, open one incident channel, name one incident commander. One person decides.",
+        "**Measure the blast radius.** Which app versions, OS versions, devices, cities, user segments, and since when.",
+        "**Mitigate.** Use the fastest safe lever, in this order: turn off the feature flag, change remote config, roll back the backend change, halt the staged rollout, then a hotfix build.",
+        "**Communicate.** Post updates at a fixed interval, for example every 30 minutes for SEV1: impact, current action, next update time. Brief support with a customer message.",
+        "**Find the cause.** Ask what changed: app release, flag, config, backend deploy, third-party SDK, OS update, certificate expiry. Reproduce it.",
+        "**Fix.** Make the smallest change that removes the cause. Two reviewers. Add a test that fails without the fix.",
+        "**Verify.** Test on the affected devices and versions, plus regression on the surrounding flow.",
+        "**Ship the hotfix.** Branch from the release tag, not from main. Request expedited review on iOS. Roll out in stages even under pressure. Consider a forced upgrade if the broken version is dangerous.",
+        "**Monitor.** Watch the same metrics until they return to baseline, and confirm in the channel.",
+        "**Review.** Within about five working days hold a blameless review: timeline, cause, what slowed detection or mitigation, actions with owners and dates.",
+        "**Prevent.** Close the actions: a test, an alert, a flag, a checklist item or a design change."
+       ]
+      },
+      {
+       "type": "text",
+       "text": "**Rules under pressure**"
+      },
+      {
+       "type": "list",
+       "ordered": false,
+       "items": [
+        "Do not refactor in a hotfix.",
+        "Do not skip review or staged rollout. A bad hotfix is a second incident.",
+        "Keep people out of the channel who are not needed, and keep debugging talk in a separate thread.",
+        "Write the timeline as you go. Memory is unreliable after the event.",
+        "Merge the fix to main the same day so that the next release does not reintroduce the bug."
+       ]
+      },
+      {
+       "type": "text",
+       "text": "**Roles by level**"
+      },
+      {
+       "type": "table",
+       "headers": [
+        "",
+        "Tech Lead",
+        "Principal Engineer",
+        "Engineering Manager"
+       ],
+       "rows": [
+        [
+         "During the incident",
+         "Incident commander for the team's area; decides the mitigation; assigns one engineer to mitigate and one to investigate",
+         "Joins SEV1s and cross-team incidents; leads diagnosis when the cause spans app, backend and SDKs; challenges risky fixes",
+         "Handles communication to leadership, product and support; gets people and approvals; protects the engineers from interruptions"
+        ],
+        [
+         "Hands on",
+         "Often debugging and reviewing the fix",
+         "Debugging the hardest part",
+         "Not in the code"
+        ],
+        [
+         "After",
+         "Writes the incident review; closes team actions",
+         "Finds the pattern across incidents; changes architecture, tooling or standards to remove the class of bug",
+         "Makes sure actions are staffed and finished; fixes on-call load and process gaps; reports to leadership"
+        ],
+        [
+         "Measured on",
+         "Time to mitigate; no repeat in the team",
+         "Fewer incidents of the same class across the org",
+         "Incident trend, action closure rate, team sustainability"
+        ]
+       ]
+      }
+     ],
+     "quiz": []
+    },
+    {
+     "id": "career-debugging-skill",
+     "title": "Debugging skill",
+     "minutes": 4,
+     "level": 0,
+     "blocks": [
+      {
+       "type": "text",
+       "text": "Debugging is a method: form a hypothesis, design the cheapest test that could disprove it, and narrow the search by half each time. Senior engineers are faster because they follow the method, and because they have seen more failure patterns."
+      },
+      {
+       "type": "text",
+       "text": "**The method**"
+      },
+      {
+       "type": "list",
+       "ordered": true,
+       "items": [
+        "**State the problem precisely.** Expected result, actual result, who is affected, since when.",
+        "**Reproduce it.** Same app version, OS, device class, account state, network condition and flag values. If you cannot reproduce, add logging and narrow from production data.",
+        "**Ask what changed.** Releases, flags, config, backend deploys, SDK versions, OS updates.",
+        "**Bisect.** Halve the search space each step: by commit with `git bisect`, by flag, by layer (UI, state, repository, network, backend), by device or version.",
+        "**Read the evidence before the code.** Full stack trace, breadcrumbs, logs, network trace, the exact request and response.",
+        "**One hypothesis, one change.** Write the hypothesis down, predict the result, test, record the outcome.",
+        "**Find the root cause.** Ask why until you reach something you can change so that the bug cannot return.",
+        "**Fix, then prove it.** A test that fails before and passes after; check the same pattern elsewhere in the code.",
+        "**Share it.** A short note on the cause and how you found it trains the whole team."
+       ]
+      },
+      {
+       "type": "text",
+       "text": "**Mobile toolkit**"
+      },
+      {
+       "type": "table",
+       "headers": [
+        "Need",
+        "Flutter",
+        "iOS",
+        "Android"
+       ],
+       "rows": [
+        [
+         "Step and inspect",
+         "Dart DevTools debugger, widget inspector",
+         "Xcode debugger, LLDB, view hierarchy debugger",
+         "Android Studio debugger, Layout Inspector"
+        ],
+        [
+         "Performance",
+         "DevTools performance and CPU profiler, frame timeline",
+         "Instruments: Time Profiler, Hangs, App Launch",
+         "Android Studio Profiler, Perfetto, Macrobenchmark"
+        ],
+        [
+         "Memory",
+         "DevTools memory view",
+         "Instruments: Allocations and Leaks, memory graph",
+         "Memory Profiler, LeakCanary"
+        ],
+        [
+         "Network",
+         "DevTools network view, proxy tools",
+         "Proxy tools, network link conditioner",
+         "Network Inspector, proxy tools"
+        ],
+        [
+         "Production crashes",
+         "Crash reporting with symbol files uploaded for Dart obfuscation",
+         "dSYM symbolication, crash organiser, MetricKit",
+         "Mapping files, Play vitals, ANR traces"
+        ],
+        [
+         "Device logs",
+         "`flutter logs`",
+         "Console app, `os_log`",
+         "`adb logcat`"
+        ]
+       ]
+      },
+      {
+       "type": "text",
+       "text": "**Hard bug classes and where to look**"
+      },
+      {
+       "type": "table",
+       "headers": [
+        "Symptom",
+        "Likely causes",
+        "Approach"
+       ],
+       "rows": [
+        [
+         "Crash only in production",
+         "Obfuscation or release-mode differences, missing symbol files, real data shapes, low memory",
+         "Symbolicate; build in release or profile mode; replay the real payload"
+        ],
+        [
+         "Only on some devices",
+         "OS version, vendor customisation, screen size, low RAM, locale or font scale",
+         "Group crashes by device and OS; borrow or rent the device"
+        ],
+        [
+         "Intermittent",
+         "Race conditions, async ordering, lifecycle timing, network timing",
+         "Add timestamps and IDs to logs; force delays and slow networks; stress the sequence"
+        ],
+        [
+         "Jank and slow screens",
+         "Heavy work on the UI thread, excessive rebuilds, large images, layout passes",
+         "Profile in profile mode on a low-end device; never judge performance in debug mode"
+        ],
+        [
+         "Memory growth",
+         "Leaked listeners, controllers or streams not disposed, retain cycles, image caches",
+         "Take heap snapshots before and after repeating the flow; compare retained objects"
+        ],
+        [
+         "Wrong state after resume",
+         "Process death, lifecycle not handled, stale cache",
+         "Kill the app in the background and restore; test with \"don't keep activities\""
+        ],
+        [
+         "Flutter–native boundary",
+         "Channel called before engine ready, wrong thread, type mismatch, missing handler",
+         "Log both sides with a shared request ID; check ordering at start-up"
+        ],
+        [
+         "Payment or order inconsistency",
+         "Retries without idempotency, callback lost when app is killed, timeout treated as failure",
+         "Trace one transaction end to end across app, SDK and backend"
+        ],
+        [
+         "Works on Wi-Fi, fails on mobile data",
+         "Timeouts, payload size, DNS, captive networks",
+         "Throttle the network; test on real carrier connections"
+        ]
+       ]
+      },
+      {
+       "type": "text",
+       "text": "**Debugging at each level**"
+      },
+      {
+       "type": "table",
+       "headers": [
+        "",
+        "Tech Lead",
+        "Principal Engineer",
+        "Engineering Manager"
+       ],
+       "rows": [
+        [
+         "Your own role",
+         "Solve the team's hard bugs, but coach before you take over",
+         "Solve bugs that cross app, SDK, OS and backend; own the cases nobody else can crack",
+         "Rarely debug code; diagnose the system: why this class of bug keeps escaping"
+        ],
+        [
+         "What you build",
+         "Team habits: logging conventions, reproducible bug reports, a debugging checklist",
+         "Org tooling: tracing across app and backend, symbolication pipeline, performance dashboards, debug menus",
+         "Time and budget for tooling; a culture where incident reviews are blameless"
+        ],
+        [
+         "How you teach",
+         "Pair-debug and narrate your reasoning; ask for the hypothesis before the fix",
+         "Run debugging clinics and write up notable investigations",
+         "Reward root-cause work in reviews, not only feature delivery"
+        ],
+        [
+         "Question you ask",
+         "What is your hypothesis and how will you test it?",
+         "Why was this bug possible in our architecture?",
+         "What in our process let this reach users, and who owns fixing that?"
+        ]
+       ]
+      }
+     ],
+     "quiz": []
+    },
+    {
+     "id": "career-metrics-scorecard",
+     "title": "Metrics scorecard",
+     "minutes": 3,
+     "level": 0,
+     "blocks": [
+      {
+       "type": "text",
+       "text": "Review these monthly. The targets are common starting points; measure your own baseline first and set targets from it."
+      },
+      {
+       "type": "table",
+       "headers": [
+        "Group",
+        "Metric",
+        "Starting target",
+        "Owner"
+       ],
+       "rows": [
+        [
+         "Stability",
+         "Crash-free users",
+         "99.5% or higher",
+         "TL"
+        ],
+        [
+         "Stability",
+         "Crash-free sessions",
+         "99.9% or higher",
+         "TL"
+        ],
+        [
+         "Stability",
+         "ANR rate (Android)",
+         "Well under the Play bad-behaviour threshold shown in Play Console",
+         "TL"
+        ],
+        [
+         "Performance",
+         "Cold start to first usable screen",
+         "Under 2 seconds on a mid-range device",
+         "TL, PE"
+        ],
+        [
+         "Performance",
+         "Slow and frozen frames",
+         "Downward trend each quarter",
+         "TL, PE"
+        ],
+        [
+         "Performance",
+         "App download size",
+         "Fixed budget; any increase needs approval",
+         "PE"
+        ],
+        [
+         "Business",
+         "Checkout and payment success rate",
+         "No release may lower it",
+         "TL, EM"
+        ],
+        [
+         "Business",
+         "Store rating and review themes",
+         "4.5 or higher; top complaints tracked",
+         "EM"
+        ],
+        [
+         "Delivery",
+         "Release frequency",
+         "Weekly or fortnightly, on schedule",
+         "TL"
+        ],
+        [
+         "Delivery",
+         "Lead time from merge to production",
+         "Under two weeks",
+         "PE"
+        ],
+        [
+         "Delivery",
+         "Hotfixes per release",
+         "Fewer than one in five releases",
+         "TL"
+        ],
+        [
+         "Delivery",
+         "Commitments met per quarter",
+         "80% or higher",
+         "EM"
+        ],
+        [
+         "Developer experience",
+         "CI time per PR",
+         "Under 15–20 minutes",
+         "PE"
+        ],
+        [
+         "Developer experience",
+         "Clean and incremental build time",
+         "Tracked, with a quarterly reduction goal",
+         "PE"
+        ],
+        [
+         "Developer experience",
+         "Flaky test rate",
+         "Under 1–2% of runs",
+         "PE"
+        ],
+        [
+         "Developer experience",
+         "PR review turnaround",
+         "Under one working day",
+         "TL"
+        ],
+        [
+         "Incidents",
+         "Time to detect and time to mitigate SEV1",
+         "Minutes to detect; under one hour to mitigate",
+         "TL, PE"
+        ],
+        [
+         "Incidents",
+         "Review actions closed on time",
+         "90% or higher",
+         "EM"
+        ],
+        [
+         "People",
+         "Regretted attrition",
+         "Tracked each quarter with reasons",
+         "EM"
+        ],
+        [
+         "People",
+         "Time to hire and offer acceptance",
+         "Tracked per role",
+         "EM"
+        ],
+        [
+         "People",
+         "Engagement survey and 1:1 completion",
+         "Stable or rising",
+         "EM"
+        ],
+        [
+         "People",
+         "Promotions and internal growth",
+         "At least one credible case in preparation per team",
+         "EM"
+        ]
+       ]
+      }
+     ],
+     "quiz": []
+    },
+    {
+     "id": "career-stakeholders-and-communication",
+     "title": "Stakeholders and communication",
+     "minutes": 3,
+     "level": 0,
+     "blocks": [
+      {
+       "type": "text",
+       "text": "From TL onward, most failures are communication failures. Each stakeholder needs something different from you."
+      },
+      {
+       "type": "table",
+       "headers": [
+        "Stakeholder",
+        "What they need from you",
+        "How to give it"
+       ],
+       "rows": [
+        [
+         "Your manager",
+         "No surprises; a clear view of risk",
+         "Weekly written update; raise problems with a proposed option"
+        ],
+        [
+         "Product managers",
+         "Reliable estimates and honest trade-offs",
+         "Offer scope options (full, reduced, phased) with dates for each"
+        ],
+        [
+         "Design",
+         "Early feasibility input",
+         "Join design reviews before handoff; agree on shared components"
+        ],
+        [
+         "Backend teams",
+         "Stable contracts and early notice",
+         "Joint API design reviews; agreed versioning rules"
+        ],
+        [
+         "QA",
+         "Testable builds and clear scope of change",
+         "Release notes per build; risk areas called out"
+        ],
+        [
+         "Your engineers",
+         "Context, clarity and cover",
+         "Explain the reason behind priorities; absorb pressure from above"
+        ],
+        [
+         "Leadership",
+         "Short answers tied to business impact",
+         "One page: problem, recommendation, cost, risk, the decision you need"
+        ]
+       ]
+      },
+      {
+       "type": "text",
+       "text": "Three habits carry most of the weight:"
+      },
+      {
+       "type": "list",
+       "ordered": true,
+       "items": [
+        "Write things down. Decisions made only in meetings are lost and re-argued.",
+        "Lead with the conclusion, then the reasoning.",
+        "Say no with an alternative: what you can deliver, by when, and what it costs."
+       ]
+      }
+     ],
+     "quiz": []
+    },
+    {
+     "id": "career-roadmap",
+     "title": "Roadmap",
+     "minutes": 3,
+     "level": 0,
+     "blocks": [
+      {
+       "type": "text",
+       "text": "The timings below are typical ranges, not promises. Promotion cycles, open positions and your manager's support decide the actual dates."
+      },
+      {
+       "type": "table",
+       "headers": [
+        "Phase",
+        "Period",
+        "Focus",
+        "Done when"
+       ],
+       "rows": [
+        [
+         "1. Align",
+         "Days 1–30",
+         "Tell your manager you want TL and, in time, EM. Get the ladder document and a written gap list. Pick one project to lead.",
+         "You have an agreed growth plan with two or three specific gaps"
+        ],
+        [
+         "2. Lead a project",
+         "Days 31–90",
+         "Run one multi-engineer project end to end. Start mentoring. Send weekly updates.",
+         "Project shipped with a design doc, staged rollout and measured result"
+        ],
+        [
+         "3. Act as TL",
+         "Months 4–12",
+         "Own the team's planning, release train and tech-debt budget. Fix one team-level problem with numbers.",
+         "Your manager delegates team planning to you; promotion case submitted"
+        ],
+        [
+         "4. Establish as TL",
+         "Year 1–2",
+         "Make the team predictable. Grow a successor. Start one initiative that helps a second team. Sit in on hiring and calibration.",
+         "The team runs well when you are on leave"
+        ],
+        [
+         "5. Cross-team scope",
+         "Year 2–3",
+         "Write the mobile technical strategy. Lead one or two org-wide initiatives through RFCs.",
+         "Other teams adopt your standards; leads ask for your review"
+        ],
+        [
+         "6. PE case",
+         "Year 3–5",
+         "Show sustained org-level impact with business numbers. Get sponsorship from a director or VP.",
+         "Multi-team results over 12+ months, documented and endorsed"
+        ],
+        [
+         "7. Management trial",
+         "During phase 5 or 6",
+         "Take two to four direct reports, or act as manager for a team during a gap. Run their 1:1s, goals and reviews for two cycles.",
+         "You and your manager both know whether you want and suit the job"
+        ],
+        [
+         "8. EM",
+         "Year 4–6, or year 2–4 on the direct TL route",
+         "Move formally to EM. Hand over technical ownership to a TL or PE. Own hiring, performance, planning and org structure.",
+         "Two review cycles completed, attrition and delivery stable, one person promoted under you"
+        ],
+        [
+         "9. Senior EM / mobile head",
+         "After two or more years as EM",
+         "Manage managers and leads. Own the mobile budget, headcount plan and annual roadmap.",
+         "Leads run their teams without you; leadership treats you as the owner of mobile"
+        ]
+       ]
+      },
+      {
+       "type": "text",
+       "text": "Keep a running record from today: date, what you did, the result, and who can vouch for it. Promotion documents are written from this record."
+      }
+     ],
+     "quiz": []
+    },
+    {
+     "id": "career-pitfalls-that-stall-this-path",
+     "title": "Pitfalls that stall this path",
+     "minutes": 3,
+     "level": 0,
+     "blocks": [
+      {
+       "type": "list",
+       "ordered": false,
+       "items": [
+        "**Staying the best coder.** Taking every hard task yourself makes you the bottleneck and stops the team from growing.",
+        "**Waiting to be asked.** Nobody assigns leadership work to an SSE. You take it, with your manager's knowledge.",
+        "**Invisible work.** Impact that is not written down and shared does not count at promotion time.",
+        "**Rewrites as strategy.** Large rewrites and framework migrations rarely pay back. Prefer incremental migration with measurable steps.",
+        "**Technology for its own sake.** A proposal without a business measure will lose to one that has it.",
+        "**Avoiding hard conversations.** Late feedback and unspoken disagreement cost more than the discomfort of raising them early.",
+        "**No sponsor.** At PE level you need a senior leader who argues for you in rooms you are not in.",
+        "**Spreading too thin.** Many side projects reduce the depth of evidence in your main role. Protect focus on the work that builds the case.",
+        "**Skipping the people skills.** TL and PE both fail more often on communication and trust than on technical ability."
+       ]
+      }
+     ],
+     "quiz": []
+    },
+    {
+     "id": "career-skills-matrix",
+     "title": "Skills matrix",
+     "minutes": 3,
+     "level": 0,
+     "blocks": [
+      {
+       "type": "text",
+       "text": "Use this to rate yourself each quarter and to pick the next gap to close."
+      },
+      {
+       "type": "table",
+       "headers": [
+        "Skill",
+        "SSE",
+        "Tech Lead",
+        "Principal Engineer",
+        "Engineering Manager"
+       ],
+       "rows": [
+        [
+         "Coding",
+         "Clean, tested features delivered independently",
+         "Sets the team's standards; writes the risky parts",
+         "Prototypes and critical paths; raises the standard across teams",
+         "Reads code and reviews occasionally"
+        ],
+        [
+         "System design",
+         "Designs a feature",
+         "Designs a subsystem and reviews the team's designs",
+         "Designs across app, platform and backend; sets the target architecture",
+         "Judges risk and asks the right questions"
+        ],
+        [
+         "Debugging",
+         "Solves own bugs methodically",
+         "Solves the team's hardest bugs and teaches the method",
+         "Solves cross-system problems; builds diagnostic tooling",
+         "Diagnoses process failures"
+        ],
+        [
+         "Incident handling",
+         "Fixes under direction",
+         "Commands team incidents",
+         "Leads SEV1 diagnosis; removes classes of failure",
+         "Runs communication; ensures actions close"
+        ],
+        [
+         "Planning and estimation",
+         "Estimates own tasks",
+         "Plans a quarter for one team; manages risk",
+         "Sequences multi-quarter technical programmes",
+         "Capacity, headcount and roadmap for the org"
+        ],
+        [
+         "Communication",
+         "Clear PRs and updates",
+         "Design docs, status reports, negotiation with product",
+         "Strategy papers and RFCs; presents to leadership",
+         "Leadership reporting; hard conversations; org-wide messages"
+        ],
+        [
+         "Mentoring",
+         "Helps juniors when asked",
+         "Grows every engineer on the team",
+         "Grows TLs and senior engineers",
+         "Career plans, sponsorship, promotions"
+        ],
+        [
+         "Feedback",
+         "Gives review comments",
+         "Gives regular behavioural feedback",
+         "Gives calibrated input on senior engineers",
+         "Owns ratings and performance outcomes"
+        ],
+        [
+         "Hiring",
+         "Interviews",
+         "Interviews and helps calibrate",
+         "Sets the technical bar and designs interview content",
+         "Owns the plan, the loop and the offer"
+        ],
+        [
+         "Business understanding",
+         "Knows what the feature is for",
+         "Knows the team's metrics",
+         "Ties technical strategy to company goals",
+         "Trades off cost, people and outcomes"
+        ],
+        [
+         "Influence",
+         "Within the team",
+         "Across adjacent teams",
+         "Across the org, without authority",
+         "Across functions, with authority and budget"
+        ],
+        [
+         "Delegation",
+         "Not required",
+         "Delegates modules and designs",
+         "Delegates leadership of initiatives",
+         "Delegates everything except people decisions"
+        ]
+       ]
+      }
+     ],
+     "quiz": []
+    },
+    {
+     "id": "career-templates",
+     "title": "Templates",
+     "minutes": 3,
+     "level": 0,
+     "blocks": [
+      {
+       "type": "text",
+       "text": "Copy these headings into your own documents."
+      },
+      {
+       "type": "text",
+       "text": "**Design doc (TL)**"
+      },
+      {
+       "type": "list",
+       "ordered": true,
+       "items": [
+        "Problem and why now",
+        "Goals and non-goals",
+        "Current behaviour",
+        "Options considered, with trade-offs",
+        "Chosen design: components, data flow, API changes, state handling",
+        "Impact on old app versions and on the Flutter–native boundary",
+        "Testing plan",
+        "Rollout: flag, stages, metrics to watch, rollback",
+        "Risks and open questions",
+        "Milestones and owners"
+       ]
+      },
+      {
+       "type": "text",
+       "text": "**RFC (PE)**"
+      },
+      {
+       "type": "list",
+       "ordered": true,
+       "items": [
+        "Summary in three sentences",
+        "The problem, with data from more than one team",
+        "Proposal",
+        "Alternatives, including doing nothing",
+        "Cost: engineer-weeks, migration effort, running cost",
+        "Migration plan and how both old and new coexist",
+        "Teams affected and what each must do",
+        "Decision needed, by whom, by when"
+       ]
+      },
+      {
+       "type": "text",
+       "text": "**Weekly status update (TL)**"
+      },
+      {
+       "type": "list",
+       "ordered": false,
+       "items": [
+        "Shipped this week",
+        "Planned next week",
+        "Risks and blockers, each with an owner and a date",
+        "Decisions needed from others",
+        "Release health in one line"
+       ]
+      },
+      {
+       "type": "text",
+       "text": "**1:1 agenda (TL and EM)**"
+      },
+      {
+       "type": "list",
+       "ordered": false,
+       "items": [
+        "Their topics first",
+        "How the work is going and what is blocking it",
+        "Feedback in both directions",
+        "Growth: progress on the agreed gaps",
+        "Anything about the team or company they want to raise"
+       ]
+      },
+      {
+       "type": "text",
+       "text": "**Incident review (TL)**"
+      },
+      {
+       "type": "list",
+       "ordered": false,
+       "items": [
+        "Summary and customer impact, with numbers",
+        "Timeline: introduced, detected, mitigated, resolved",
+        "Root cause and contributing factors",
+        "What went well and what slowed the response",
+        "Actions: owner, date, type (test, alert, flag, process, design)"
+       ]
+      },
+      {
+       "type": "text",
+       "text": "**Monthly org report (EM)**"
+      },
+      {
+       "type": "list",
+       "ordered": false,
+       "items": [
+        "Delivery against commitments",
+        "Quality and incidents",
+        "People: hiring, attrition, promotions, concerns",
+        "Top three risks",
+        "Requests to leadership"
+       ]
+      },
+      {
+       "type": "text",
+       "text": "**Promotion case (all levels)**"
+      },
+      {
+       "type": "list",
+       "ordered": false,
+       "items": [
+        "Target level and the ladder criteria",
+        "Three to five pieces of evidence, each with scope, your role, result and a number",
+        "Feedback from peers, partners and people you led",
+        "Gaps remaining and the plan for each"
+       ]
+      }
+     ],
+     "quiz": []
+    },
+    {
+     "id": "career-weekly-routine-and-reading",
+     "title": "Weekly routine and reading",
+     "minutes": 3,
+     "level": 0,
+     "blocks": [
+      {
+       "type": "text",
+       "text": "**Weekly checklist**"
+      },
+      {
+       "type": "list",
+       "ordered": false,
+       "items": [
+        "Send the written status update: done, next, risks",
+        "Review release health: crash-free rate, ANRs, start time, key funnel",
+        "Hold 1:1s or mentoring sessions",
+        "Review at least one design doc or write part of your own",
+        "Talk to one person outside your team: backend, product, QA or another mobile lead",
+        "Add one entry to your impact record",
+        "Spend two hours on learning: system design, platform internals or leadership"
+       ]
+      },
+      {
+       "type": "text",
+       "text": "**Reading**"
+      },
+      {
+       "type": "table",
+       "headers": [
+        "Book",
+        "Author",
+        "Use it for"
+       ],
+       "rows": [
+        [
+         "The Manager's Path",
+         "Camille Fournier",
+         "Every stage from mentor to TL to manager of managers"
+        ],
+        [
+         "The Staff Engineer's Path",
+         "Tanya Reilly",
+         "Operating at Staff and Principal level as an individual contributor"
+        ],
+        [
+         "Staff Engineer",
+         "Will Larson",
+         "Archetypes of senior IC roles and how people reached them"
+        ],
+        [
+         "An Elegant Puzzle",
+         "Will Larson",
+         "Team sizing, org design, migrations and planning as a manager"
+        ],
+        [
+         "High Output Management",
+         "Andrew Grove",
+         "The core of the manager's job: leverage, 1:1s, reviews, planning"
+        ],
+        [
+         "Radical Candor",
+         "Kim Scott",
+         "Giving direct feedback while keeping trust"
+        ],
+        [
+         "Resilient Management",
+         "Lara Hogan",
+         "Coaching, sponsoring and handling team change"
+        ],
+        [
+         "Team Topologies",
+         "Matthew Skelton and Manuel Pais",
+         "Structuring feature teams and platform teams"
+        ],
+        [
+         "Accelerate",
+         "Nicole Forsgren, Jez Humble and Gene Kim",
+         "The delivery metrics behind the CI/CD and release pillars"
+        ],
+        [
+         "Designing Data-Intensive Applications",
+         "Martin Kleppmann",
+         "The backend and data knowledge needed to work across the stack"
+        ]
+       ]
+      }
+     ],
+     "quiz": []
+    }
+   ]
+  }
+ ],
+ "questions": [],
+ "resources": []
+}

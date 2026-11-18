@@ -1,0 +1,1385 @@
+<!doctype html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"></head><body>
+<title>Power BI in 4 Weeks</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700&family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&display=swap">
+<style>
+/* Layout: sticky week tabs on top, one reading column (max 880px), figures sit in framed panels like visuals on a report canvas. */
+:root{
+  --bg:#f3f4f7; --surface:#ffffff; --surface2:#eceef3;
+  --ink:#141922; --ink2:#48515f; --muted:#778192;
+  --line:#dde1e8; --line2:#c3c9d3;
+  --gold:#f2c200; --gold-soft:#fdf1bd; --on-gold:#1d1a05;
+  --link:#1b5fae;
+  --good:#0a6b1f; --good-bg:#e2f4e5; --bad:#a82a2a; --bad-bg:#fbe6e4;
+  --s1:#2a78d6; --s2:#eb6834; --s3:#1baf7a; --s4:#eda100; --s1-soft:#cde2fb;
+  --display:"Bricolage Grotesque","Avenir Next","Segoe UI",sans-serif;
+  --body:"IBM Plex Sans",system-ui,-apple-system,"Segoe UI",sans-serif;
+  --mono:"IBM Plex Mono",ui-monospace,Menlo,Consolas,monospace;
+}
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]){
+    color-scheme:dark;
+    --bg:#0f1217; --surface:#181c23; --surface2:#20252e;
+    --ink:#eceff4; --ink2:#b7c0cd; --muted:#8792a2;
+    --line:#2a303a; --line2:#3b4350;
+    --gold:#e3b600; --gold-soft:#3a3210; --on-gold:#1d1a05;
+    --link:#74aef0;
+    --good:#5ccf73; --good-bg:#16301c; --bad:#f08a84; --bad-bg:#3a1b1a;
+    --s1:#3987e5; --s2:#d95926; --s3:#199e70; --s4:#c98500; --s1-soft:#1d3554;
+  }
+}
+:root[data-theme="dark"]{
+  color-scheme:dark;
+  --bg:#0f1217; --surface:#181c23; --surface2:#20252e;
+  --ink:#eceff4; --ink2:#b7c0cd; --muted:#8792a2;
+  --line:#2a303a; --line2:#3b4350;
+  --gold:#e3b600; --gold-soft:#3a3210; --on-gold:#1d1a05;
+  --link:#74aef0;
+  --good:#5ccf73; --good-bg:#16301c; --bad:#f08a84; --bad-bg:#3a1b1a;
+  --s1:#3987e5; --s2:#d95926; --s3:#199e70; --s4:#c98500; --s1-soft:#1d3554;
+}
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+.st-db{color:var(--good);font-weight:600}.st-pc{color:var(--bad);font-weight:600}
+tr.tot td{font-weight:600;border-top:1px solid var(--line2)}tr.diff td{background:var(--gold-soft)}
+body{background:var(--bg);color:var(--ink);font-family:var(--body);font-size:16px;line-height:1.6}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:10;background:var(--surface)}
+a{color:var(--link)}
+:focus-visible{outline:2px solid var(--link);outline-offset:2px}
+.wrap{max-width:880px;margin:0 auto;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+
+/* header */
+.top{background:var(--surface);border-bottom:1px solid var(--line)}
+.top .wrap{padding-block:28px 20px;display:flex;flex-direction:column;gap:8px}
+.eyebrow{font-size:12px;letter-spacing:.09em;text-transform:uppercase;color:var(--muted);font-weight:600}
+h1{font-family:var(--display);font-weight:700;font-size:clamp(30px,6vw,46px);line-height:1.05;margin:0;text-wrap:balance}
+h1 mark{background:var(--gold);color:var(--on-gold);padding:0 .18em;border-radius:3px}
+.lede{color:var(--ink2);max-width:62ch;margin:0}
+
+/* tabs */
+.tabs{position:sticky;top:env(safe-area-inset-top,0px);z-index:9;background:var(--surface);border-bottom:1px solid var(--line)}
+.tabs .wrap{display:flex;gap:4px;overflow-x:auto;padding-block:8px}
+.tab{font:500 14px var(--body);color:var(--ink2);background:none;border:1px solid transparent;border-radius:6px;padding:7px 12px;cursor:pointer;white-space:nowrap;display:flex;gap:6px;align-items:center}
+.tab:hover{background:var(--surface2)}
+.tab[aria-selected="true"]{background:var(--gold);color:var(--on-gold);font-weight:600}
+.tab .tick{display:none;width:14px;height:14px;border-radius:50%;background:var(--good);color:var(--surface);font-size:10px;line-height:14px;text-align:center}
+.tab.passed .tick{display:inline-block}
+
+main{padding-block:28px 64px}
+section.page{display:flex;flex-direction:column;gap:22px}
+h2{font-family:var(--display);font-weight:700;font-size:28px;line-height:1.15;margin:0;text-wrap:balance}
+h3{font-family:var(--display);font-weight:500;font-size:20px;line-height:1.25;margin:14px 0 0;text-wrap:balance}
+h4{font:600 13px var(--body);letter-spacing:.07em;text-transform:uppercase;color:var(--muted);margin:0}
+p{margin:0;max-width:68ch}
+ul,ol{margin:0;padding-left:1.25em;max-width:68ch;display:flex;flex-direction:column;gap:6px}
+.meta{display:flex;flex-wrap:wrap;gap:8px 20px;color:var(--ink2);font-size:14px}
+.meta b{color:var(--ink);font-weight:600}
+
+.panel{background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:18px;display:flex;flex-direction:column;gap:12px}
+.panel > h4{margin-bottom:2px}
+figure{margin:0;display:flex;flex-direction:column;gap:10px}
+figcaption{font-size:13.5px;color:var(--ink2);max-width:70ch}
+.scroll{overflow-x:auto}
+svg.dia{display:block;width:100%;height:auto;min-width:560px;font-family:var(--body)}
+.d-box{fill:var(--surface2);stroke:var(--line2);stroke-width:1}
+.d-hi{fill:var(--gold-soft);stroke:var(--gold);stroke-width:1.5}
+.d-t{fill:var(--ink);font-size:13px;font-weight:600}
+.d-s{fill:var(--ink2);font-size:11.5px}
+.d-m{fill:var(--muted);font-size:11px}
+.d-ln{stroke:var(--ink2);stroke-width:1.5;fill:none}
+.d-hd{fill:var(--ink2)}
+.d-num{fill:var(--gold)} .d-numt{fill:var(--on-gold);font-size:12px;font-weight:700}
+
+.concepts{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:12px}
+.concept{border-top:2px solid var(--line2);padding-top:10px;display:flex;flex-direction:column;gap:4px}
+.concept b{font-weight:600}
+.concept span{color:var(--ink2);font-size:14.5px}
+.concept em{font-style:normal;color:var(--muted);font-size:13.5px}
+
+table{border-collapse:collapse;width:100%;font-size:14px}
+th,td{text-align:left;padding:7px 10px;border-bottom:1px solid var(--line);vertical-align:top}
+th{font-weight:600;color:var(--ink2);font-size:12.5px;letter-spacing:.04em;text-transform:uppercase;white-space:nowrap}
+td.num,th.num{text-align:right;font-variant-numeric:tabular-nums}
+.grid td,.grid th{font-family:var(--mono);font-size:12.5px;white-space:nowrap;padding:5px 9px}
+.grid th{text-transform:none;letter-spacing:0}
+.grid .ty{display:block;color:var(--muted);font-size:10.5px;font-weight:400}
+.grid .nul{color:var(--muted);font-style:italic}
+.grid .sp{color:var(--s2)}
+.grid tr.dim td{opacity:.32}
+.grid tr.on td{background:var(--gold-soft)}
+
+pre.code{margin:0;background:var(--surface2);border-radius:6px;padding:12px 14px;overflow-x:auto;font:400 13px/1.55 var(--mono);color:var(--ink)}
+code{font-family:var(--mono);font-size:.9em;background:var(--surface2);padding:1px 5px;border-radius:4px}
+pre.code code{background:none;padding:0;font-size:inherit}
+.kw{color:var(--link)}
+
+.btn{font:500 14px var(--body);padding:7px 12px;border-radius:6px;border:1px solid var(--line2);background:var(--surface);color:var(--ink);cursor:pointer}
+.btn:hover{background:var(--surface2)}
+.btn[aria-pressed="true"]{background:var(--ink);color:var(--surface);border-color:var(--ink)}
+.btn:disabled{opacity:.4;cursor:default}
+.row{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.lab{font-size:13px;color:var(--muted);font-weight:600;min-width:74px}
+
+.note{border-left:3px solid var(--gold);padding:4px 0 4px 12px;color:var(--ink2);max-width:68ch}
+.gate{background:var(--gold-soft);border-radius:6px;padding:10px 14px;font-size:14.5px}
+.check{list-style:none;padding:0}
+.check label{display:flex;gap:10px;align-items:flex-start;cursor:pointer}
+.check input{margin-top:5px;accent-color:var(--s1);flex:none}
+
+/* quiz */
+.q{display:flex;flex-direction:column;gap:8px;padding-top:12px;border-top:1px solid var(--line)}
+.q:first-of-type{border-top:0;padding-top:0}
+.q p.qq{font-weight:600}
+.opt{text-align:left;font:400 14.5px var(--body);padding:9px 12px;border-radius:6px;border:1px solid var(--line2);background:var(--surface);color:var(--ink);cursor:pointer}
+.opt:hover{background:var(--surface2)}
+.opt.right{background:var(--good-bg);border-color:var(--good)}
+.opt.wrong{background:var(--bad-bg);border-color:var(--bad)}
+.why{font-size:14px;color:var(--ink2)}
+.why b.ok{color:var(--good)} .why b.no{color:var(--bad)}
+.score{font-weight:600}
+
+/* charts */
+.legend{display:flex;flex-wrap:wrap;gap:6px 16px;font-size:13px;color:var(--ink2)}
+.legend i{display:inline-block;width:10px;height:10px;border-radius:2px;margin-right:6px}
+.hbar{display:grid;grid-template-columns:64px 1fr 44px;gap:8px;align-items:center;font-size:13px}
+.hbar .trk{display:flex;gap:2px;height:20px}
+.hbar .seg{height:100%;min-width:2px}
+.hbar .seg:last-child{border-radius:0 4px 4px 0}
+.hbar .tot{font-variant-numeric:tabular-nums;color:var(--ink2)}
+.axis{display:grid;grid-template-columns:64px 1fr 44px;gap:8px;font-size:11.5px;color:var(--muted)}
+.axis div{display:flex;justify-content:space-between}
+#hours{display:flex;flex-direction:column;gap:8px}
+.tabs .wrap{scrollbar-width:thin}
+.kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}
+@media (max-width:720px){.kpis{grid-template-columns:repeat(2,1fr)}}
+.kpi{background:var(--surface2);border-radius:6px;padding:10px 12px;display:flex;flex-direction:column}
+.kpi span{font-size:12.5px;color:var(--ink2)}
+.kpi b{font:700 24px var(--display)}
+.dash{display:grid;grid-template-columns:1.5fr 1fr;gap:16px}
+@media (max-width:640px){.dash{grid-template-columns:1fr}}
+.dash h5{margin:0 0 6px;font:600 13.5px var(--body)}
+svg.chart{display:block;width:100%;height:auto;font-family:var(--body)}
+.c-grid{stroke:var(--line);stroke-width:1}
+.c-base{stroke:var(--line2);stroke-width:1}
+.c-tick{fill:var(--muted);font-size:11px;font-variant-numeric:tabular-nums}
+.c-line{stroke:var(--s1);stroke-width:2;fill:none;stroke-linejoin:round;stroke-linecap:round}
+.c-area{fill:var(--s1);opacity:.1}
+.c-dot{fill:var(--s1);stroke:var(--surface);stroke-width:2}
+.c-lbl{fill:var(--ink);font-size:11.5px;font-weight:600}
+.c-hit{fill:transparent}
+.cbar{display:grid;grid-template-columns:62px 1fr 60px;gap:8px;align-items:center;font-size:13px;background:none;border:0;padding:4px 0;width:100%;color:var(--ink);font-family:var(--body);cursor:pointer;text-align:left}
+.cbar .b{height:18px;background:var(--s1);border-radius:0 4px 4px 0;min-width:2px}
+.cbar.off .b{background:var(--s1-soft)}
+.cbar .v{text-align:right;font-variant-numeric:tabular-nums;color:var(--ink2)}
+#tip{position:fixed;z-index:20;pointer-events:none;background:var(--ink);color:var(--surface);font-size:12.5px;padding:5px 8px;border-radius:5px;max-width:240px}
+
+.two{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:14px}
+.measure{display:grid;grid-template-columns:1fr auto;gap:4px 14px;align-items:baseline;padding:8px 0;border-top:1px solid var(--line)}
+.measure:first-child{border-top:0}
+.measure code{background:none;padding:0;font-size:12.5px;color:var(--ink2);overflow-wrap:anywhere}
+.measure b{font:700 20px var(--display);font-variant-numeric:tabular-nums}
+.measure span{font-size:13px;font-weight:600;grid-column:1/-1}
+details{border-top:1px solid var(--line);padding:10px 0}
+details:last-child{border-bottom:1px solid var(--line)}
+summary{cursor:pointer;font-weight:600;max-width:70ch}
+details p{margin-top:8px;color:var(--ink2)}
+.tag{font:500 11.5px var(--body);background:var(--surface2);color:var(--ink2);padding:2px 7px;border-radius:10px;margin-right:8px;white-space:nowrap}
+textarea{width:100%;font:400 12.5px/1.5 var(--mono);background:var(--surface2);color:var(--ink);border:1px solid var(--line);border-radius:6px;padding:10px;resize:vertical}
+@media (prefers-reduced-motion:no-preference){.hbar .seg,.cbar .b{transition:width .25s}}
+</style>
+
+<header class="top"><div class="wrap">
+  <span class="eyebrow">Beginner to advanced · 4 core weeks + 4 advanced weeks · about 10 hours a week</span>
+  <h1>Power BI in <mark>4 weeks</mark></h1>
+  <p class="lede">Clean data with Power Query, connect it in a model, calculate with DAX, then design a dashboard people can read in five seconds. Weeks 5 to 8 take the same four skills to an advanced level. Each week ends with a mini-project and a 3-question quiz.</p>
+</div></header>
+
+<nav class="tabs" aria-label="Sections"><div class="wrap" role="tablist">
+  <button class="tab" role="tab" data-tab="start" id="t-start">Start here</button>
+  <button class="tab" role="tab" data-tab="w1" id="t-w1"><span class="tick">✓</span>Week 1 · Power Query</button>
+  <button class="tab" role="tab" data-tab="w2" id="t-w2"><span class="tick">✓</span>Week 2 · Data model</button>
+  <button class="tab" role="tab" data-tab="w3" id="t-w3"><span class="tick">✓</span>Week 3 · DAX</button>
+  <button class="tab" role="tab" data-tab="w4" id="t-w4"><span class="tick">✓</span>Week 4 · Dashboard</button>
+  <button class="tab" role="tab" data-tab="w5" id="t-w5"><span class="tick">✓</span>Week 5 · Advanced Query</button>
+  <button class="tab" role="tab" data-tab="w6" id="t-w6"><span class="tick">✓</span>Week 6 · Advanced model</button>
+  <button class="tab" role="tab" data-tab="w7" id="t-w7"><span class="tick">✓</span>Week 7 · Advanced DAX</button>
+  <button class="tab" role="tab" data-tab="w8" id="t-w8"><span class="tick">✓</span>Week 8 · Publish</button>
+  <button class="tab" role="tab" data-tab="adv" id="t-adv">After week 8</button>
+  <button class="tab" role="tab" data-tab="qa" id="t-qa">Q&amp;A bank</button>
+</div></nav>
+
+<main class="wrap">
+
+<!-- ================= START ================= -->
+<section class="page" id="p-start">
+  <h2>How Power BI works, in one picture</h2>
+  <p>Power BI is four jobs done in order. Raw files go in on the left. A report other people can use comes out on the right. Each week of this plan covers one job.</p>
+  <figure class="panel">
+    <div class="scroll">
+    <svg class="dia" viewBox="0 0 860 150" role="img" aria-label="Data flows from sources through Power Query, the data model, DAX and the report to the Power BI service.">
+      <defs><marker id="ah" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path class="d-hd" d="M0 0L10 5L0 10z"/></marker></defs>
+      <g>
+        <rect class="d-box" x="8" y="30" width="118" height="70" rx="6"/><text class="d-t" x="67" y="60" text-anchor="middle">Sources</text><text class="d-s" x="67" y="80" text-anchor="middle">Excel, CSV, SQL</text>
+        <rect class="d-hi" x="152" y="30" width="118" height="70" rx="6"/><text class="d-t" x="211" y="60" text-anchor="middle">Power Query</text><text class="d-s" x="211" y="80" text-anchor="middle">clean and shape</text>
+        <rect class="d-hi" x="296" y="30" width="118" height="70" rx="6"/><text class="d-t" x="355" y="60" text-anchor="middle">Data model</text><text class="d-s" x="355" y="80" text-anchor="middle">relate the tables</text>
+        <rect class="d-hi" x="440" y="30" width="118" height="70" rx="6"/><text class="d-t" x="499" y="60" text-anchor="middle">DAX</text><text class="d-s" x="499" y="80" text-anchor="middle">calculate</text>
+        <rect class="d-hi" x="584" y="30" width="118" height="70" rx="6"/><text class="d-t" x="643" y="60" text-anchor="middle">Report</text><text class="d-s" x="643" y="80" text-anchor="middle">charts and slicers</text>
+        <rect class="d-box" x="728" y="30" width="118" height="70" rx="6"/><text class="d-t" x="787" y="60" text-anchor="middle">Service</text><text class="d-s" x="787" y="80" text-anchor="middle">publish and share</text>
+        <line class="d-ln" x1="126" y1="65" x2="150" y2="65" marker-end="url(#ah)"/><line class="d-ln" x1="270" y1="65" x2="294" y2="65" marker-end="url(#ah)"/><line class="d-ln" x1="414" y1="65" x2="438" y2="65" marker-end="url(#ah)"/><line class="d-ln" x1="558" y1="65" x2="582" y2="65" marker-end="url(#ah)"/><line class="d-ln" x1="702" y1="65" x2="726" y2="65" marker-end="url(#ah)"/>
+        <text class="d-m" x="211" y="122" text-anchor="middle">Week 1</text><text class="d-m" x="355" y="122" text-anchor="middle">Week 2</text><text class="d-m" x="499" y="122" text-anchor="middle">Week 3</text><text class="d-m" x="643" y="122" text-anchor="middle">Week 4</text><text class="d-m" x="787" y="122" text-anchor="middle">Week 8</text>
+      </g>
+    </svg></div>
+    <figcaption>The four highlighted boxes all live inside Power BI Desktop. Most beginner trouble with DAX is really an unfinished job one or two boxes to the left.</figcaption>
+  </figure>
+
+  <h3>Before day 1</h3>
+  <ul>
+    <li><b>Install Power BI Desktop.</b> It is free, from the Microsoft Store or the Microsoft download page.</li>
+    <li><b>You are on a Mac, and Power BI Desktop runs on Windows only.</b> Use a Windows virtual machine (Parallels or similar), a cloud Windows PC, or a spare Windows laptop. The Power BI website alone is not enough for weeks 1 to 3.</li>
+    <li><b>No account is needed to build.</b> You need a work or school account only when you publish and share, which is week 8.</li>
+  </ul>
+
+  <h3>Where your hours go</h3>
+  <figure class="panel">
+    <h4>Planned study hours per week, by activity</h4>
+    <div class="legend" id="hoursLegend"></div>
+    <div id="hours"></div>
+    <figcaption>About 43 hours for the four core weeks and 44 for the four advanced weeks. Weeks 3 and 7 are the heaviest because DAX needs repetition.</figcaption>
+  </figure>
+
+  <h3>The practice dataset: Kettle &amp; Crumb</h3>
+  <p>One small invented shop runs through all eight weeks: 20 orders of tea, coffee and bakery items across five Indian cities, January to June 2025. It is small on purpose so you can check every number by eye. The raw file is messy on purpose, and you clean it in week 1.</p>
+  <div class="panel">
+    <h4>orders_raw.csv (invented sample data)</h4>
+    <textarea id="csvOrders" rows="8" readonly aria-label="orders_raw.csv contents"></textarea>
+    <div class="row"><button class="btn" data-copy="csvOrders">Copy orders</button><span class="why" id="copyMsg1"></span></div>
+    <h4>products.csv</h4>
+    <textarea id="csvProducts" rows="5" readonly aria-label="products.csv contents"></textarea>
+    <div class="row"><button class="btn" data-copy="csvProducts">Copy products</button></div>
+    <p class="why">Paste each into Notepad and save as <code>orders_raw.csv</code> and <code>products.csv</code>. Then in Power BI Desktop choose Get data, then Text/CSV.</p>
+  </div>
+  <p class="note">For a second pass with more rows, use the Financial Sample workbook that Power BI Desktop offers on its start screen under sample data, or the AdventureWorks and Contoso samples from Microsoft Learn. Each week lists a stretch task for it.</p>
+
+  <h3>Twelve words you will hear every day</h3>
+  <div class="panel"><table>
+    <tbody id="glossary"></tbody>
+  </table></div>
+  <div class="row"><button class="btn" data-go="w1">Start week 1</button></div>
+</section>
+
+<!-- ================= WEEK 1 ================= -->
+<section class="page" id="p-w1" hidden>
+  <h2>Week 1: Power Query, the cleaning room</h2>
+  <div class="meta"><span><b>Goal</b> turn a messy file into a tidy table</span><span><b>Time</b> 10 hours</span><span><b>You finish with</b> a clean Orders query that refreshes with one click</span></div>
+  <p>Power Query is a recorder. Every click you make to clean the data is saved as a step. When a new file arrives next month, Power BI replays the steps for you. You never edit the source file by hand.</p>
+
+  <div class="concepts">
+    <div class="concept"><b>Query</b><span>One recipe that produces one table.</span><em>Like a saved macro, but readable.</em></div>
+    <div class="concept"><b>Applied Steps</b><span>The list on the right. Each row is one change. You can click any step to see the data at that point, rename it, or delete it.</span></div>
+    <div class="concept"><b>Data types</b><span>Text, whole number, decimal, date. Wrong types cause wrong sums and broken date charts. Set them on purpose.</span></div>
+    <div class="concept"><b>Unpivot</b><span>Turns month columns (Jan, Feb, Mar) into rows. Charts and slicers need one column per kind of thing.</span></div>
+    <div class="concept"><b>Merge and Append</b><span>Merge adds columns from another table by a matching key. Append stacks rows of tables with the same columns.</span><em>Merge is a join. Append is a union.</em></div>
+    <div class="concept"><b>Close &amp; Apply</b><span>Loads the cleaned result into the model. Until you press it, the report still has the old data.</span></div>
+  </div>
+
+  <h3>Watch the steps work</h3>
+  <figure class="panel">
+    <h4>Applied Steps on the first rows of orders_raw.csv</h4>
+    <div class="row" id="pqBtns"></div>
+    <p id="pqDesc"></p>
+    <pre class="code"><code id="pqM"></code></pre>
+    <div class="scroll"><table class="grid" id="pqTable"></table></div>
+    <figcaption>Orange dots mark stray spaces. Step 5 leaves the missing amount as <code>null</code>. That is correct: a blank is unknown, and turning it into 0 would lower your averages.</figcaption>
+  </figure>
+
+  <h3>Wide data against long data</h3>
+  <figure class="panel">
+    <div class="two">
+      <div><h4>Wide (how people type it)</h4><table class="grid"><tr><th>product</th><th>Jan</th><th>Feb</th><th>Mar</th></tr><tr><td>Assam Tea</td><td>640</td><td>0</td><td>960</td></tr><tr><td>Filter Coffee</td><td>420</td><td>1260</td><td>420</td></tr></table></div>
+      <div><h4>Long (what Power BI wants)</h4><table class="grid"><tr><th>product</th><th>month</th><th>sales</th></tr><tr><td>Assam Tea</td><td>Jan</td><td>640</td></tr><tr><td>Assam Tea</td><td>Feb</td><td>0</td></tr><tr><td>Assam Tea</td><td>Mar</td><td>960</td></tr><tr><td>Filter Coffee</td><td>Jan</td><td>420</td></tr><tr><td colspan="3" class="nul">2 more rows</td></tr></table></div>
+    </div>
+    <figcaption>Select the product column, then Transform, Unpivot Columns, Unpivot Other Columns. A new month next quarter becomes new rows, so nothing in the report breaks.</figcaption>
+  </figure>
+
+  <h3>Day by day</h3>
+  <div class="panel scroll"><table>
+    <tr><th>Day</th><th>Learn</th><th>Do</th></tr>
+    <tr><td>1</td><td>Tour of Power BI Desktop: Report, Table and Model views. Get data.</td><td>Load both CSV files. Open Transform data and find the Applied Steps list.</td></tr>
+    <tr><td>2</td><td>Promote headers, remove rows, remove duplicates, data types, locale.</td><td>Turn on Column quality and Column distribution in the View tab. List every problem you can see in orders_raw.</td></tr>
+    <tr><td>3</td><td>Text cleanup: Trim, Clean, Capitalize Each Word, Replace Values, Split Column.</td><td>Fix customer names, split city and region, remove the Rs prefix.</td></tr>
+    <tr><td>4</td><td>Unpivot, Merge, Append, Reference against Duplicate.</td><td>Type the wide table above with Enter data and unpivot it.</td></tr>
+    <tr><td>5</td><td>Read the M code in Advanced Editor. Rename steps so they explain themselves.</td><td>Rename every step in your Orders query.</td></tr>
+    <tr><td>6 to 7</td><td colspan="2">Mini-project and quiz.</td></tr>
+  </table></div>
+
+  <h3>Mini-project: clean the Kettle &amp; Crumb orders</h3>
+  <div class="panel">
+    <ul class="check">
+      <li><label><input type="checkbox" id="c-w1-1"><span>Load <code>orders_raw.csv</code> and open Transform data.</span></label></li>
+      <li><label><input type="checkbox" id="c-w1-2"><span>Remove the blank row and the duplicate order.</span></label></li>
+      <li><label><input type="checkbox" id="c-w1-3"><span>Trim customer names and set them to Capitalize Each Word.</span></label></li>
+      <li><label><input type="checkbox" id="c-w1-4"><span>Split <code>city - region</code> into two columns named city and region.</span></label></li>
+      <li><label><input type="checkbox" id="c-w1-5"><span>Remove the <code>Rs</code> prefix, then set amount to Whole Number and order date to Date using the English (India) locale.</span></label></li>
+      <li><label><input type="checkbox" id="c-w1-6"><span>Rename the query to Orders and press Close &amp; Apply.</span></label></li>
+    </ul>
+    <p class="gate" id="w1Check"></p>
+    <p class="why"><b>Stretch:</b> load the Financial Sample, unpivot nothing, but split it: use Reference to create a Products query that keeps only Product and Manufacturing Price, then remove duplicates.</p>
+  </div>
+
+  <h3>Mistakes beginners make this week</h3>
+  <ul>
+    <li>Fixing the Excel file by hand. The fix is lost when the next file arrives.</li>
+    <li>Accepting the automatic Changed Type step without reading it. It often guesses dates wrong.</li>
+    <li>Replacing every null with 0. Only do that when blank truly means zero.</li>
+  </ul>
+
+  <h3>Quiz: 3 practical questions</h3>
+  <div class="panel quiz" data-week="w1"></div>
+</section>
+
+<!-- ================= WEEK 2 ================= -->
+<section class="page" id="p-w2" hidden>
+  <p class="gate" data-needs="w1"></p>
+  <h2>Week 2: Data modeling, the wiring</h2>
+  <div class="meta"><span><b>Goal</b> connect tables so one slicer filters everything</span><span><b>Time</b> 10 hours</span><span><b>You finish with</b> a star schema of Orders, Products, Stores and Date</span></div>
+  <p>A model is a set of tables joined by relationships. Instead of one giant sheet with everything repeated, you keep events in one table and descriptions in small lookup tables. Power BI then knows that choosing Tea in the Products table should filter the matching orders.</p>
+
+  <div class="concepts">
+    <div class="concept"><b>Fact table</b><span>Things that happened. One row per order, payment or visit. Long, mostly numbers and keys.</span><em>Here: Orders.</em></div>
+    <div class="concept"><b>Dimension table</b><span>Things you describe and filter by. One row per product, store or day. Short, mostly text.</span><em>Here: Products, Stores, Date.</em></div>
+    <div class="concept"><b>Relationship</b><span>A line between a key column in two tables. Almost always one-to-many: one product, many orders.</span></div>
+    <div class="concept"><b>Filter direction</b><span>Filters flow from the one side to the many side. A product filter reaches orders. An order filter does not reach products.</span></div>
+    <div class="concept"><b>Date table</b><span>One row per calendar day with year, month and quarter columns. Needed for month sorting and for year-to-date measures in week 3.</span></div>
+    <div class="concept"><b>Star schema</b><span>One fact in the middle, dimensions around it. Simple to read, fast, and the shape DAX expects.</span></div>
+  </div>
+
+  <figure class="panel">
+    <h4>The Kettle &amp; Crumb star schema</h4>
+    <div class="scroll">
+    <svg class="dia" viewBox="0 0 640 360" role="img" aria-label="Star schema: the Orders fact table in the centre, filtered by Date, Products and Stores, each through a one-to-many relationship.">
+      <defs><marker id="ah2" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path class="d-hd" d="M0 0L10 5L0 10z"/></marker></defs>
+      <rect class="d-hi" x="230" y="130" width="180" height="120" rx="6"/>
+      <text class="d-t" x="320" y="152" text-anchor="middle">Orders (fact)</text>
+      <text class="d-s" x="244" y="174">order_id</text><text class="d-s" x="244" y="191">order date</text><text class="d-s" x="244" y="208">product, city</text><text class="d-s" x="244" y="225">qty, amount</text><text class="d-m" x="244" y="242">20 rows</text>
+      <rect class="d-box" x="245" y="14" width="150" height="72" rx="6"/><text class="d-t" x="320" y="36" text-anchor="middle">Date</text><text class="d-s" x="320" y="54" text-anchor="middle">Date, Year, Month</text><text class="d-m" x="320" y="72" text-anchor="middle">365 rows</text>
+      <rect class="d-box" x="14" y="150" width="150" height="80" rx="6"/><text class="d-t" x="89" y="172" text-anchor="middle">Products</text><text class="d-s" x="89" y="190" text-anchor="middle">product, category</text><text class="d-s" x="89" y="206" text-anchor="middle">price, unit_cost</text><text class="d-m" x="89" y="222" text-anchor="middle">6 rows</text>
+      <rect class="d-box" x="476" y="150" width="150" height="80" rx="6"/><text class="d-t" x="551" y="178" text-anchor="middle">Stores</text><text class="d-s" x="551" y="196" text-anchor="middle">city, region</text><text class="d-m" x="551" y="214" text-anchor="middle">5 rows</text>
+      <line class="d-ln" x1="320" y1="86" x2="320" y2="128" marker-end="url(#ah2)"/>
+      <line class="d-ln" x1="164" y1="190" x2="228" y2="190" marker-end="url(#ah2)"/>
+      <line class="d-ln" x1="476" y1="190" x2="412" y2="190" marker-end="url(#ah2)"/>
+      <text class="d-t" x="330" y="100">1</text><text class="d-t" x="330" y="124">*</text>
+      <text class="d-t" x="170" y="182">1</text><text class="d-t" x="214" y="182">*</text>
+      <text class="d-t" x="462" y="182">1</text><text class="d-t" x="420" y="182">*</text>
+      <text class="d-m" x="320" y="290" text-anchor="middle">Arrows show which way a filter travels: from each dimension into the fact.</text>
+      <text class="d-m" x="320" y="308" text-anchor="middle">1 = one row per value on this side. * = many rows on this side.</text>
+    </svg></div>
+    <figcaption>Pick a category in Products and the filter travels along the arrow into Orders. Nothing travels back, which is why dimensions never filter each other by accident.</figcaption>
+  </figure>
+
+  <h3>Why not one flat table?</h3>
+  <div class="panel scroll"><table>
+    <tr><th></th><th>One flat table</th><th>Star schema</th></tr>
+    <tr><td>Category spelling</td><td>Repeated on every order row. One typo creates a new category.</td><td>Stored once per product.</td></tr>
+    <tr><td>Product with no sales yet</td><td>Cannot appear at all.</td><td>Appears with a blank total.</td></tr>
+    <tr><td>File size and speed</td><td>Grows with every repeated text value.</td><td>Small. Text lives in short tables.</td></tr>
+    <tr><td>DAX</td><td>Measures need workarounds.</td><td>Standard patterns work as written.</td></tr>
+  </table></div>
+
+  <h3>Day by day</h3>
+  <div class="panel scroll"><table>
+    <tr><th>Day</th><th>Learn</th><th>Do</th></tr>
+    <tr><td>1</td><td>Facts and dimensions. Model view.</td><td>For each column in Orders, write F (a fact) or D (a description).</td></tr>
+    <tr><td>2</td><td>Relationships, cardinality, filter direction.</td><td>Drag Products[product] onto Orders[product]. Read the 1 and * on the line.</td></tr>
+    <tr><td>3</td><td>Building a dimension from a fact with Reference and Remove Duplicates.</td><td>Create Stores from Orders: keep city and region, remove duplicates.</td></tr>
+    <tr><td>4</td><td>Date tables. Mark as date table. Sort by column. Turning off Auto date/time.</td><td>Create the Date table below and sort Month by Month No.</td></tr>
+    <tr><td>5</td><td>Hiding key columns, naming, folders. Many-to-many and both-direction filters, and why to avoid them for now.</td><td>Hide Orders[product] and Orders[city] from Report view.</td></tr>
+    <tr><td>6 to 7</td><td colspan="2">Mini-project and quiz.</td></tr>
+  </table></div>
+
+  <pre class="code"><code><span class="kw">Date</span> =
+ADDCOLUMNS (
+    CALENDAR ( DATE ( 2025, 1, 1 ), DATE ( 2025, 12, 31 ) ),
+    "Year", YEAR ( [Date] ),
+    "Month No", MONTH ( [Date] ),
+    "Month", FORMAT ( [Date], "MMM" ),
+    "Quarter", "Q" &amp; QUARTER ( [Date] )
+)</code></pre>
+  <p class="why">Modeling tab, New table, paste. Then Table tools, Mark as date table, and choose the Date column.</p>
+
+  <h3>Mini-project: build the star</h3>
+  <div class="panel">
+    <ul class="check">
+      <li><label><input type="checkbox" id="c-w2-1"><span>Load <code>products.csv</code> as Products. Check product has no duplicates.</span></label></li>
+      <li><label><input type="checkbox" id="c-w2-2"><span>Create Stores from Orders with Reference, keep city and region, remove duplicates. Expect 5 rows.</span></label></li>
+      <li><label><input type="checkbox" id="c-w2-3"><span>Create the Date table and mark it as a date table.</span></label></li>
+      <li><label><input type="checkbox" id="c-w2-4"><span>Create three one-to-many relationships into Orders: product, city, and Date to order date.</span></label></li>
+      <li><label><input type="checkbox" id="c-w2-5"><span>Test: put Products[category] in a table visual with Orders[amount]. You should see three different totals.</span></label></li>
+    </ul>
+    <p class="why"><b>Stretch:</b> the Financial Sample is one flat table. Split it into Sales, Products, Countries and Segments, and add a Date table for 2013 to 2014.</p>
+  </div>
+
+  <h3>Mistakes beginners make this week</h3>
+  <ul>
+    <li>Every category shows the same total. The relationship is missing or inactive.</li>
+    <li>Setting filter direction to Both to make something work. It hides the real problem and gives odd totals later.</li>
+    <li>Using the date column from the fact table on chart axes. Always use the Date table.</li>
+  </ul>
+
+  <h3>Quiz: 3 practical questions</h3>
+  <div class="panel quiz" data-week="w2"></div>
+</section>
+
+<!-- ================= WEEK 3 ================= -->
+<section class="page" id="p-w3" hidden>
+  <p class="gate" data-needs="w2"></p>
+  <h2>Week 3: DAX, the calculator</h2>
+  <div class="meta"><span><b>Goal</b> write measures that stay correct under any filter</span><span><b>Time</b> 12 hours</span><span><b>You finish with</b> ten measures, from Total Sales to month-over-month growth</span></div>
+  <p>DAX looks like Excel formulas, but it works on whole columns and tables, never on a cell like B2. One idea explains most of it: a measure has no fixed answer. It is recalculated for every cell of every visual, using only the rows that survive the current filters. Those surviving rows are the filter context.</p>
+
+  <figure class="panel">
+    <h4>Filter context simulator</h4>
+    <div class="row"><span class="lab">Region</span><span class="row" id="simRegion"></span></div>
+    <div class="row"><span class="lab">Category</span><span class="row" id="simCat"></span></div>
+    <div class="two">
+      <div id="simMeasures"></div>
+      <div class="scroll" style="max-height:330px;overflow-y:auto"><table class="grid" id="simTable"></table></div>
+    </div>
+    <figcaption>Click the slicers. Highlighted rows are the filter context, and every measure is computed from those rows only. The last measure uses CALCULATE to remove the region filter, so its denominator ignores your region choice.</figcaption>
+  </figure>
+
+  <div class="concepts">
+    <div class="concept"><b>Measure</b><span>A formula calculated when a visual asks for it. Changes with slicers. Use for anything you total, average or divide.</span></div>
+    <div class="concept"><b>Calculated column</b><span>A formula calculated once per row at refresh and stored. Use for values you slice or group by, such as a price band.</span></div>
+    <div class="concept"><b>Row context</b><span>Working through a table one row at a time. Calculated columns and the X functions (SUMX, AVERAGEX) have it.</span></div>
+    <div class="concept"><b>CALCULATE</b><span>Runs a measure under changed filters. Add one, replace one, or remove one. It is the most used function in DAX.</span></div>
+    <div class="concept"><b>Time intelligence</b><span>Ready-made date shifts: TOTALYTD, DATEADD, SAMEPERIODLASTYEAR. They need the marked Date table from week 2.</span></div>
+    <div class="concept"><b>Variables</b><span><code>VAR</code> stores a step, <code>RETURN</code> gives the result. Easier to read and to debug.</span></div>
+  </div>
+
+  <h3>Measure or calculated column?</h3>
+  <div class="panel scroll"><table>
+    <tr><th></th><th>Measure</th><th>Calculated column</th></tr>
+    <tr><td>Calculated</td><td>When a visual needs it</td><td>Once, at refresh</td></tr>
+    <tr><td>Stored in the file</td><td>No</td><td>Yes, one value per row</td></tr>
+    <tr><td>Reacts to slicers</td><td>Yes</td><td>No</td></tr>
+    <tr><td>Can go on a slicer or axis</td><td>No</td><td>Yes</td></tr>
+    <tr><td>Example</td><td><code>Margin % = DIVIDE([Profit], [Total Sales])</code></td><td><code>Price Band = IF(Products[price] &gt;= 400, "Premium", "Standard")</code></td></tr>
+  </table></div>
+  <p class="note">Rule of thumb: if the answer is a number shown in a card, table or chart, write a measure. Reach for a column only when you need to filter or group by the result.</p>
+
+  <h3>The ten measures to learn, in order</h3>
+<pre class="code"><code><span class="kw">Total Sales</span>   = SUMX ( Orders, Orders[qty] * RELATED ( Products[price] ) )
+<span class="kw">Orders Count</span>  = COUNTROWS ( Orders )
+<span class="kw">Avg Order</span>     = DIVIDE ( [Total Sales], [Orders Count] )
+<span class="kw">Total Cost</span>    = SUMX ( Orders, Orders[qty] * RELATED ( Products[unit_cost] ) )
+<span class="kw">Profit</span>        = [Total Sales] - [Total Cost]
+<span class="kw">Margin %</span>      = DIVIDE ( [Profit], [Total Sales] )
+<span class="kw">Tea Sales</span>     = CALCULATE ( [Total Sales], Products[category] = "Tea" )
+<span class="kw">% of Regions</span>  = DIVIDE ( [Total Sales],
+                    CALCULATE ( [Total Sales], REMOVEFILTERS ( Stores[region] ) ) )
+<span class="kw">Sales YTD</span>     = TOTALYTD ( [Total Sales], 'Date'[Date] )
+<span class="kw">Sales MoM %</span>   =
+    VAR Prev = CALCULATE ( [Total Sales], DATEADD ( 'Date'[Date], -1, MONTH ) )
+    RETURN DIVIDE ( [Total Sales] - Prev, Prev )</code></pre>
+  <p class="why" id="w3Check"></p>
+
+  <h3>Day by day</h3>
+  <div class="panel scroll"><table>
+    <tr><th>Day</th><th>Learn</th><th>Do</th></tr>
+    <tr><td>1</td><td>Measures against columns. SUM, COUNTROWS, DISTINCTCOUNT, DIVIDE.</td><td>Write measures 1 to 3. Put them on cards.</td></tr>
+    <tr><td>2</td><td>Filter context. Use the simulator above, then repeat it with a real slicer.</td><td>Predict a number before you click, then check.</td></tr>
+    <tr><td>3</td><td>Row context and iterators: SUMX, AVERAGEX, RELATED.</td><td>Write measures 4 to 6.</td></tr>
+    <tr><td>4</td><td>CALCULATE, REMOVEFILTERS, ALL, KEEPFILTERS.</td><td>Write measures 7 and 8. Explain each to yourself in one sentence.</td></tr>
+    <tr><td>5</td><td>Time intelligence and variables.</td><td>Write measures 9 and 10. Put month on rows and check them by hand.</td></tr>
+    <tr><td>6 to 7</td><td colspan="2">Mini-project and quiz.</td></tr>
+  </table></div>
+
+  <h3>Mini-project: the measures table</h3>
+  <div class="panel">
+    <ul class="check">
+      <li><label><input type="checkbox" id="c-w3-1"><span>Create an empty table named _Measures with Enter data and keep all measures there.</span></label></li>
+      <li><label><input type="checkbox" id="c-w3-2"><span>Write all ten measures. Format currency and percentages in Measure tools.</span></label></li>
+      <li><label><input type="checkbox" id="c-w3-3"><span>Build a matrix: Date[Month] on rows, Total Sales, Sales YTD and Sales MoM % as values.</span></label></li>
+      <li><label><input type="checkbox" id="c-w3-4"><span>Build a second matrix: Stores[region] on rows with Total Sales and % of Regions. The percentages must add to 100.</span></label></li>
+      <li><label><input type="checkbox" id="c-w3-5"><span>Check Total Sales against the number shown above.</span></label></li>
+    </ul>
+    <p class="why"><b>Stretch:</b> on the Financial Sample, which covers 2013 and 2014, write <code>Sales LY = CALCULATE([Total Sales], SAMEPERIODLASTYEAR('Date'[Date]))</code> and a year-over-year percentage.</p>
+  </div>
+
+  <h3>Mistakes beginners make this week</h3>
+  <ul>
+    <li>Averaging a percentage column. Divide the totals in a measure and the result is right at every level.</li>
+    <li>Using <code>/</code> where the bottom can be zero. <code>DIVIDE</code> returns blank and avoids the error.</li>
+    <li>Writing <code>SUM(Orders[qty]) * SUM(Products[price])</code>. That multiplies two totals. Use SUMX to multiply row by row.</li>
+  </ul>
+
+  <h3>Quiz: 3 practical questions</h3>
+  <div class="panel quiz" data-week="w3"></div>
+</section>
+
+<!-- ================= WEEK 4 ================= -->
+<section class="page" id="p-w4" hidden>
+  <p class="gate" data-needs="w3"></p>
+  <h2>Week 4: Dashboard design, the shop window</h2>
+  <div class="meta"><span><b>Goal</b> a one-page report a manager understands in five seconds</span><span><b>Time</b> 11 hours</span><span><b>You finish with</b> the Kettle &amp; Crumb sales dashboard</span></div>
+  <p>A good dashboard answers one question for one person. Decide the question first, then choose visuals. Design is mostly removing things: fewer colours, fewer charts, fewer decimals.</p>
+
+  <figure class="panel">
+    <h4>A layout that works for most one-page reports</h4>
+    <div class="scroll">
+    <svg class="dia" viewBox="0 0 640 330" role="img" aria-label="Dashboard layout: title and slicers on top, KPI cards below, a trend chart on the left, a comparison chart on the right, and a detail table at the bottom.">
+      <rect class="d-box" x="10" y="10" width="620" height="310" rx="6"/>
+      <text class="d-t" x="26" y="38">Sales overview</text><rect class="d-box" x="420" y="22" width="92" height="24" rx="4"/><text class="d-s" x="466" y="38" text-anchor="middle">Region</text><rect class="d-box" x="522" y="22" width="92" height="24" rx="4"/><text class="d-s" x="568" y="38" text-anchor="middle">Month</text>
+      <rect class="d-hi" x="26" y="58" width="138" height="54" rx="4"/><rect class="d-hi" x="176" y="58" width="138" height="54" rx="4"/><rect class="d-hi" x="326" y="58" width="138" height="54" rx="4"/><rect class="d-hi" x="476" y="58" width="138" height="54" rx="4"/>
+      <text class="d-s" x="95" y="90" text-anchor="middle">Total sales</text><text class="d-s" x="245" y="90" text-anchor="middle">Orders</text><text class="d-s" x="395" y="90" text-anchor="middle">Avg order</text><text class="d-s" x="545" y="90" text-anchor="middle">Margin %</text>
+      <rect class="d-box" x="26" y="124" width="364" height="110" rx="4"/><text class="d-s" x="208" y="184" text-anchor="middle">Trend over time (line)</text>
+      <rect class="d-box" x="402" y="124" width="212" height="110" rx="4"/><text class="d-s" x="508" y="184" text-anchor="middle">Comparison (bars)</text>
+      <rect class="d-box" x="26" y="246" width="588" height="60" rx="4"/><text class="d-s" x="320" y="281" text-anchor="middle">Detail table</text>
+      <circle class="d-num" cx="26" cy="58" r="11"/><text class="d-numt" x="26" y="62" text-anchor="middle">1</text>
+      <circle class="d-num" cx="26" cy="124" r="11"/><text class="d-numt" x="26" y="128" text-anchor="middle">2</text>
+      <circle class="d-num" cx="402" cy="124" r="11"/><text class="d-numt" x="402" y="128" text-anchor="middle">3</text>
+      <circle class="d-num" cx="26" cy="246" r="11"/><text class="d-numt" x="26" y="250" text-anchor="middle">4</text>
+    </svg></div>
+    <figcaption>Eyes start top-left. Put the headline numbers there (1), then what changed over time (2), then what explains it (3), then the rows for people who want proof (4). Slicers sit together in one place.</figcaption>
+  </figure>
+
+  <h3>The dashboard you will build</h3>
+  <figure class="panel">
+    <h4>Kettle &amp; Crumb sales, Jan to Jun 2025 (invented sample data)</h4>
+    <div class="row"><span class="lab">Region</span><span class="row" id="dRegion"></span></div>
+    <div class="kpis" id="dKpis"></div>
+    <div class="dash">
+      <div><h5 id="dLineTitle">Sales by month</h5><svg class="chart" id="dLine" viewBox="0 0 520 220" role="img" aria-label="Line chart of monthly sales"></svg></div>
+      <div><h5>Sales by category</h5><div id="dBars"></div><p class="why">Click a bar to filter the page. Click it again to clear.</p></div>
+    </div>
+    <figcaption>This runs on the same 20 orders. Clicking a category bar filters the cards and the line, which is the cross-filtering Power BI gives you for free once the model is a star.</figcaption>
+  </figure>
+
+  <h3>Which visual for which question</h3>
+  <div class="panel scroll"><table>
+    <tr><th>The question</th><th>Use</th><th>Avoid</th></tr>
+    <tr><td>What is the number right now?</td><td>Card, or the new card visual with a reference label</td><td>A gauge with no target</td></tr>
+    <tr><td>How did it change over time?</td><td>Line chart</td><td>Pie chart per month</td></tr>
+    <tr><td>Which is biggest?</td><td>Bar chart, sorted, horizontal for long names</td><td>Pie with more than four slices</td></tr>
+    <tr><td>What makes up the total?</td><td>Stacked bar, or 100% stacked bar</td><td>3D or exploded pies</td></tr>
+    <tr><td>How are two numbers related?</td><td>Scatter chart</td><td>Two axes on one chart</td></tr>
+    <tr><td>What are the exact values?</td><td>Table or matrix with conditional formatting</td><td>Labels on every data point</td></tr>
+  </table></div>
+
+  <div class="concepts">
+    <div class="concept"><b>One accent colour</b><span>Grey for context, one colour for the thing to notice. Red and green only for bad and good.</span></div>
+    <div class="concept"><b>Titles that say something</b><span>"Sales fell in February" beats "Sales by Month".</span></div>
+    <div class="concept"><b>Slicers and interactions</b><span>Slicers filter the page. Edit interactions decides which visuals react to a click.</span></div>
+    <div class="concept"><b>Drill-through and tooltips</b><span>Keep the first page simple. Send detail to a drill-through page or a report page tooltip.</span></div>
+    <div class="concept"><b>Bookmarks</b><span>Save a state of the page. Used for view toggles and guided stories.</span></div>
+    <div class="concept"><b>Accessibility</b><span>Enough contrast, alt text on visuals, a sensible tab order, and never colour as the only signal.</span></div>
+  </div>
+
+  <h3>Day by day</h3>
+  <div class="panel scroll"><table>
+    <tr><th>Day</th><th>Learn</th><th>Do</th></tr>
+    <tr><td>1</td><td>Audience and question. Sketch on paper first.</td><td>Write the one question your page answers. Sketch the four zones.</td></tr>
+    <tr><td>2</td><td>Cards, line, bar, table. Format pane basics.</td><td>Build the four KPI cards and the line chart.</td></tr>
+    <tr><td>3</td><td>Slicers, Edit interactions, sync slicers.</td><td>Add a region slicer and the category bar chart.</td></tr>
+    <tr><td>4</td><td>Themes, conditional formatting, titles, alignment and spacing.</td><td>Reduce the page to one accent colour. Align everything to a grid.</td></tr>
+    <tr><td>5</td><td>Drill-through, tooltips, bookmarks, mobile layout.</td><td>Add a product drill-through page.</td></tr>
+    <tr><td>6 to 7</td><td colspan="2">Mini-project, five-second test with a friend, and quiz.</td></tr>
+  </table></div>
+
+  <h3>Mini-project: publish-ready sales dashboard</h3>
+  <div class="panel">
+    <ul class="check">
+      <li><label><input type="checkbox" id="c-w4-1"><span>Four cards: Total Sales, Orders Count, Avg Order, Margin %.</span></label></li>
+      <li><label><input type="checkbox" id="c-w4-2"><span>Line chart: Date[Month] on the axis, Total Sales as values, sorted by Month No.</span></label></li>
+      <li><label><input type="checkbox" id="c-w4-3"><span>Bar chart: Products[category] by Total Sales, sorted descending.</span></label></li>
+      <li><label><input type="checkbox" id="c-w4-4"><span>Region slicer, plus a detail table of orders at the bottom.</span></label></li>
+      <li><label><input type="checkbox" id="c-w4-5"><span>Your numbers match the mock above for All, North, South and West.</span></label></li>
+      <li><label><input type="checkbox" id="c-w4-6"><span>Five-second test: show it to someone, hide it, ask what they remember.</span></label></li>
+    </ul>
+    <p class="why"><b>Stretch:</b> rebuild the page on the Financial Sample with Country and Segment slicers and a year-over-year card.</p>
+  </div>
+
+  <h3>Quiz: 3 practical questions</h3>
+  <div class="panel quiz" data-week="w4"></div>
+</section>
+
+<!-- ================= WEEK 5 ================= -->
+<section class="page" id="p-w5" hidden>
+  <p class="gate" data-needs="w4"></p>
+  <h2>Week 5: Advanced Power Query, built to scale</h2>
+  <div class="meta"><span><b>Goal</b> queries that handle many files and large tables</span><span><b>Time</b> 10 hours</span><span><b>You finish with</b> a folder-driven Orders query with a parameter and a reusable function</span></div>
+  <p>Week 1 cleaned one file by hand. Real work has a new file every month and tables with millions of rows. This week you make the same cleaning steps reusable, and you learn why some queries refresh in seconds while others take an hour.</p>
+
+  <div class="concepts">
+    <div class="concept"><b>Parameter</b><span>A named value, such as a folder path or a region, that queries read. Change it once and every query follows.</span><em>Home, Manage Parameters.</em></div>
+    <div class="concept"><b>Custom function</b><span>A query that takes an input and returns a result. Write a cleaning rule once and call it on any column or file.</span></div>
+    <div class="concept"><b>Combine files from a folder</b><span>Point at a folder. Power BI builds the steps on one sample file and runs them on every file, then stacks the results.</span></div>
+    <div class="concept"><b>Query folding</b><span>With a database source, Power Query turns your steps into one SQL query so the database does the work. A step it cannot translate runs on your PC, and so does everything after it.</span></div>
+    <div class="concept"><b>try ... otherwise</b><span>Catches a conversion error in one cell and returns a fallback, so one bad value does not fail the whole refresh.</span></div>
+    <div class="concept"><b>Incremental refresh</b><span>Reload only recent rows, such as the last 7 days, and keep older data as it is. Needs two date/time parameters named exactly <code>RangeStart</code> and <code>RangeEnd</code>.</span></div>
+  </div>
+
+  <h3>How a folder of files becomes one table</h3>
+  <figure class="panel">
+    <div class="scroll">
+    <svg class="dia" viewBox="0 0 712 110" role="img" aria-label="Folder combine: files in a folder, steps built on one sample file, turned into a function, run on every file, appended into one table.">
+      <defs><marker id="ah5" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path class="d-hd" d="M0 0L10 5L0 10z"/></marker></defs>
+      <rect class="d-box" x="5" y="20" width="120" height="64" rx="6"/><text class="d-t" x="65" y="47" text-anchor="middle">Folder</text><text class="d-s" x="65" y="66" text-anchor="middle">one CSV per month</text>
+      <rect class="d-hi" x="150" y="20" width="120" height="64" rx="6"/><text class="d-t" x="210" y="47" text-anchor="middle">Sample file</text><text class="d-s" x="210" y="66" text-anchor="middle">you build steps here</text>
+      <rect class="d-hi" x="295" y="20" width="120" height="64" rx="6"/><text class="d-t" x="355" y="47" text-anchor="middle">Function</text><text class="d-s" x="355" y="66" text-anchor="middle">made from the steps</text>
+      <rect class="d-box" x="440" y="20" width="120" height="64" rx="6"/><text class="d-t" x="500" y="47" text-anchor="middle">Every file</text><text class="d-s" x="500" y="66" text-anchor="middle">function runs on each</text>
+      <rect class="d-box" x="585" y="20" width="120" height="64" rx="6"/><text class="d-t" x="645" y="47" text-anchor="middle">One table</text><text class="d-s" x="645" y="66" text-anchor="middle">results appended</text>
+      <line class="d-ln" x1="125" y1="52" x2="148" y2="52" marker-end="url(#ah5)"/><line class="d-ln" x1="270" y1="52" x2="293" y2="52" marker-end="url(#ah5)"/><line class="d-ln" x1="415" y1="52" x2="438" y2="52" marker-end="url(#ah5)"/><line class="d-ln" x1="560" y1="52" x2="583" y2="52" marker-end="url(#ah5)"/>
+    </svg></div>
+    <figcaption>Get data, Folder, then Combine &amp; Transform Data. Power BI creates the two highlighted pieces for you. Edit the sample file's steps and every file gets the same treatment. A new file dropped in the folder is picked up at the next refresh.</figcaption>
+  </figure>
+
+  <h3>Query folding simulator</h3>
+  <figure class="panel">
+    <h4>Where does each step run? (illustrative numbers)</h4>
+    <div class="row"><span class="lab">Merge step is</span><span class="row" id="foldPos"></span></div>
+    <div class="scroll"><table id="foldTable"></table></div>
+    <p class="gate" id="foldSum"></p>
+    <figcaption>The source is a database table. A merge with an Excel file cannot be turned into SQL, because the database cannot see the Excel file. Put that step late, after the filters and grouping, and the database still does the heavy work. Which steps fold depends on the connector, so right-click a step and look for View Native Query, or read the folding indicator next to each step.</figcaption>
+  </figure>
+
+  <h3>Four patterns to type once</h3>
+<pre class="code"><code><span class="kw">// 1. A parameter used in a filter (RegionParam is a text parameter)</span>
+= Table.SelectRows(Orders, each [region] = RegionParam)
+
+<span class="kw">// 2. A custom function: New Source, Blank Query, name it fxCleanAmount</span>
+(amountText as nullable text) as nullable number =>
+    if amountText = null or amountText = "" then null
+    else Number.FromText(Text.Replace(amountText, "Rs ", ""), "en-IN")
+
+<span class="kw">// 3. A safe conversion: bad cells become null, good cells convert</span>
+= Table.AddColumn(Source, "amount_num",
+    each try Number.FromText([amount], "en-IN") otherwise null, type nullable number)
+
+<span class="kw">// 4. The incremental refresh filter (the column must be date/time)</span>
+= Table.SelectRows(Source, each [order_datetime] >= RangeStart and [order_datetime] &lt; RangeEnd)</code></pre>
+  <p class="why">Pattern 4 uses <code>&gt;=</code> on one side and <code>&lt;</code> on the other so a row on the boundary is never loaded twice.</p>
+
+  <h3>Day by day</h3>
+  <div class="panel scroll"><table>
+    <tr><th>Day</th><th>Learn</th><th>Do</th></tr>
+    <tr><td>1</td><td>Parameters. Using one in a source path and in a filter.</td><td>Create a FolderPath parameter and a RegionParam parameter.</td></tr>
+    <tr><td>2</td><td>Get data from Folder. Combine &amp; Transform. The sample file query.</td><td>Split orders_raw.csv into two files and combine them.</td></tr>
+    <tr><td>3</td><td>Custom functions. Invoke Custom Function on a column.</td><td>Write fxCleanAmount and replace your week 1 Replace Values and type steps with it.</td></tr>
+    <tr><td>4</td><td>Errors: try ... otherwise, Keep Errors, Replace Errors. Conditional Column.</td><td>Type N/A into one amount cell and make the query survive it.</td></tr>
+    <tr><td>5</td><td>Query folding, View Native Query, incremental refresh, Table.Buffer and when not to use it.</td><td>Use the simulator. If you have a database, check which of your steps fold.</td></tr>
+    <tr><td>6 to 7</td><td colspan="2">Mini-project and quiz.</td></tr>
+  </table></div>
+
+  <h3>Mini-project: orders from a folder</h3>
+  <div class="panel">
+    <ul class="check">
+      <li><label><input type="checkbox" id="c-w5-1"><span>Make a folder with two files, <code>orders_jan_mar.csv</code> and <code>orders_apr_jun.csv</code>, cut from orders_raw.csv. Both keep the header row.</span></label></li>
+      <li><label><input type="checkbox" id="c-w5-2"><span>Create a text parameter FolderPath and load the folder through it with Combine &amp; Transform.</span></label></li>
+      <li><label><input type="checkbox" id="c-w5-3"><span>Move your week 1 cleaning steps into the sample file query.</span></label></li>
+      <li><label><input type="checkbox" id="c-w5-4"><span>Create fxCleanAmount and use it for the amount column.</span></label></li>
+      <li><label><input type="checkbox" id="c-w5-5"><span>Add a third file with two orders of your own, press Refresh, and confirm the row count rises by two.</span></label></li>
+    </ul>
+    <p class="gate" id="w5Check"></p>
+  </div>
+
+  <h3>Mistakes people make this week</h3>
+  <ul>
+    <li>Hard-coding a path like C:\Users\you\Desktop in the query. Nobody else can refresh it. Use a parameter.</li>
+    <li>Putting a non-folding step first on a large database table, so every row is downloaded.</li>
+    <li>Using Replace Errors on a whole table without reading the errors. It hides real data problems.</li>
+  </ul>
+
+  <h3>Quiz: 3 practical questions</h3>
+  <div class="panel quiz" data-week="w5"></div>
+</section>
+
+<!-- ================= WEEK 6 ================= -->
+<section class="page" id="p-w6" hidden>
+  <p class="gate" data-needs="w5"></p>
+  <h2>Week 6: Advanced modeling, the hard cases</h2>
+  <div class="meta"><span><b>Goal</b> handle two dates, many-to-many, big data and security</span><span><b>Time</b> 11 hours</span><span><b>You finish with</b> a model with a delivery date, three security roles and a clear storage choice</span></div>
+  <p>A star schema covers most reports. Four situations need more: a fact with two dates, two things that relate many-to-many, data too large or too fresh to copy, and people who must see only their own rows.</p>
+
+  <div class="concepts">
+    <div class="concept"><b>Role-playing dimension</b><span>One Date table used for two purposes, such as order date and delivery date. Only one relationship can be active. The other is switched on inside a measure with USERELATIONSHIP.</span></div>
+    <div class="concept"><b>Bridge table</b><span>A small table that sits between two tables that relate many-to-many, with one row per valid pair.</span><em>A product can be in many promotions. A promotion covers many products.</em></div>
+    <div class="concept"><b>Storage mode</b><span>Import copies data into the model. DirectQuery leaves it in the source and asks on every click. Dual does either, as needed. Direct Lake reads Fabric lake files directly.</span></div>
+    <div class="concept"><b>Composite model</b><span>A model that mixes modes, such as an imported Products table with a DirectQuery fact.</span></div>
+    <div class="concept"><b>Row-level security</b><span>A DAX filter attached to a role. A member of the role sees only the rows where the filter is true, in every visual and every total.</span><em>Modeling, Manage roles.</em></div>
+    <div class="concept"><b>Dynamic security</b><span>One role for everyone. The filter compares a column with the signed-in user: <code>Stores[manager_email] = USERPRINCIPALNAME()</code>.</span></div>
+  </div>
+
+  <h3>One Date table, two dates</h3>
+  <figure class="panel">
+    <h4>Total Sales by order month against Delivered Sales by delivery month</h4>
+    <div class="scroll"><table id="delivTable"></table></div>
+<pre class="code"><code><span class="kw">Delivered Sales</span> =
+    CALCULATE ( [Total Sales],
+        USERELATIONSHIP ( Orders[delivery date], 'Date'[Date] ) )</code></pre>
+    <figcaption>Computed on the 20 practice orders with delivery set to two days after the order. Both columns add to the same total. Orders placed in the last days of a month move into the next month, which is why February and March differ.</figcaption>
+  </figure>
+
+  <h3>Many-to-many through a bridge</h3>
+  <figure class="panel">
+    <div class="scroll">
+    <svg class="dia" viewBox="0 0 700 150" role="img" aria-label="Promotions relate to a bridge table, the bridge relates to Products, and Products relate to Orders. The bridge to Products link must filter in both directions for a promotion filter to reach Orders.">
+      <defs><marker id="ah6" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path class="d-hd" d="M0 0L10 5L0 10z"/></marker></defs>
+      <rect class="d-box" x="10" y="40" width="130" height="64" rx="6"/><text class="d-t" x="75" y="67" text-anchor="middle">Promotions</text><text class="d-s" x="75" y="86" text-anchor="middle">one row per promo</text>
+      <rect class="d-hi" x="200" y="40" width="150" height="64" rx="6"/><text class="d-t" x="275" y="67" text-anchor="middle">PromoProducts</text><text class="d-s" x="275" y="86" text-anchor="middle">one row per pair</text>
+      <rect class="d-box" x="410" y="40" width="120" height="64" rx="6"/><text class="d-t" x="470" y="67" text-anchor="middle">Products</text><text class="d-s" x="470" y="86" text-anchor="middle">6 rows</text>
+      <rect class="d-box" x="590" y="40" width="100" height="64" rx="6"/><text class="d-t" x="640" y="67" text-anchor="middle">Orders</text><text class="d-s" x="640" y="86" text-anchor="middle">20 rows</text>
+      <line class="d-ln" x1="140" y1="72" x2="198" y2="72" marker-end="url(#ah6)"/>
+      <line class="d-ln" x1="352" y1="72" x2="408" y2="72" marker-start="url(#ah6)" marker-end="url(#ah6)"/>
+      <line class="d-ln" x1="530" y1="72" x2="588" y2="72" marker-end="url(#ah6)"/>
+      <text class="d-m" x="169" y="62" text-anchor="middle">1 to *</text><text class="d-m" x="380" y="62" text-anchor="middle">* to 1</text><text class="d-m" x="559" y="62" text-anchor="middle">1 to *</text>
+      <text class="d-m" x="380" y="128" text-anchor="middle">both directions here, or CROSSFILTER in the measure</text>
+    </svg></div>
+    <figcaption>A promotion filter has to travel right, through the bridge, into Products and on to Orders. The middle link normally filters from Products to the bridge only. Either set that one relationship to Both, or keep it single and write <code>CALCULATE([Total Sales], CROSSFILTER(PromoProducts[product], Products[product], BOTH))</code>.</figcaption>
+  </figure>
+
+  <h3>Import or DirectQuery</h3>
+  <figure class="panel">
+    <div class="scroll">
+    <svg class="dia" viewBox="0 0 640 230" role="img" aria-label="Import copies data into the model at refresh and visuals read the copy. DirectQuery keeps no copy and every click sends a query to the source.">
+      <defs><marker id="ah7" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path class="d-hd" d="M0 0L10 5L0 10z"/></marker></defs>
+      <text class="d-t" x="20" y="22">Import</text>
+      <rect class="d-box" x="20" y="34" width="130" height="54" rx="6"/><text class="d-t" x="85" y="66" text-anchor="middle">Source</text>
+      <rect class="d-hi" x="255" y="34" width="130" height="54" rx="6"/><text class="d-t" x="320" y="58" text-anchor="middle">Model</text><text class="d-s" x="320" y="76" text-anchor="middle">holds a copy</text>
+      <rect class="d-box" x="490" y="34" width="130" height="54" rx="6"/><text class="d-t" x="555" y="66" text-anchor="middle">Visual</text>
+      <line class="d-ln" x1="150" y1="61" x2="253" y2="61" marker-end="url(#ah7)"/><text class="d-m" x="202" y="52" text-anchor="middle">copied at refresh</text>
+      <line class="d-ln" x1="385" y1="61" x2="488" y2="61" marker-end="url(#ah7)"/><text class="d-m" x="437" y="52" text-anchor="middle">fast answers</text>
+      <text class="d-t" x="20" y="138">DirectQuery</text>
+      <rect class="d-box" x="20" y="150" width="130" height="54" rx="6"/><text class="d-t" x="85" y="182" text-anchor="middle">Source</text>
+      <rect class="d-hi" x="255" y="150" width="130" height="54" rx="6"/><text class="d-t" x="320" y="174" text-anchor="middle">Model</text><text class="d-s" x="320" y="192" text-anchor="middle">holds no data</text>
+      <rect class="d-box" x="490" y="150" width="130" height="54" rx="6"/><text class="d-t" x="555" y="182" text-anchor="middle">Visual</text>
+      <line class="d-ln" x1="490" y1="177" x2="387" y2="177" marker-end="url(#ah7)"/><text class="d-m" x="437" y="168" text-anchor="middle">every click asks</text>
+      <line class="d-ln" x1="255" y1="177" x2="152" y2="177" marker-end="url(#ah7)"/><text class="d-m" x="202" y="168" text-anchor="middle">SQL sent live</text>
+    </svg></div>
+    <figcaption>With Import the source is touched only at refresh, so visuals are fast and the data is as old as the last refresh. With DirectQuery the arrows point the other way: nothing is stored, and each visual waits for the source to answer.</figcaption>
+  </figure>
+  <div class="panel scroll"><table>
+    <tr><th></th><th>Import</th><th>DirectQuery</th><th>Direct Lake</th></tr>
+    <tr><td>Where the data sits</td><td>Compressed copy in the model</td><td>In the source database</td><td>Delta files in a Fabric lakehouse</td></tr>
+    <tr><td>How fresh</td><td>As of the last refresh</td><td>Live</td><td>Close to live</td></tr>
+    <tr><td>Speed of visuals</td><td>Fastest</td><td>Depends on the source</td><td>Close to Import</td></tr>
+    <tr><td>Choose it when</td><td>The data fits and a scheduled refresh is fresh enough. Start here.</td><td>The data is too large to copy or must be current to the minute</td><td>Your organisation already keeps its data in Fabric</td></tr>
+  </table></div>
+
+  <h3>Row-level security simulator</h3>
+  <figure class="panel">
+    <h4>View as role</h4>
+    <div class="row" id="rlsRole"></div>
+    <div class="two">
+      <div id="rlsOut"></div>
+      <div class="scroll" style="max-height:300px;overflow-y:auto"><table class="grid" id="rlsTable"></table></div>
+    </div>
+    <figcaption>The role filter sits on the Stores dimension and flows into Orders through the relationship, the same way a slicer does. The difference is that the reader cannot remove it. Totals, percentages and exports all respect it.</figcaption>
+  </figure>
+
+  <h3>Day by day</h3>
+  <div class="panel scroll"><table>
+    <tr><th>Day</th><th>Learn</th><th>Do</th></tr>
+    <tr><td>1</td><td>Active and inactive relationships. USERELATIONSHIP.</td><td>Add a delivery date column in Power Query with <code>Date.AddDays([order date], 2)</code> and relate it to Date.</td></tr>
+    <tr><td>2</td><td>Many-to-many, bridge tables, CROSSFILTER.</td><td>Type a Promotions table and a PromoProducts bridge with Enter data. Build the diagram above.</td></tr>
+    <tr><td>3</td><td>Import, DirectQuery, Dual, Direct Lake. Composite models. Aggregations in outline.</td><td>For three reports you know, write which mode fits and why.</td></tr>
+    <tr><td>4</td><td>Row-level security: static roles, View as, dynamic roles with USERPRINCIPALNAME.</td><td>Create three region roles and test each with View as.</td></tr>
+    <tr><td>5</td><td>Model hygiene: hide keys, display folders, descriptions, a measures table, star against snowflake.</td><td>Tidy your model so a stranger could use the Data pane.</td></tr>
+    <tr><td>6 to 7</td><td colspan="2">Mini-project and quiz.</td></tr>
+  </table></div>
+
+  <h3>Mini-project: two dates and three roles</h3>
+  <div class="panel">
+    <ul class="check">
+      <li><label><input type="checkbox" id="c-w6-1"><span>Add the delivery date column and an inactive relationship from Date[Date] to Orders[delivery date]. The line is dotted.</span></label></li>
+      <li><label><input type="checkbox" id="c-w6-2"><span>Write Delivered Sales and put it beside Total Sales in a matrix by Date[Month]. Compare with the table above.</span></label></li>
+      <li><label><input type="checkbox" id="c-w6-3"><span>Create roles North, South and West, each with a filter on Stores[region].</span></label></li>
+      <li><label><input type="checkbox" id="c-w6-4"><span>Use Modeling, View as for each role and compare the totals with the check line below.</span></label></li>
+      <li><label><input type="checkbox" id="c-w6-5"><span>Add a manager_email column to Stores and replace the three roles with one dynamic role.</span></label></li>
+    </ul>
+    <p class="gate" id="w6Check"></p>
+  </div>
+
+  <h3>Mistakes people make this week</h3>
+  <ul>
+    <li>Loading a second copy of the Date table for every date column when one inactive relationship would do. A second Date table is fine when readers need to slice by both dates at once.</li>
+    <li>Choosing DirectQuery because it sounds modern. It moves the performance problem to the database.</li>
+    <li>Building security with hidden pages or slicers. Anyone can undo those. Only roles are security.</li>
+  </ul>
+  <p class="note">A documented limit: Microsoft's reference says USERELATIONSHIP can raise an error when row-level security is defined on the tables in that relationship. In this project the roles filter Stores, and the inactive relationship joins Orders and Date. If you do hit the error in your own model, give the second date its own Date table instead.</p>
+
+  <h3>Quiz: 3 practical questions</h3>
+  <div class="panel quiz" data-week="w6"></div>
+</section>
+
+<!-- ================= WEEK 7 ================= -->
+<section class="page" id="p-w7" hidden>
+  <p class="gate" data-needs="w6"></p>
+  <h2>Week 7: Advanced DAX, thinking in tables</h2>
+  <div class="meta"><span><b>Goal</b> rank, accumulate and compare against any total</span><span><b>Time</b> 12 hours</span><span><b>You finish with</b> ranking, running totals, share measures and a calculation group</span></div>
+  <p>Week 3 measures returned one number from the current filters. Advanced DAX builds a small table in memory first, such as one row per product, and then works on that table. Three ideas carry most of it: context transition, the ALL family, and iterating over a list of values.</p>
+
+  <h3>Context transition</h3>
+  <figure class="panel">
+    <div class="scroll">
+    <svg class="dia" viewBox="0 0 680 120" role="img" aria-label="Context transition: the current row of Products becomes a filter, which reduces Orders to that product's rows before the sum runs.">
+      <defs><marker id="ah8" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path class="d-hd" d="M0 0L10 5L0 10z"/></marker></defs>
+      <rect class="d-box" x="10" y="26" width="170" height="64" rx="6"/><text class="d-t" x="95" y="52" text-anchor="middle">Row context</text><text class="d-s" x="95" y="72" text-anchor="middle">current row: Assam Tea</text>
+      <rect class="d-hi" x="255" y="26" width="170" height="64" rx="6"/><text class="d-t" x="340" y="52" text-anchor="middle">Filter context</text><text class="d-s" x="340" y="72" text-anchor="middle">product = Assam Tea</text>
+      <rect class="d-box" x="500" y="26" width="170" height="64" rx="6"/><text class="d-t" x="585" y="52" text-anchor="middle">Orders</text><text class="d-s" x="585" y="72" text-anchor="middle">4 rows left, qty 9</text>
+      <line class="d-ln" x1="180" y1="58" x2="253" y2="58" marker-end="url(#ah8)"/><text class="d-m" x="216" y="48" text-anchor="middle">CALCULATE</text>
+      <line class="d-ln" x1="425" y1="58" x2="498" y2="58" marker-end="url(#ah8)"/><text class="d-m" x="461" y="48" text-anchor="middle">relationship</text>
+    </svg></div>
+<pre class="code"><code><span class="kw">Wrong</span> = SUMX ( Products, SUM ( Orders[qty] ) )
+<span class="kw">Right</span> = SUMX ( Products, CALCULATE ( SUM ( Orders[qty] ) ) )</code></pre>
+    <p id="ctxNums"></p>
+    <figcaption>Being on a row does not filter anything. CALCULATE turns the current row into a filter. Every measure has a hidden CALCULATE around it, which is why calling <code>[Total Sales]</code> inside SUMX works per row.</figcaption>
+  </figure>
+
+  <div class="concepts">
+    <div class="concept"><b>ALL and REMOVEFILTERS</b><span>Ignore filters on a column or table. The denominator becomes the grand total.</span></div>
+    <div class="concept"><b>ALLSELECTED</b><span>Ignore the filter from the visual's own rows, but keep slicers. The denominator becomes the visible total.</span></div>
+    <div class="concept"><b>ALLEXCEPT</b><span>Remove every filter on a table except the columns you name. Used for a share within a group.</span></div>
+    <div class="concept"><b>VALUES</b><span>The distinct values of a column that are visible right now. Iterate over it to work per customer, per month or per product.</span></div>
+    <div class="concept"><b>RANKX and TOPN</b><span>RANKX gives a position. TOPN returns the best rows as a table you can filter by.</span></div>
+    <div class="concept"><b>Calculation group</b><span>A calculation such as YTD written once with <code>SELECTEDMEASURE()</code> and applied to any measure.</span><em>Model view, Calculation group.</em></div>
+  </div>
+
+  <h3>Share of what? ALL against ALLSELECTED</h3>
+  <figure class="panel">
+    <h4>Category share with a region slicer</h4>
+    <div class="row"><span class="lab">Region</span><span class="row" id="asRegion"></span></div>
+    <div class="scroll"><table id="asTable"></table></div>
+<pre class="code"><code><span class="kw">% of All</span>      = DIVIDE ( [Total Sales], CALCULATE ( [Total Sales], REMOVEFILTERS () ) )
+<span class="kw">% of Selected</span> = DIVIDE ( [Total Sales],
+                    CALCULATE ( [Total Sales], ALLSELECTED ( Products[category] ) ) )</code></pre>
+    <figcaption>With no slicer the two columns match. Pick a region and they separate: % of All divides by every sale in the model, while % of Selected divides by what the slicer leaves, so it always adds to 100.</figcaption>
+  </figure>
+
+  <h3>Ranking and running totals</h3>
+  <figure class="panel">
+    <h4>What these measures return on the practice data</h4>
+    <div class="row" id="advView"></div>
+    <div class="scroll"><table id="advTable"></table></div>
+<pre class="code"><code><span class="kw">Product Rank</span> =
+    IF ( HASONEVALUE ( Products[product] ),
+        RANKX ( ALL ( Products[product] ), [Total Sales] ) )
+
+<span class="kw">Cumulative %</span> =
+    VAR Cur = [Total Sales]
+    VAR Bigger = FILTER ( ALL ( Products[product] ), [Total Sales] >= Cur )
+    RETURN DIVIDE ( SUMX ( Bigger, [Total Sales] ),
+                    CALCULATE ( [Total Sales], ALL ( Products[product] ) ) )
+
+<span class="kw">Running Total</span> =
+    CALCULATE ( [Total Sales],
+        FILTER ( ALL ( 'Date'[Date] ), 'Date'[Date] &lt;= MAX ( 'Date'[Date] ) ) )
+
+<span class="kw">Avg Sales per Customer</span> = AVERAGEX ( VALUES ( Orders[customer] ), [Total Sales] )
+
+<span class="kw">Top 3 Sales</span> =
+    CALCULATE ( [Total Sales], TOPN ( 3, ALL ( Products[product] ), [Total Sales] ) )</code></pre>
+    <p id="advNums"></p>
+    <figcaption>Each measure removes the filter from the row it is on, builds the full list, then compares the current row against it. Rank counts how many products sell more. Cumulative % adds every product that sells at least as much. One documented catch: when products tie at the cut-off, TOPN returns all of the tied rows, so Top 3 can cover four products.</figcaption>
+  </figure>
+
+  <h3>Calculation groups</h3>
+<pre class="code"><code><span class="kw">// Calculation group "Time view", three calculation items</span>
+<span class="kw">Current</span> = SELECTEDMEASURE ()
+<span class="kw">YTD</span>     = CALCULATE ( SELECTEDMEASURE (), DATESYTD ( 'Date'[Date] ) )
+<span class="kw">vs PM %</span> =
+    VAR Prev = CALCULATE ( SELECTEDMEASURE (), DATEADD ( 'Date'[Date], -1, MONTH ) )
+    RETURN DIVIDE ( SELECTEDMEASURE () - Prev, Prev )</code></pre>
+  <p class="why">Put the Time view column on a matrix's columns and any measure in values. Total Sales, Profit and Orders Count all get Current, YTD and vs PM % without nine separate measures. Power BI asks you to switch on "discourage implicit measures" first, because calculation items only apply to measures you wrote.</p>
+
+  <h3>Making DAX fast</h3>
+  <ul>
+    <li>Store a value in a <code>VAR</code> when you use it twice. It is calculated once.</li>
+    <li>Filter a column, not a whole table: <code>Products[category] = "Tea"</code> beats <code>FILTER ( Products, ... )</code>.</li>
+    <li>Find the slow visual with View, Performance analyzer, then copy its query into DAX query view to test changes.</li>
+    <li>Fix the model before the measure. A missing relationship or a wide flat table costs more than any formula.</li>
+  </ul>
+
+  <h3>Day by day</h3>
+  <div class="panel scroll"><table>
+    <tr><th>Day</th><th>Learn</th><th>Do</th></tr>
+    <tr><td>1</td><td>Context transition. Why a measure inside an iterator works.</td><td>Write Wrong and Right above and explain the two results aloud.</td></tr>
+    <tr><td>2</td><td>ALL, REMOVEFILTERS, ALLSELECTED, ALLEXCEPT.</td><td>Write % of All and % of Selected. Test with the region slicer.</td></tr>
+    <tr><td>3</td><td>VALUES, SUMMARIZE, ADDCOLUMNS. Averages over a list.</td><td>Write Avg Sales per Customer and a best-month measure with MAXX.</td></tr>
+    <tr><td>4</td><td>RANKX, TOPN, running totals, Pareto.</td><td>Write Product Rank, Cumulative %, Running Total and Top 3 Sales.</td></tr>
+    <tr><td>5</td><td>Calculation groups. Performance analyzer and DAX query view.</td><td>Build the Time view group. Time one visual before and after a change.</td></tr>
+    <tr><td>6 to 7</td><td colspan="2">Mini-project and quiz.</td></tr>
+  </table></div>
+
+  <h3>Mini-project: the analyst's page</h3>
+  <div class="panel">
+    <ul class="check">
+      <li><label><input type="checkbox" id="c-w7-1"><span>A product table with Total Sales, Product Rank and Cumulative %, sorted by rank. Match it to the By product view above.</span></label></li>
+      <li><label><input type="checkbox" id="c-w7-2"><span>A month matrix with Total Sales and Running Total. Match it to the By month view.</span></label></li>
+      <li><label><input type="checkbox" id="c-w7-3"><span>A category table with % of All and % of Selected, plus a region slicer.</span></label></li>
+      <li><label><input type="checkbox" id="c-w7-4"><span>A card for Avg Sales per Customer and one for Top 3 Sales. Check both against the numbers above.</span></label></li>
+      <li><label><input type="checkbox" id="c-w7-5"><span>The Time view calculation group on a matrix with two different measures.</span></label></li>
+    </ul>
+  </div>
+
+  <h3>Quiz: 3 practical questions</h3>
+  <div class="panel quiz" data-week="w7"></div>
+</section>
+
+<!-- ================= WEEK 8 ================= -->
+<section class="page" id="p-w8" hidden>
+  <p class="gate" data-needs="w7"></p>
+  <h2>Week 8: Publish, secure and maintain</h2>
+  <div class="meta"><span><b>Goal</b> a report other people can rely on</span><span><b>Time</b> 11 hours</span><span><b>You finish with</b> a published report with scheduled refresh, tested security and a safe way to change it</span></div>
+  <p>A report on your laptop helps nobody. This week moves it to the Power BI service, keeps its data fresh, controls who sees what, and sets up a way to change it without breaking what people use every morning. You need a work or school account for this week.</p>
+
+  <figure class="panel">
+    <h4>From your PC to the reader</h4>
+    <div class="scroll">
+    <svg class="dia" viewBox="0 0 720 210" role="img" aria-label="Desktop publishes to a workspace, which holds the semantic model and report. The workspace publishes an app that readers open. A gateway connects on-premises sources to the workspace for scheduled refresh.">
+      <defs><marker id="ah9" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path class="d-hd" d="M0 0L10 5L0 10z"/></marker></defs>
+      <rect class="d-box" x="10" y="26" width="130" height="64" rx="6"/><text class="d-t" x="75" y="52" text-anchor="middle">Desktop</text><text class="d-s" x="75" y="72" text-anchor="middle">.pbix or .pbip</text>
+      <rect class="d-hi" x="210" y="26" width="170" height="64" rx="6"/><text class="d-t" x="295" y="52" text-anchor="middle">Workspace</text><text class="d-s" x="295" y="72" text-anchor="middle">semantic model + report</text>
+      <rect class="d-box" x="450" y="26" width="110" height="64" rx="6"/><text class="d-t" x="505" y="52" text-anchor="middle">App</text><text class="d-s" x="505" y="72" text-anchor="middle">read-only</text>
+      <rect class="d-box" x="620" y="26" width="90" height="64" rx="6"/><text class="d-t" x="665" y="62" text-anchor="middle">Readers</text>
+      <line class="d-ln" x1="140" y1="58" x2="208" y2="58" marker-end="url(#ah9)"/><text class="d-m" x="174" y="48" text-anchor="middle">publish</text>
+      <line class="d-ln" x1="380" y1="58" x2="448" y2="58" marker-end="url(#ah9)"/><text class="d-m" x="414" y="48" text-anchor="middle">publish app</text>
+      <line class="d-ln" x1="560" y1="58" x2="618" y2="58" marker-end="url(#ah9)"/>
+      <rect class="d-box" x="10" y="140" width="130" height="54" rx="6"/><text class="d-t" x="75" y="164" text-anchor="middle">Sources</text><text class="d-s" x="75" y="182" text-anchor="middle">on your network</text>
+      <rect class="d-box" x="210" y="140" width="170" height="54" rx="6"/><text class="d-t" x="295" y="164" text-anchor="middle">Data gateway</text><text class="d-s" x="295" y="182" text-anchor="middle">a small app on a PC</text>
+      <line class="d-ln" x1="140" y1="167" x2="208" y2="167" marker-end="url(#ah9)"/>
+      <line class="d-ln" x1="295" y1="140" x2="295" y2="92" marker-end="url(#ah9)"/><text class="d-m" x="304" y="120">scheduled refresh</text>
+    </svg></div>
+    <figcaption>Publishing sends two things to the workspace: the semantic model and the report. Readers get the app, not the workspace. The service can reach cloud sources by itself. For anything on your network or your own disk it needs a gateway to fetch the data.</figcaption>
+  </figure>
+
+  <div class="concepts">
+    <div class="concept"><b>Workspace</b><span>A shared folder in the service for the people who build. Roles: Admin, Member, Contributor, Viewer.</span></div>
+    <div class="concept"><b>App</b><span>A packaged, read-only view of a workspace for the people who read. One link, clean navigation.</span></div>
+    <div class="concept"><b>Scheduled refresh</b><span>The service reloads the data on a timetable using saved credentials, and emails you when it fails.</span></div>
+    <div class="concept"><b>Security in the service</b><span>Open the semantic model's menu, choose Security, add people to roles, then Test as role. Roles apply to Viewers only. Admins, Members and Contributors see everything.</span></div>
+    <div class="concept"><b>Deployment pipeline</b><span>Development, Test and Production stages, each its own workspace. You change Development and promote when it is right.</span></div>
+    <div class="concept"><b>Power BI project</b><span>File, Save as, Power BI project. The report and model become text files you can keep in Git and compare line by line.</span></div>
+  </div>
+
+  <h3>Do I need a gateway?</h3>
+  <figure class="panel">
+    <h4>Pick where the data lives</h4>
+    <div class="row" id="gwSrc"></div>
+    <p class="gate" id="gwOut"></p>
+    <figcaption>Most first-time refresh failures are this question. The service runs in the cloud and cannot see your C: drive.</figcaption>
+  </figure>
+
+  <h3>Report features that make a page feel finished</h3>
+  <div class="panel scroll"><table>
+    <tr><th>Feature</th><th>What it gives the reader</th><th>Where</th></tr>
+    <tr><td>Field parameter</td><td>A slicer that swaps the measure or the axis of a chart</td><td>Modeling, New parameter, Fields</td></tr>
+    <tr><td>Bookmark with buttons</td><td>A toggle between two views of the same page</td><td>View, Bookmarks and Selection</td></tr>
+    <tr><td>Drill-through page</td><td>Right-click a bar to open the detail for that item</td><td>Build pane, Drill through well</td></tr>
+    <tr><td>Report page tooltip</td><td>A small chart on hover in place of the plain tooltip</td><td>Page format, Page information</td></tr>
+    <tr><td>Mobile layout</td><td>A portrait arrangement for phones</td><td>View, Mobile layout</td></tr>
+    <tr><td>Subscription and alert</td><td>The page by email on a schedule, or a notice when a number crosses a line</td><td>The service</td></tr>
+  </table></div>
+  <p class="note">Licences change. Building is free. Sharing normally needs a paid licence or capacity, and deployment pipelines need more than the basic one. Check Microsoft's current licensing page before you promise anything to a team.</p>
+
+  <h3>Day by day</h3>
+  <div class="panel scroll"><table>
+    <tr><th>Day</th><th>Learn</th><th>Do</th></tr>
+    <tr><td>1</td><td>Publishing. Workspaces, roles, apps.</td><td>Publish the Kettle &amp; Crumb report to a new workspace.</td></tr>
+    <tr><td>2</td><td>Credentials, gateways, scheduled refresh, refresh history.</td><td>Move the CSV files to OneDrive or install a gateway. Schedule a daily refresh.</td></tr>
+    <tr><td>3</td><td>Security in the service. Test as role. Sharing against app access.</td><td>Assign a colleague to the North role as a Viewer and test it.</td></tr>
+    <tr><td>4</td><td>Field parameters, bookmarks, drill-through, tooltips, mobile layout.</td><td>Add a field parameter that swaps Total Sales, Profit and Orders Count.</td></tr>
+    <tr><td>5</td><td>Deployment pipelines. Power BI projects and Git. A release checklist.</td><td>Save as a project and read the measure definitions as text.</td></tr>
+    <tr><td>6 to 7</td><td colspan="2">Capstone and quiz.</td></tr>
+  </table></div>
+
+  <h3>Capstone: ship it</h3>
+  <div class="panel">
+    <ul class="check">
+      <li><label><input type="checkbox" id="c-w8-1"><span>The report is published and wrapped in an app.</span></label></li>
+      <li><label><input type="checkbox" id="c-w8-2"><span>Scheduled refresh has run once without an error. Check Refresh history.</span></label></li>
+      <li><label><input type="checkbox" id="c-w8-3"><span>Test as role shows the right totals for North, South and West.</span></label></li>
+      <li><label><input type="checkbox" id="c-w8-4"><span>One field parameter and one drill-through page work in the published report.</span></label></li>
+      <li><label><input type="checkbox" id="c-w8-5"><span>The project is saved as .pbip and committed to a Git repository.</span></label></li>
+      <li><label><input type="checkbox" id="c-w8-6"><span>A one-page note says what the report answers, where the data comes from, and who to ask.</span></label></li>
+    </ul>
+  </div>
+
+  <h3>Mistakes people make this week</h3>
+  <ul>
+    <li>Giving readers the Member role so they can open the report. They can now edit it, and security roles no longer apply to them.</li>
+    <li>Editing the live report directly. Keep a development copy.</li>
+    <li>Testing security only in Desktop. Assignments happen in the service, so test there as well.</li>
+  </ul>
+
+  <h3>Quiz: 3 practical questions</h3>
+  <div class="panel quiz" data-week="w8"></div>
+</section>
+
+<!-- ================= AFTER ================= -->
+<section class="page" id="p-adv" hidden>
+  <h2>After week 8</h2>
+  <p>You have covered the working set of Power BI. What is left is depth and practice. Use this ladder to see where you stand and what to pick up next.</p>
+  <div class="panel scroll"><table>
+    <tr><th>Level</th><th>Power Query</th><th>Model</th><th>DAX</th><th>Report and service</th></tr>
+    <tr><td><b>Basic</b><br><span class="why">weeks 1 to 4</span></td><td>Clean, types, split, unpivot, merge, append</td><td>Star schema, one-to-many, date table</td><td>SUM, SUMX, DIVIDE, CALCULATE, TOTALYTD</td><td>Cards, line, bar, slicers, one-page layout</td></tr>
+    <tr><td><b>Advanced</b><br><span class="why">weeks 5 to 8</span></td><td>Parameters, functions, folder combine, folding, error handling</td><td>Two dates, bridge tables, storage modes, row-level security</td><td>Context transition, ALL family, RANKX, TOPN, running totals, calculation groups</td><td>Publish, refresh, gateway, apps, field parameters, pipelines, projects</td></tr>
+    <tr><td><b>Expert</b><br><span class="why">months 3 to 6</span></td><td>Incremental refresh at scale, dataflows, Fabric lakehouse sources</td><td>Aggregations, composite models over shared models, large-model tuning, object-level security</td><td>Query plans, DAX Studio, user-defined functions, visual calculations</td><td>Governance, endorsement, Tabular Editor, automated deployment</td></tr>
+  </table></div>
+
+  <h3>Proving it</h3>
+  <ul>
+    <li><b>Portfolio:</b> three reports on public data you care about, each with a short note on the question, the model and one insight.</li>
+    <li><b>Certification:</b> Microsoft's PL-300 exam covers preparing data, modeling, visualising and managing reports, which is the ground of these eight weeks.</li>
+    <li><b>Habit:</b> rebuild one dashboard you admire each month. Copying a layout teaches more than reading about one.</li>
+  </ul>
+
+  <h3>How this page was checked</h3>
+  <ul>
+    <li>Every number on the page is calculated by the page from the 20 practice orders, so the check totals cannot drift from the data.</li>
+    <li>Function syntax and menu paths were read against Microsoft Learn in November 2026: 20 functions and features across DAX, Power Query and the service, including RANKX, TOPN, ALLSELECTED, CROSSFILTER, DATEADD, USERELATIONSHIP and REMOVEFILTERS.</li>
+    <li>The DAX and M were not executed in Power BI Desktop, which needs Windows. If a formula errors for you, the Q&amp;A bank has a debugging entry, and menu names can shift between monthly releases.</li>
+  </ul>
+</section>
+
+<!-- ================= QA ================= -->
+<section class="page" id="p-qa" hidden>
+  <h2>Q&amp;A bank</h2>
+  <p>Questions beginners ask and interviewers ask. Try to answer aloud before you open one.</p>
+  <div class="row" id="qaFilter"></div>
+  <div id="qaList"></div>
+</section>
+
+</main>
+<div id="tip" hidden></div>
+
+<script>
+(function(){
+"use strict";
+var $=function(s,r){return (r||document).querySelector(s)}, $$=function(s,r){return Array.prototype.slice.call((r||document).querySelectorAll(s))};
+function el(tag,attrs,html){var e=document.createElement(tag);if(attrs)for(var k in attrs)e.setAttribute(k,attrs[k]);if(html!=null)e.innerHTML=html;return e}
+function esc(s){return String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;")}
+var inr=function(n){return "₹"+Math.round(n).toLocaleString("en-IN")};
+
+/* ---------- saved progress (this browser only) ---------- */
+var KEY="pbi-4-weeks-v1", state={quiz:{},checks:{}};
+try{var raw=localStorage.getItem(KEY);if(raw)state=JSON.parse(raw)||state}catch(e){}
+state.quiz=state.quiz||{};state.checks=state.checks||{};
+function save(){try{localStorage.setItem(KEY,JSON.stringify(state))}catch(e){}}
+
+/* ---------- dataset ---------- */
+var PRODUCTS=[["Assam Tea","Tea",320,190],["Green Tea","Tea",300,170],["Filter Coffee","Coffee",420,260],["Cold Brew","Coffee",430,240],["Butter Cookies","Bakery",260,140],["Banana Bread","Bakery",270,150]];
+var P={};PRODUCTS.forEach(function(p){P[p[0]]={cat:p[1],price:p[2],cost:p[3]}});
+var CITY={Pune:"West",Mumbai:"West",Delhi:"North",Chennai:"South",Bengaluru:"South"};
+var MON=["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
+var ORDERS=[[1001,"03/01/2025","Asha Rao","Pune","Assam Tea",2],[1002,"03/01/2025","Vikram Nair","Delhi","Filter Coffee",1],[1003,"14/01/2025","Meera Iyer","Chennai","Green Tea",3],[1004,"25/01/2025","Rohan Das","Mumbai","Butter Cookies",4],[1005,"02/02/2025","Lata Pillai","Delhi","Filter Coffee",3],[1006,"09/02/2025","Asha Rao","Pune","Banana Bread",1],[1007,"17/02/2025","Kabir Shah","Bengaluru","Cold Brew",2],[1008,"28/02/2025","Meera Iyer","Chennai","Butter Cookies",2],[1009,"06/03/2025","Vikram Nair","Delhi","Assam Tea",1],[1010,"15/03/2025","Rohan Das","Mumbai","Filter Coffee",1],[1011,"22/03/2025","Nisha Verma","Bengaluru","Green Tea",1],[1012,"30/03/2025","Lata Pillai","Delhi","Assam Tea",2],[1013,"08/04/2025","Kabir Shah","Bengaluru","Filter Coffee",2],[1014,"19/04/2025","Asha Rao","Pune","Cold Brew",1],[1015,"27/04/2025","Meera Iyer","Chennai","Banana Bread",3],[1016,"05/05/2025","Nisha Verma","Bengaluru","Butter Cookies",2],[1017,"16/05/2025","Vikram Nair","Delhi","Cold Brew",3],[1018,"24/05/2025","Rohan Das","Mumbai","Assam Tea",4],[1019,"07/06/2025","Lata Pillai","Delhi","Green Tea",2],[1020,"18/06/2025","Kabir Shah","Bengaluru","Banana Bread",2]]
+.map(function(o){var p=P[o[4]];return {id:o[0],d:o[1],cust:o[2],city:o[3],region:CITY[o[3]],prod:o[4],cat:p.cat,qty:o[5],amt:o[5]*p.price,cost:o[5]*p.cost,m:+o[1].slice(3,5)}});
+var MISSING=1006;
+var HEAD=["order_id","order date","customer","city - region","product","qty","amount"];
+function rawRows(){var out=[];ORDERS.forEach(function(o,i){var c=o.cust;
+  if(i%4===0)c="  "+c.toLowerCase();else if(i%4===1)c=c.toUpperCase()+" ";else if(i%4===3)c=c.toLowerCase();
+  var row=[String(o.id),o.d,c,o.city+" - "+o.region,o.prod,String(o.qty),o.id===MISSING?"":"Rs "+o.amt.toLocaleString("en-IN")];
+  out.push(row);if(o.id===1003)out.push(["","","","","","",""]);if(o.id===1004)out.push(row.slice());});return out}
+var RAW=rawRows();
+function csv(rows){return rows.map(function(r){return r.map(function(c){return /[",]/.test(c)?'"'+c.replace(/"/g,'""')+'"':c}).join(",")}).join("\n")}
+$("#csvOrders").value=csv([HEAD].concat(RAW));
+$("#csvProducts").value=csv([["product","category","price","unit_cost"]].concat(PRODUCTS.map(function(p){return p.map(String)})));
+$$("[data-copy]").forEach(function(b){b.addEventListener("click",function(){var t=$("#"+b.getAttribute("data-copy"));
+  function fallback(){t.focus();t.select();$("#copyMsg1").textContent="Selected. Press Ctrl+C or Cmd+C to copy."}
+  try{navigator.clipboard.writeText(t.value).then(function(){var o=b.textContent;b.textContent="Copied";setTimeout(function(){b.textContent=o},1400)},fallback)}catch(e){fallback()}})});
+var sum=function(rows,f){return rows.reduce(function(a,r){return a+f(r)},0)};
+var FULL=sum(ORDERS,function(o){return o.amt}), MISS=ORDERS.filter(function(o){return o.id===MISSING})[0].amt;
+$("#w1Check").innerHTML="<b>Check your result:</b> 20 rows, 8 columns, no errors. The amount column sums to "+inr(FULL-MISS)+" with one null (order "+MISSING+").";
+$("#w3Check").innerHTML="<b>Check:</b> Total Sales for all data should be "+inr(FULL)+". That is "+inr(MISS)+" more than the sum of the amount column, because order "+MISSING+" has a missing amount. Calculating from qty and price fills the gap, which is one reason to prefer it.";
+
+/* ---------- glossary ---------- */
+[["Semantic model","The tables, relationships and measures behind a report. Older name: dataset."],["Query","A saved list of cleaning steps that outputs one table."],["Fact table","Rows of events, such as orders."],["Dimension table","Rows that describe things, such as products or dates."],["Relationship","The link between a key column in two tables."],["Cardinality","How many rows match on each side: one-to-many, one-to-one, many-to-many."],["Measure","A DAX formula calculated on demand for each visual."],["Calculated column","A DAX formula stored once per row."],["Filter context","The rows left after slicers, axes and filters are applied."],["Slicer","A filter control placed on the report page."],["Visual","Any chart, card or table on the page."],["Refresh","Reloading the source data and replaying every query step."]]
+.forEach(function(g){$("#glossary").appendChild(el("tr",null,"<td><b>"+g[0]+"</b></td><td>"+g[1]+"</td>"))});
+
+/* ---------- tooltip ---------- */
+var tip=$("#tip");
+function showTip(t,x,y){tip.textContent=t;tip.hidden=false;var w=tip.offsetWidth;tip.style.left=Math.max(8,Math.min(x+12,innerWidth-w-8))+"px";tip.style.top=Math.max(8,y-34)+"px"}
+document.addEventListener("pointermove",function(e){var t=e.target.closest&&e.target.closest("[data-tip]");if(t)showTip(t.getAttribute("data-tip"),e.clientX,e.clientY);else tip.hidden=true});
+document.addEventListener("focusin",function(e){var t=e.target.closest&&e.target.closest("[data-tip]");if(t){var r=t.getBoundingClientRect();showTip(t.getAttribute("data-tip"),r.left,r.top)}});
+document.addEventListener("focusout",function(){tip.hidden=true});
+
+/* ---------- study hours chart ---------- */
+(function(){var acts=[["Lessons","--s1"],["Guided practice","--s2"],["Mini-project","--s3"],["Quiz and review","--s4"]];
+  var data=[["Week 1",[4,3,2,1]],["Week 2",[3,3,3,1]],["Week 3",[4,4,3,1]],["Week 4",[2,3,5,1]],["Week 5",[3,3,3,1]],["Week 6",[4,3,3,1]],["Week 7",[4,4,3,1]],["Week 8",[3,3,4,1]]],max=12,h=$("#hours");
+  $("#hoursLegend").innerHTML=acts.map(function(a){return "<span><i style=\"background:var("+a[1]+")\"></i>"+a[0]+"</span>"}).join("");
+  data.forEach(function(w){var tot=w[1].reduce(function(a,b){return a+b},0);
+    var segs=w[1].map(function(v,i){return "<div class=\"seg\" tabindex=\"0\" style=\"width:"+(v/max*100)+"%;background:var("+acts[i][1]+")\" data-tip=\""+w[0]+" · "+acts[i][0]+": "+v+" h\"></div>"}).join("");
+    h.appendChild(el("div",{"class":"hbar"},"<span>"+w[0]+"</span><div class=\"trk\">"+segs+"</div><span class=\"tot\">"+tot+" h</span>"))});
+  h.appendChild(el("div",{"class":"axis"},"<span></span><div><span>0</span><span>4</span><span>8</span><span>12 h</span></div><span></span>"));
+})();
+
+/* ---------- Power Query stepper ---------- */
+(function(){
+  var demo=RAW.slice(0,8);
+  function proper(s){return s.trim().toLowerCase().replace(/\b[a-z]/g,function(c){return c.toUpperCase()})}
+  function fmtDate(d){var p=d.split("/");return (+p[0])+" "+MON[+p[1]-1]+" "+p[2]}
+  var s0={h:["Column1","Column2","Column3","Column4","Column5","Column6","Column7"],r:[HEAD].concat(demo)};
+  var s1={h:HEAD,r:demo};
+  var s2={h:HEAD,r:s1.r.filter(function(r){return r.join("")!==""})};
+  var s3={h:HEAD,r:s2.r.map(function(r){var c=r.slice();c[2]=proper(c[2]);return c})};
+  var h4=["order_id","order date","customer","city","region","product","qty","amount"];
+  var s4={h:h4,r:s3.r.map(function(r){var p=r[3].split(" - ");return [r[0],r[1],r[2],p[0],p[1],r[4],r[5],r[6]]})};
+  var ty=["123","date","ABC","ABC","ABC","ABC","123","123"];
+  var s5={h:h4,t:ty,r:s4.r.map(function(r){var c=r.slice();c[1]=fmtDate(c[1]);c[7]=c[7]===""?null:c[7].replace("Rs ","").replace(/,/g,"");return c})};
+  var seen={};var s6={h:h4,t:ty,r:s5.r.filter(function(r){var k=r.join("|");if(seen[k])return false;seen[k]=1;return true})};
+  var steps=[
+   ["Source","The file as it arrives. Headers are sitting in row 1 as data, there is a blank row, a duplicate, and every column is text.",'= Csv.Document(File.Contents("orders_raw.csv"), [Delimiter=",", Encoding=65001])',s0],
+   ["Promoted Headers","Home, Use First Row as Headers. Row 1 becomes the column names.",'= Table.PromoteHeaders(Source, [PromoteAllScalars=true])',s1],
+   ["Removed Blank Rows","Home, Remove Rows, Remove Blank Rows.",'= Table.SelectRows(#"Promoted Headers", each not List.IsEmpty(\n    List.RemoveMatchingItems(Record.FieldValues(_), {"", null})))',s2],
+   ["Cleaned Text","Transform, Format, Trim, then Capitalize Each Word on the customer column. The spaces and the mixed case are gone.",'= Table.TransformColumns(#"Removed Blank Rows",\n    {{"customer", each Text.Proper(Text.Trim(_)), type text}})',s3],
+   ["Split Column","Transform, Split Column, By Delimiter, using space-dash-space. One column becomes city and region.",'= Table.SplitColumn(#"Cleaned Text", "city - region",\n    Splitter.SplitTextByDelimiter(" - "), {"city", "region"})',s4],
+   ["Changed Type","Replace Values removes the Rs prefix first. Then Change Type, Using Locale, English (India) reads 14/01/2025 as 14 January and 1,260 as a number. The empty amount becomes null.",'= Table.TransformColumnTypes(#"Replaced Value",\n    {{"order_id", Int64.Type}, {"order date", type date},\n     {"qty", Int64.Type}, {"amount", Int64.Type}}, "en-IN")',s5],
+   ["Removed Duplicates","Select all columns, then Home, Remove Rows, Remove Duplicates. The second copy of order 1004 goes.",'= Table.Distinct(#"Changed Type")',s6]];
+  var cur=0,btns=$("#pqBtns");
+  function cell(v){if(v===null)return "<span class=\"nul\">null</span>";return esc(v).replace(/^ +| +$/g,function(m){return "<span class=\"sp\">"+m.replace(/ /g,"·")+"</span>"})||"&nbsp;"}
+  function draw(){var s=steps[cur],d=s[3];
+    $$("button",btns).forEach(function(b,i){b.setAttribute("aria-pressed",i===cur?"true":"false")});
+    $("#pqDesc").innerHTML="<b>Step "+cur+": "+s[0]+".</b> "+s[1];$("#pqM").textContent=s[2];
+    $("#pqTable").innerHTML="<tr>"+d.h.map(function(h,i){return "<th><span class=\"ty\">"+(d.t?d.t[i]:"ABC")+"</span>"+esc(h)+"</th>"}).join("")+"</tr>"+d.r.map(function(r){return "<tr>"+r.map(function(c){return "<td>"+cell(c)+"</td>"}).join("")+"</tr>"}).join("")}
+  steps.forEach(function(s,i){var b=el("button",{"class":"btn",type:"button",id:"pq-"+i},i+" "+s[0]);b.addEventListener("click",function(){cur=i;draw()});btns.appendChild(b)});
+  draw();
+})();
+
+/* ---------- pill groups ---------- */
+function pills(host,opts,get,set){opts.forEach(function(o){var b=el("button",{"class":"btn",type:"button",id:host.id+"-"+o},o);b.addEventListener("click",function(){set(o)});host.appendChild(b)});
+  return function(){$$("button",host).forEach(function(b){b.setAttribute("aria-pressed",b.textContent===get()?"true":"false")})}}
+function pick(rows,region,cat){return rows.filter(function(o){return (region==="All"||o.region===region)&&(cat==="All"||o.cat===cat)})}
+
+/* ---------- filter context simulator ---------- */
+(function(){var st={region:"All",cat:"All"};
+  var u1=pills($("#simRegion"),["All","North","South","West"],function(){return st.region},function(v){st.region=v;draw()});
+  var u2=pills($("#simCat"),["All","Tea","Coffee","Bakery"],function(){return st.cat},function(v){st.cat=v;draw()});
+  function draw(){u1();u2();var inC=pick(ORDERS,st.region,st.cat),ids={};inC.forEach(function(o){ids[o.id]=1});
+    var sales=sum(inC,function(o){return o.amt}),n=inC.length,allReg=sum(pick(ORDERS,"All",st.cat),function(o){return o.amt});
+    var ms=[["Total Sales","SUMX ( Orders, Orders[qty] * RELATED ( Products[price] ) )",inr(sales)],
+            ["Orders Count","COUNTROWS ( Orders )",String(n)],
+            ["Avg Order","DIVIDE ( [Total Sales], [Orders Count] )",n?inr(sales/n):"(blank)"],
+            ["% of Regions","DIVIDE ( [Total Sales], CALCULATE ( [Total Sales], REMOVEFILTERS ( Stores[region] ) ) )",allReg?(sales/allReg*100).toFixed(1)+"%":"(blank)"]];
+    $("#simMeasures").innerHTML=ms.map(function(m){return "<div class=\"measure\"><span>"+m[0]+"</span><code>"+esc(m[1])+"</code><b>"+m[2]+"</b></div>"}).join("")+
+      "<p class=\"why\" style=\"margin-top:8px\">"+n+" of 20 rows are in the filter context. The % of Regions denominator is "+inr(allReg)+".</p>";
+    $("#simTable").innerHTML="<tr><th>id</th><th>region</th><th>category</th><th>qty</th><th>price</th><th>qty × price</th></tr>"+ORDERS.map(function(o){return "<tr class=\""+(ids[o.id]?"on":"dim")+"\"><td>"+o.id+"</td><td>"+o.region+"</td><td>"+o.cat+"</td><td>"+o.qty+"</td><td>"+P[o.prod].price+"</td><td>"+o.amt+"</td></tr>"}).join("")}
+  draw();
+})();
+
+/* ---------- dashboard ---------- */
+(function(){var st={region:"All",cat:"All"},cats=["Coffee","Tea","Bakery"];
+  var u=pills($("#dRegion"),["All","North","South","West"],function(){return st.region},function(v){st.region=v;draw()});
+  function niceMax(v){var steps=[500,1000,2000,2500,5000,10000];for(var i=0;i<steps.length;i++){if(v<=steps[i]*4)return steps[i]*4}return v}
+  function line(rows){var W=520,H=220,L=52,R=44,T=16,B=28,vals=[1,2,3,4,5,6].map(function(m){return sum(rows.filter(function(o){return o.m===m}),function(o){return o.amt})});
+    var mx=niceMax(Math.max.apply(null,vals.concat([1]))),x=function(i){return L+i*(W-L-R)/5},y=function(v){return T+(H-T-B)*(1-v/mx)},s="";
+    for(var k=0;k<=4;k++){var v=mx*k/4;s+="<line class=\""+(k?"c-grid":"c-base")+"\" x1=\""+L+"\" x2=\""+(W-R)+"\" y1=\""+y(v)+"\" y2=\""+y(v)+"\"/><text class=\"c-tick\" x=\""+(L-8)+"\" y=\""+(y(v)+4)+"\" text-anchor=\"end\">"+inr(v)+"</text>"}
+    var pts=vals.map(function(v,i){return x(i)+","+y(v)});
+    s+="<path class=\"c-area\" d=\"M"+x(0)+","+y(0)+" L"+pts.join(" L")+" L"+x(5)+","+y(0)+"z\"/><path class=\"c-line\" d=\"M"+pts.join(" L")+"\"/>";
+    vals.forEach(function(v,i){s+="<text class=\"c-tick\" x=\""+x(i)+"\" y=\""+(H-8)+"\" text-anchor=\"middle\">"+MON[i]+"</text><circle class=\"c-dot\" cx=\""+x(i)+"\" cy=\""+y(v)+"\" r=\"4\"/>"});
+    s+="<text class=\"c-lbl\" x=\""+(x(5)+8)+"\" y=\""+(y(vals[5])+4)+"\">"+Math.round(vals[5]).toLocaleString("en-IN")+"</text>";
+    vals.forEach(function(v,i){s+="<rect class=\"c-hit\" tabindex=\"0\" x=\""+(x(i)-40)+"\" y=\""+T+"\" width=\"80\" height=\""+(H-T-B)+"\" data-tip=\""+MON[i]+" 2025: "+inr(v)+"\"/>"});
+    $("#dLine").innerHTML=s}
+  function draw(){u();var rows=pick(ORDERS,st.region,st.cat),sales=sum(rows,function(o){return o.amt}),cost=sum(rows,function(o){return o.cost}),n=rows.length;
+    $("#dKpis").innerHTML=[["Total sales",inr(sales)],["Orders",n],["Avg order",n?inr(sales/n):"–"],["Margin %",sales?((sales-cost)/sales*100).toFixed(1)+"%":"–"]].map(function(k){return "<div class=\"kpi\"><span>"+k[0]+"</span><b>"+k[1]+"</b></div>"}).join("");
+    $("#dLineTitle").textContent="Sales by month"+(st.cat==="All"?"":", "+st.cat)+(st.region==="All"?"":", "+st.region);
+    line(rows);
+    var byReg=pick(ORDERS,st.region,"All"),tot=cats.map(function(c){return sum(byReg.filter(function(o){return o.cat===c}),function(o){return o.amt})}),mx=Math.max.apply(null,tot.concat([1])),host=$("#dBars");host.innerHTML="";
+    cats.map(function(c,i){return [c,tot[i]]}).sort(function(a,b){return b[1]-a[1]}).forEach(function(c){
+      var b=el("button",{"class":"cbar"+(st.cat!=="All"&&st.cat!==c[0]?" off":""),type:"button",id:"dbar-"+c[0],"aria-pressed":st.cat===c[0]?"true":"false","data-tip":c[0]+": "+inr(c[1])},"<span>"+c[0]+"</span><span class=\"b\" style=\"width:"+(c[1]/mx*100)+"%\"></span><span class=\"v\">"+inr(c[1])+"</span>");
+      b.addEventListener("click",function(){st.cat=st.cat===c[0]?"All":c[0];draw()});host.appendChild(b)})}
+  draw();
+})();
+
+/* ---------- week 5: folding simulator ---------- */
+(function(){var pos="Last";
+  var u=pills($("#foldPos"),["Last","First"],function(){return pos},function(v){pos=v;draw()});
+  function draw(){u();var mid=[["Filtered Rows","keep year 2025"],["Removed Columns","keep 4 of 30 columns"],["Grouped Rows","total sales by month"]],mg=["Merged Queries","add targets from an Excel file"];
+    var steps=pos==="Last"?mid.concat([mg]):[mg].concat(mid),broken=false;
+    var h="<tr><th>Step</th><th>What it does</th><th>Where it runs</th></tr><tr><td>Source</td><td>sales table, 2,000,000 rows</td><td><span class=\"st-db\">Database</span></td></tr>";
+    steps.forEach(function(s){if(s===mg)broken=true;h+="<tr><td>"+s[0]+"</td><td>"+s[1]+"</td><td>"+(broken?"<span class=\"st-pc\">Your PC</span>":"<span class=\"st-db\">Database</span>")+"</td></tr>"});
+    $("#foldTable").innerHTML=h;
+    $("#foldSum").innerHTML=pos==="Last"?"<b>Merge last:</b> the first three steps fold into one SQL query. The database returns 12 rows, one per month, and your PC merges those 12 rows.":"<b>Merge first:</b> folding stops at step 1. All 2,000,000 rows and 30 columns are downloaded, and your PC does the filtering and grouping."}
+  draw();
+})();
+$("#w5Check").innerHTML="<b>Check your result:</b> the combined query returns the same 20 rows as week 1, and the amount column still sums to "+inr(FULL-MISS)+" with one null.";
+
+/* ---------- week 6: delivery date, RLS ---------- */
+(function(){function dm(o){var p=o.d.split("/");return new Date(Date.UTC(+p[2],+p[1]-1,+p[0]+2)).getUTCMonth()+1}
+  var h="<tr><th>Month</th><th class=\"num\">Total Sales</th><th class=\"num\">Delivered Sales</th></tr>",a=0,b=0;
+  for(var m=1;m<=6;m++){var s=sum(ORDERS.filter(function(o){return o.m===m}),function(o){return o.amt}),d=sum(ORDERS.filter(function(o){return dm(o)===m}),function(o){return o.amt});a+=s;b+=d;
+    h+="<tr"+(s!==d?" class=\"diff\"":"")+"><td>"+MON[m-1]+"</td><td class=\"num\">"+inr(s)+"</td><td class=\"num\">"+inr(d)+"</td></tr>"}
+  h+="<tr class=\"tot\"><td>Total</td><td class=\"num\">"+inr(a)+"</td><td class=\"num\">"+inr(b)+"</td></tr>";$("#delivTable").innerHTML=h;
+})();
+(function(){var map={"No role":"All","North":"North","South":"South","West":"West"},role="No role";
+  var u=pills($("#rlsRole"),Object.keys(map),function(){return role},function(v){role=v;draw()});
+  function draw(){u();var rows=pick(ORDERS,map[role],"All"),ids={};rows.forEach(function(o){ids[o.id]=1});
+    var f=role==="No role"?"(none, you see every row)":"Stores[region] = \""+role+"\"";
+    $("#rlsOut").innerHTML="<div class=\"measure\"><span>Role filter</span><code>"+esc(f)+"</code><b></b></div><div class=\"measure\"><span>Orders visible</span><code>COUNTROWS ( Orders )</code><b>"+rows.length+"</b></div><div class=\"measure\"><span>Total Sales</span><code>[Total Sales]</code><b>"+inr(sum(rows,function(o){return o.amt}))+"</b></div>";
+    $("#rlsTable").innerHTML="<tr><th>id</th><th>city</th><th>region</th><th>sales</th></tr>"+ORDERS.map(function(o){return "<tr class=\""+(ids[o.id]?"on":"dim")+"\"><td>"+o.id+"</td><td>"+o.city+"</td><td>"+o.region+"</td><td>"+o.amt+"</td></tr>"}).join("")}
+  draw();
+  $("#w6Check").innerHTML="<b>Check your result:</b> "+["North","South","West"].map(function(r){var rows=pick(ORDERS,r,"All");return r+" sees "+rows.length+" orders and "+inr(sum(rows,function(o){return o.amt}))}).join(". ")+". Together that is 20 orders and "+inr(FULL)+".";
+})();
+
+/* ---------- week 7: advanced DAX results ---------- */
+(function(){var qty=sum(ORDERS,function(o){return o.qty});
+  $("#ctxNums").innerHTML="On the practice data <b>Wrong returns "+qty*PRODUCTS.length+"</b> and <b>Right returns "+qty+"</b>. Wrong adds the full quantity of "+qty+" once for each of the "+PRODUCTS.length+" products, because SUM ignores the row it is on.";
+  var reg="All",cats=["Coffee","Tea","Bakery"];
+  var u=pills($("#asRegion"),["All","North","South","West"],function(){return reg},function(v){reg=v;drawAs()});
+  function pct(a,b){return b?(a/b*100).toFixed(1)+"%":"(blank)"}
+  function drawAs(){u();var rows=pick(ORDERS,reg,"All"),vis=sum(rows,function(o){return o.amt});
+    var h="<tr><th>Category</th><th class=\"num\">Total Sales</th><th class=\"num\">% of All</th><th class=\"num\">% of Selected</th></tr>";
+    cats.forEach(function(c){var s=sum(rows.filter(function(o){return o.cat===c}),function(o){return o.amt});h+="<tr><td>"+c+"</td><td class=\"num\">"+inr(s)+"</td><td class=\"num\">"+pct(s,FULL)+"</td><td class=\"num\">"+pct(s,vis)+"</td></tr>"});
+    h+="<tr class=\"tot\"><td>Total</td><td class=\"num\">"+inr(vis)+"</td><td class=\"num\">"+pct(vis,FULL)+"</td><td class=\"num\">"+pct(vis,vis)+"</td></tr>";$("#asTable").innerHTML=h}
+  drawAs();
+  var view="By product",prods=PRODUCTS.map(function(p){return [p[0],sum(ORDERS.filter(function(o){return o.prod===p[0]}),function(o){return o.amt})]}).sort(function(a,b){return b[1]-a[1]});
+  var u2=pills($("#advView"),["By product","By month"],function(){return view},function(v){view=v;drawAdv()});
+  function drawAdv(){u2();var h,run=0;
+    if(view==="By product"){h="<tr><th>Product</th><th class=\"num\">Total Sales</th><th class=\"num\">Product Rank</th><th class=\"num\">Cumulative %</th></tr>";
+      prods.forEach(function(p,i){run+=p[1];h+="<tr><td>"+p[0]+"</td><td class=\"num\">"+inr(p[1])+"</td><td class=\"num\">"+(i+1)+"</td><td class=\"num\">"+pct(run,FULL)+"</td></tr>"})}
+    else{h="<tr><th>Month</th><th class=\"num\">Total Sales</th><th class=\"num\">Running Total</th><th class=\"num\">Sales MoM %</th></tr>";var prev=null;
+      for(var m=1;m<=6;m++){var s=sum(ORDERS.filter(function(o){return o.m===m}),function(o){return o.amt});run+=s;
+        h+="<tr><td>"+MON[m-1]+"</td><td class=\"num\">"+inr(s)+"</td><td class=\"num\">"+inr(run)+"</td><td class=\"num\">"+(prev?((s-prev)/prev*100).toFixed(1)+"%":"(blank)")+"</td></tr>";prev=s}}
+    $("#advTable").innerHTML=h}
+  drawAdv();
+  var cust={};ORDERS.forEach(function(o){cust[o.cust]=1});var nc=Object.keys(cust).length;
+  $("#advNums").innerHTML="With no filters, <b>Avg Sales per Customer</b> is "+inr(FULL/nc)+" ("+inr(FULL)+" across "+nc+" customers) and <b>Top 3 Sales</b> is "+inr(prods[0][1]+prods[1][1]+prods[2][1])+" ("+prods.slice(0,3).map(function(p){return p[0]}).join(", ")+").";
+})();
+
+/* ---------- week 8: gateway helper ---------- */
+(function(){var ans={"File on my PC":"<b>Gateway needed.</b> The service cannot reach your disk. Install the on-premises data gateway in personal mode on that PC, which must be switched on at refresh time. The easier fix is to move the file to OneDrive or SharePoint.",
+  "OneDrive or SharePoint":"<b>No gateway.</b> The file is already in the cloud. Connect to it by its web address, not through a synced local folder, then sign in once under the semantic model's data source credentials.",
+  "On-premises database":"<b>Gateway needed.</b> Use the standard gateway on a server that is always on and can reach the database. Ask your IT team, because one gateway usually serves many reports.",
+  "Cloud database":"<b>Usually no gateway.</b> Services such as Azure SQL or Snowflake are reachable from the service. You only enter credentials. A gateway is needed if the database sits inside a private network."},src="File on my PC";
+  var u=pills($("#gwSrc"),Object.keys(ans),function(){return src},function(v){src=v;draw()});
+  function draw(){u();$("#gwOut").innerHTML=ans[src]}
+  draw();
+})();
+
+/* ---------- quizzes ---------- */
+var QUIZ={
+ w1:[{q:"After Changed Type, dates such as 14/01/2025 show Error while 03/01/2025 loads as 1 March. What is the right fix?",o:["Replace errors with null and move on","Delete the step, then use Change Type, Using Locale, with a day-first locale such as English (India)","Keep the column as text","Open the CSV and retype the dates as month/day/year"],a:1,why:"Your machine reads dates month-first, so day 14 is invalid and day 3 is silently read as March. Using Locale tells Power Query the source is day-first. Replacing errors would hide wrong dates."},
+     {q:"A sheet has columns Product, Jan, Feb, Mar holding sales. You want one Month slicer and one line chart. What do you do in Power Query?",o:["Select Jan, Feb and Mar and Merge Columns","Transpose the table","Select Product, then Unpivot Other Columns","Add a custom column that sums the three months"],a:2,why:"Unpivot turns the three month columns into two columns, Month and Value. Unpivot Other Columns also picks up Apr automatically when it appears."},
+     {q:"Next month a new orders file arrives in the same layout and replaces the old one. What do you have to do?",o:["Repeat every cleaning step by hand","Copy the M code into a new query","Press Refresh. The applied steps run again on the new file","Clean the file in Excel first"],a:2,why:"Applied Steps are a recorded recipe. Refresh replays them on whatever data the source now holds."}],
+ w2:[{q:"You put Products[category] and a sum of Orders[amount] in a table. Tea, Coffee and Bakery all show the same grand total. What is the most likely cause?",o:["The amount column is text","There is no active relationship between Products and Orders","The visual needs a slicer","Auto date/time is switched on"],a:1,why:"With no relationship, a category filter cannot reach Orders, so every row shows the unfiltered total. Open Model view and connect Products[product] to Orders[product]."},
+     {q:"In the relationship between Products and Orders, which statement is correct?",o:["Orders is the one side and filters Products","Products is the one side. A filter on Products flows to Orders","Both are many, so it must be many-to-many","Direction does not matter in a star schema"],a:1,why:"Each product appears once in Products and many times in Orders. Filters travel from the one side to the many side."},
+     {q:"Orders has an order date column. You want to analyse by month, quarter and weekday, and later use year-to-date measures. What is the best setup?",o:["Add Month and Quarter columns inside Orders","Rely on the automatic date hierarchy","Create a separate Date table with one row per day, relate it to Orders[order date], and mark it as a date table","Convert the date to text such as 2025-01"],a:2,why:"A dedicated Date table works for every fact table, sorts months correctly, includes days with no orders, and is what the time intelligence functions expect."}],
+ w3:[{q:"You need Margin % that is correct for one product, one region and the grand total. How do you build it?",o:["A calculated column of profit ÷ amount per row, then average it","A measure: DIVIDE([Profit], [Total Sales])","A calculated column, then sum it","Type the percentages into a new table"],a:1,why:"A ratio must be recalculated from totals at each level. Averaging row percentages gives a small order the same weight as a large one."},
+     {q:"A North slicer is on. A card should show North's share of sales across all regions. Which measure does that?",o:["DIVIDE([Total Sales], [Total Sales])","DIVIDE([Total Sales], SUM(Orders[amount]))","DIVIDE([Total Sales], CALCULATE([Total Sales], REMOVEFILTERS(Stores[region])))","CALCULATE([Total Sales], Stores[region] = \"North\")"],a:2,why:"The top keeps the slicer. The bottom uses CALCULATE with REMOVEFILTERS to ignore the region filter. Try it in the simulator: the last measure works this way."},
+     {q:"Orders has qty. Products has price. Which measure gives correct revenue?",o:["SUM(Orders[qty]) * SUM(Products[price])","SUMX(Orders, Orders[qty] * RELATED(Products[price]))","SUM(Orders[qty] * Products[price])","AVERAGE(Products[price]) * COUNTROWS(Orders)"],a:1,why:"SUMX walks Orders row by row, RELATED fetches that row's price across the relationship, and the products are added up. Multiplying two totals mixes every quantity with every price."}],
+ w4:[{q:"You want to show how sales changed across six months. Which visual?",o:["Pie chart with six slices","Line chart with month on the axis","Six cards, one per month","Treemap"],a:1,why:"Lines show direction and rate of change over time. Pies show parts of a whole at one moment."},
+     {q:"A manager glances at the page for five seconds. Where do the headline KPI cards go?",o:["Bottom right, after the detail table","On a second page","Across the top, starting at the top-left","Inside a tooltip"],a:2,why:"People read from the top-left. The most important numbers go where the eye lands first."},
+     {q:"You need to compare sales for 12 products with long names. Which is the best choice?",o:["Donut chart with 12 slices","Horizontal bar chart sorted from largest to smallest","Vertical column chart with rotated labels","Twelve gauges"],a:1,why:"Horizontal bars give long labels room and sorting makes ranking instant. Twelve slices are impossible to compare."}],
+ w5:[{q:"A query on a database table of 2 million rows takes 20 minutes to refresh. The second step is a merge with an Excel file, and the filters come after it. What do you change?",o:["Add Table.Buffer after the source","Move the filter and remove-column steps before the merge so they fold into SQL, then confirm with View Native Query","Switch off background refresh","Split the query into ten queries"],a:1,why:"Once a step cannot be translated to SQL, every later step runs on your PC against all the rows. Filtering first lets the database return a small result. Try both positions in the simulator."},
+     {q:"A new monthly CSV with the same columns lands in one folder every month. How should the Orders query be built?",o:["One query per file, appended by hand each month","Get data from Folder, then Combine & Transform, with the cleaning steps in the sample file query","Paste each month into one large Excel sheet","A calculated table in DAX using UNION"],a:1,why:"The folder connector builds a function from the sample file and runs it on every file. A new file is included at the next refresh with no edits."},
+     {q:"A few amount cells contain N/A, so the type change shows errors and the refresh fails. You want real numbers kept and the bad cells empty. What is the cleanest fix?",o:["Remove every row that has an error","Leave the column as text","Convert with try Number.FromText([amount]) otherwise null","Replace N/A with 0"],a:2,why:"try ... otherwise catches the error per cell and returns null, which means unknown. Removing rows loses orders, text cannot be summed, and 0 would pull averages down."}],
+ w6:[{q:"Orders has an order date and a delivery date. Most measures use order date. One measure must total sales by delivery month. What do you build?",o:["A second copy of Orders related on delivery date","An inactive relationship from Date to Orders[delivery date], used with USERELATIONSHIP inside CALCULATE","Both relationships set to active","A text column holding the delivery month"],a:1,why:"Two tables can have only one active relationship. The inactive one waits until a measure asks for it with USERELATIONSHIP."},
+     {q:"Three regional managers open the same report. Each must see only their own region, including in totals and exports. What is the right design?",o:["Three copies of the report","A region slicer locked on each page","Hide the other regions' pages","Row-level security roles filtering Stores[region], with each manager assigned as a Viewer"],a:3,why:"Only a role is enforced by the model. Slicers and hidden pages can be undone, and copies triple the maintenance. Roles apply to people with the Viewer role."},
+     {q:"A warehouse table has 500 million rows and the report must show orders from the last minute. Which storage mode fits the fact table?",o:["Import with a refresh every hour","DirectQuery, accepting that visuals wait for the source","A CSV export loaded with Import","Import with Auto date/time switched on"],a:1,why:"The data is too large to copy comfortably and too fresh for a schedule. DirectQuery asks the source on each interaction. Keep small dimensions in Dual or Import so slicers stay quick."}],
+ w7:[{q:"SUMX ( Products, SUM ( Orders[qty] ) ) returns 252 on the practice data, but the total quantity is 42. Why?",o:["SUMX does not work on dimension tables","There is no context transition, so SUM returns all 42 for each of the 6 products","The relationship is inactive","qty is stored as text"],a:1,why:"A row context does not filter. Without CALCULATE, or a measure, the inner SUM sees every order each time: 42 × 6 = 252."},
+     {q:"A slicer has North and South selected. A table lists categories. You want each category's share of what is visible, adding to 100%. Which denominator?",o:["CALCULATE ( [Total Sales], REMOVEFILTERS () )","CALCULATE ( [Total Sales], ALLSELECTED ( Products[category] ) )","SUM ( Orders[amount] )","[Total Sales]"],a:1,why:"ALLSELECTED removes the filter from the table's own rows and keeps the slicer, so the base is the visible total. REMOVEFILTERS () would divide by all three regions."},
+     {q:"You want a rank column where the best-selling product shows 1. Which measure is right?",o:["RANKX ( Products, [Total Sales] )","RANKX ( ALL ( Products[product] ), [Total Sales] )","TOPN ( 1, Products, [Total Sales] )","A calculated column sorting Products[price]"],a:1,why:"On each row the visual has already filtered Products to one product, so ranking within Products always gives 1. ALL restores the full list to rank against."}],
+ w8:[{q:"Your published report reads an Excel file from C:\\Reports on your laptop. Scheduled refresh fails every night. What is the fix?",o:["Refresh more often","Install a data gateway on that PC, or move the file to OneDrive or SharePoint and connect to it there","Republish the report each morning","Switch the table to DirectQuery"],a:1,why:"The service cannot reach a local disk. A gateway fetches the file for it, and it only works while that PC is on. A cloud location removes the need."},
+     {q:"You created security roles in Desktop and published. A colleague still sees every region. What is the most likely cause?",o:["Roles only work in Desktop","Nobody was added to the roles in the service, or the colleague has an edit role in the workspace","The Date table is not marked","The report needs a region slicer"],a:1,why:"Members are assigned in the service under the semantic model's Security page. Roles apply to Viewers only, so an Admin, Member or Contributor sees everything."},
+     {q:"Managers use the sales report every morning. You need to rebuild two measures and a page. How do you do it safely?",o:["Edit the live report in the browser","Work in a development workspace, check it in test, then promote to production","Publish over the live report and fix problems as they are reported","Email a .pbix file to each manager"],a:1,why:"A deployment pipeline, or at least a separate development workspace, lets you change and test without touching what people rely on."}]
+};
+var NEXT={w1:"Week 2",w2:"Week 3",w3:"Week 4",w4:"Week 5, the start of the advanced track",w5:"Week 6",w6:"Week 7",w7:"Week 8",w8:"your own projects. See the After week 8 tab"};
+function refreshTabs(){["w1","w2","w3","w4","w5","w6","w7","w8"].forEach(function(w){$("#t-"+w).classList.toggle("passed",!!state.quiz[w])});
+  $$(".gate[data-needs]").forEach(function(g){var n=g.getAttribute("data-needs");g.hidden=!!state.quiz[n];g.innerHTML="You have not passed the Week "+n.slice(1)+" quiz yet. This week builds on it. <a href=\"#"+n+"\">Go to Week "+n.slice(1)+"</a>"})}
+$$(".quiz").forEach(function(host){var w=host.getAttribute("data-week"),qs=QUIZ[w],got=[];
+  var score=el("p",{"class":"score"});
+  function upd(){var done=got.filter(function(g){return g!==undefined}).length,right=got.filter(function(g){return g===true}).length;
+    if(state.quiz[w]&&!done){score.textContent="Passed earlier with 3 of 3. You are ready for "+NEXT[w]+".";return}
+    if(done<3){score.textContent=done?right+" correct so far.":"Answer all three. You need 3 of 3 to pass.";return}
+    if(right===3){state.quiz[w]=true;save();refreshTabs();score.textContent="3 of 3. Passed. You are ready for "+NEXT[w]+"."}
+    else score.textContent=right+" of 3. Read the explanations, review the section, then try again."}
+  qs.forEach(function(q,qi){var box=el("div",{"class":"q"});box.appendChild(el("p",{"class":"qq"},(qi+1)+". "+esc(q.q)));
+    var why=el("p",{"class":"why"});why.hidden=true;
+    q.o.forEach(function(o,oi){var b=el("button",{"class":"opt",type:"button",id:"q-"+w+"-"+qi+"-"+oi},esc(o));
+      b.addEventListener("click",function(){$$(".opt",box).forEach(function(x){x.classList.remove("right","wrong")});
+        var ok=oi===q.a;b.classList.add(ok?"right":"wrong");got[qi]=ok;why.hidden=false;
+        why.innerHTML=(ok?"<b class=\"ok\">Correct.</b> ":"<b class=\"no\">Not quite.</b> ")+esc(q.why);upd()});box.appendChild(b)});
+    box.appendChild(why);host.appendChild(box)});
+  var retry=el("button",{"class":"btn",type:"button",id:"retry-"+w},"Reset this quiz");
+  retry.addEventListener("click",function(){got=[];$$(".opt",host).forEach(function(x){x.classList.remove("right","wrong")});$$(".q .why",host).forEach(function(x){x.hidden=true});delete state.quiz[w];save();refreshTabs();upd()});
+  var r=el("div",{"class":"row"});r.appendChild(score);r.appendChild(retry);host.appendChild(r);upd()});
+
+/* ---------- checklists ---------- */
+$$(".check input").forEach(function(c){c.checked=!!state.checks[c.id];c.addEventListener("change",function(){state.checks[c.id]=c.checked;save()})});
+
+/* ---------- Q&A bank ---------- */
+var QA=[
+["Basics","What is the difference between Power BI Desktop and the Power BI service?","Desktop is the free Windows app where you build: Power Query, the model, DAX and report pages. The service is the website where you publish, share, schedule refresh and build dashboards from pinned visuals."],
+["Basics","What is the difference between a report and a dashboard?","A report is one or more pages of visuals built on one semantic model, with slicers and interactions. A dashboard, in the service, is a single canvas of tiles pinned from reports. In everyday speech people call a one-page report a dashboard."],
+["Basics","Do I need to know SQL or Excel first?","No. Excel habits help with formulas and SQL helps with joins, but Power Query is point-and-click and DAX is learned on its own terms."],
+["Basics","What licence do I need?","Building in Desktop is free. Sharing reports with other people in the service normally needs a paid licence or capacity. Check Microsoft's current licensing page, because the plans change."],
+["Power Query","Does Power Query change my source file?","Never. It reads the source and applies steps to a copy in memory. The original Excel or CSV file is untouched."],
+["Power Query","What is the difference between Merge and Append?","Merge joins two tables side by side on a matching key and brings in columns. Append stacks tables on top of each other and adds rows."],
+["Power Query","What is the difference between Duplicate and Reference?","Duplicate copies all the steps into an independent query. Reference starts a new query from the output of the first, so a fix in the original flows through."],
+["Power Query","Why are there errors in my column after changing the type?","Some values cannot convert, such as text in a number column or a day-first date read as month-first. Click the cell's error to see why, fix the cause with Replace Values or Using Locale, and avoid blanket Replace Errors."],
+["Power Query","What is M?","The language Power Query writes for you behind each step. You can read and edit it in the formula bar or Advanced Editor. You rarely need to write it from scratch as a beginner."],
+["Power Query","What is query folding?","When the source is a database, Power Query translates your steps into one SQL query so the database does the work. Filter and remove columns early to keep folding going."],
+["Power Query","Should I clean data in Power Query or with DAX?","Clean and shape in Power Query. Calculate in DAX. If a value never changes with slicers and can be made at load, make it upstream."],
+["Power Query","When should I unpivot?","When column headers are really values, such as months, years or product names across the top. After unpivoting, they sit in one column you can filter and chart."],
+["Modeling","What is a star schema?","One fact table of events surrounded by dimension tables that describe them, linked by one-to-many relationships. It is the shape Power BI is designed around."],
+["Modeling","How do I tell a fact table from a dimension?","Facts answer how many or how much and grow every day. Dimensions answer who, what, where and when and change slowly."],
+["Modeling","Why do I need a separate Date table?","To get every day in a continuous range, to add fiscal years or weekdays once for all facts, to sort month names properly, and because time intelligence functions rely on it."],
+["Modeling","Should I use both-direction cross filtering?","Rarely. It can create ambiguous filter paths and slow the model. Keep single direction and solve special cases in a measure."],
+["Modeling","What is cardinality?","How rows match across a relationship: one-to-many is normal, one-to-one usually means the tables could be merged, many-to-many needs care or a bridge table."],
+["Modeling","Why does a relationship show a dotted line?","It is inactive. Only one active path can exist between two tables. Use USERELATIONSHIP inside CALCULATE to use the inactive one in a specific measure."],
+["Modeling","My month names sort alphabetically. How do I fix it?","Select the Month column in the Date table, choose Sort by column, and pick the Month No column."],
+["Modeling","Should I turn off Auto date/time?","Yes, once you have your own Date table. It creates a hidden date table for every date column, which bloats the file. The setting is under Options, Data Load."],
+["DAX","What is the difference between a measure and a calculated column?","A column is computed per row at refresh and stored. A measure is computed at query time under the current filters. Use measures for numbers in visuals and columns for things you group or slice by."],
+["DAX","What is filter context?","The set of filters active for one cell of a visual: slicers, the row and column headers, page filters and cross-highlighting. A measure is evaluated on the rows those filters leave."],
+["DAX","What is row context?","Being positioned on one row of a table while a formula runs, as in a calculated column or inside SUMX. Row context does not filter other tables by itself."],
+["DAX","What does CALCULATE do?","It evaluates an expression after changing the filter context. Its filter arguments add, replace or remove filters. It also turns a row context into a filter context, which is called context transition."],
+["DAX","What is the difference between SUM and SUMX?","SUM adds one column. SUMX goes row by row through a table, evaluates an expression for each row, then adds the results. Use SUMX when you need to multiply or combine columns first."],
+["DAX","What is the difference between ALL and REMOVEFILTERS?","As a filter argument in CALCULATE they do the same thing: clear filters. REMOVEFILTERS states the intent more clearly. ALL can also be used as a table function that returns all rows."],
+["DAX","Why use DIVIDE and not the slash?","DIVIDE returns blank, or a value you choose, when the bottom is zero or blank. The slash returns an error or infinity."],
+["DAX","Why is my total row not the sum of the rows above?","The total is not added up. The measure is evaluated again with no row filter. For ratios and distinct counts this is correct. If you truly need a sum of visible rows, iterate with SUMX over the grouping column."],
+["DAX","How do I debug a measure?","Split it into variables and return one variable at a time. Put the measure in a table with the dimension you care about. For deeper checks, use DAX query view to run the expression directly."],
+["DAX","When do I need RELATED?","Inside a row context on the many side when you need a value from the one side, such as the product price while iterating Orders."],
+["Design","How many visuals should a page have?","As few as answer the question. Five to eight is a comfortable upper range for one page. If you scroll or squint, split the page."],
+["Design","When is a pie chart acceptable?","For two or three parts of one whole, where one part is clearly bigger. For anything else a sorted bar chart is easier to read."],
+["Design","How do I choose colours?","Start with grey for most marks and one accent for emphasis. Keep the same colour for the same category on every page. Use red and green only for status, and pair them with an icon or label for colour-blind readers."],
+["Design","What is the difference between a slicer and a filter?","A slicer is on the canvas and visible to readers. Filters live in the Filters pane and can apply to one visual, a page, or all pages. Use slicers for choices readers make often."],
+["Design","What is drill-through?","A right-click jump from a data point to a detail page that is filtered to that item, such as from a product bar to a product page."],
+["Design","How do I make a report fast?","Fewer visuals per page, a star schema, measures in place of heavy calculated columns, no unneeded columns in the model, and a check with Performance analyzer to find the slow visual."],
+["Advanced","What is row-level security?","Roles with DAX filters on tables, so each user sees only permitted rows. You define roles in Desktop and assign people to them in the service."],
+["Advanced","What is the difference between Import and DirectQuery?","Import stores a compressed copy in the model and is fast but needs refresh. DirectQuery sends queries to the source on every interaction, so data is current but speed depends on the source."],
+["Advanced","What is incremental refresh?","A policy that refreshes only recent data, such as the last 7 days, and keeps older partitions as they are. It makes large tables practical."],
+["Advanced","What are calculation groups?","A way to define a calculation such as YTD or previous year once and apply it to any measure, which avoids writing dozens of near-identical measures."],
+["Advanced","What is a Power Query parameter used for?","A named value that queries read, such as a folder path, a server name or a cut-off date. You change it in one place, and it can differ between development and production."],
+["Advanced","When should I write a custom function in Power Query?","When the same cleaning logic is needed on several columns, files or queries. Combine files from a folder creates one for you from the sample file."],
+["Advanced","How do I know whether a step folds?","Right-click the step. If View Native Query is available, the step folds and you can read the SQL. Recent versions also show a folding indicator beside each step. Folding depends on the connector."],
+["Advanced","What is context transition?","Inside a row-by-row loop, CALCULATE turns the current row into filters. Measures carry an implicit CALCULATE, so a measure called inside SUMX is evaluated for that row only."],
+["Advanced","What is the difference between ALL and ALLSELECTED?","ALL ignores every filter on the column or table, so you get the grand total. ALLSELECTED ignores only the filter from the visual's own rows and columns and keeps slicers, so you get the visible total."],
+["Advanced","When do I need a bridge table?","When two tables relate many-to-many, such as products and promotions, or customers and accounts. The bridge holds one row per valid pair and sits between them."],
+["Advanced","What is dynamic row-level security?","One role whose filter compares a column with the signed-in user, for example Stores[manager_email] = USERPRINCIPALNAME(). Access is then managed by editing a mapping table, not by creating roles."],
+["Advanced","Does row-level security apply to everyone?","No. It applies to people with the Viewer role. Workspace Admins, Members and Contributors can edit the model, so they see all rows."],
+["Advanced","What is a composite model?","A model that mixes storage modes, such as imported dimensions with a DirectQuery fact table, or your own tables added on top of a shared semantic model."],
+["Advanced","What is Direct Lake?","A storage mode in Microsoft Fabric where the model reads Delta files in a lakehouse directly. It aims for Import-like speed without a separate copy and refresh."],
+["Advanced","When do I need a data gateway?","When the service must refresh from something it cannot reach from the cloud: a file on a PC, a network share, or a database on your company network. Cloud sources usually do not need one."],
+["Advanced","What is the difference between a workspace and an app?","A workspace is where builders keep and edit content. An app is a read-only package published from a workspace for readers, with its own navigation and audience."],
+["Advanced","What is a deployment pipeline?","A set of stages, by default Development, Test and Production, each tied to a workspace. You promote content from one stage to the next when it is ready."],
+["Advanced","What is a .pbip file?","A Power BI project. The report and semantic model are saved as folders of text files, which makes them suitable for Git, code review and comparing versions."],
+["Advanced","What is a field parameter?","A parameter that lets readers choose which measure or which column a visual uses, through a slicer. Created from Modeling, New parameter, Fields."],
+["Advanced","How do I find out why a report page is slow?","Open View, Performance analyzer, start recording and refresh the visuals. It shows the time each visual spends on the DAX query and on drawing. Copy the slow query into DAX query view to test changes."]
+];
+(function(){var cats=["All"].concat(QA.map(function(q){return q[0]}).filter(function(c,i,a){return a.indexOf(c)===i})),cur="All",host=$("#qaList");
+  var u=pills($("#qaFilter"),cats,function(){return cur},function(v){cur=v;draw()});
+  function draw(){u();host.innerHTML="";QA.filter(function(q){return cur==="All"||q[0]===cur}).forEach(function(q){host.appendChild(el("details",null,"<summary><span class=\"tag\">"+q[0]+"</span>"+esc(q[1])+"</summary><p>"+esc(q[2])+"</p>"))})}
+  draw();
+})();
+
+/* ---------- tabs ---------- */
+var TABS=["start","w1","w2","w3","w4","w5","w6","w7","w8","adv","qa"];
+function show(t,scroll){if(TABS.indexOf(t)<0)t="start";TABS.forEach(function(x){$("#p-"+x).hidden=x!==t;$("#t-"+x).setAttribute("aria-selected",x===t?"true":"false")});
+  if(scroll)window.scrollTo(0,0);var tb=$("#t-"+t),bar=tb.parentNode;bar.scrollLeft=Math.max(0,tb.offsetLeft-bar.clientWidth/2+tb.offsetWidth/2);try{history.replaceState(null,"","#"+t)}catch(e){}}
+$$(".tab").forEach(function(b){b.addEventListener("click",function(){show(b.getAttribute("data-tab"),true)})});
+$$("[data-go]").forEach(function(b){b.addEventListener("click",function(){show(b.getAttribute("data-go"),true)})});
+window.addEventListener("hashchange",function(){show(location.hash.slice(1),true)});
+refreshTabs();show(location.hash.slice(1)||"start",false);
+})();
+</script>
+
+</body></html>

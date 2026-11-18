@@ -1,0 +1,365 @@
+{
+ "_comment": "Single source of truth for the API. Run `python3 tools/specgen/gen.py` after any change. Never edit generated files.",
+ "info": {
+  "title": "Mastery Academy API",
+  "version": "1.0.0",
+  "basePath": "/v1"
+ },
+ "enums": {
+  "ProgressKind": [
+   "lesson",
+   "quiz",
+   "card",
+   "bookmark"
+  ],
+  "ErrorCode": [
+   "VALIDATION_FAILED",
+   "UNAUTHENTICATED",
+   "INVALID_CREDENTIALS",
+   "TOKEN_REUSED",
+   "FORBIDDEN",
+   "NOT_FOUND",
+   "CONFLICT",
+   "RATE_LIMITED",
+   "NOT_IMPLEMENTED",
+   "INTERNAL",
+   "AI_DISABLED",
+   "LIMIT_REACHED",
+   "AI_FAILED"
+  ],
+  "AskMode": [
+   "tutor",
+   "explain"
+  ],
+  "MarkKind": [
+   "quiz",
+   "task",
+   "interview"
+  ]
+ },
+ "schemas": {
+  "User": {
+   "id": "uuid",
+   "email": "string",
+   "displayName": "string",
+   "createdAt": "datetime"
+  },
+  "Tokens": {
+   "accessToken": "string",
+   "refreshToken": "string",
+   "expiresIn": "int"
+  },
+  "AuthResult": {
+   "user": "User",
+   "tokens": "Tokens"
+  },
+  "RegisterBody": {
+   "email": "string",
+   "password": "string",
+   "displayName": "string"
+  },
+  "SessionBody": {
+   "email": "string",
+   "password": "string",
+   "deviceName": "string?"
+  },
+  "RefreshBody": {
+   "refreshToken": "string"
+  },
+  "CourseSummary": {
+   "id": "string",
+   "title": "string",
+   "subtitle": "string",
+   "icon": "string",
+   "tint": "string",
+   "group": "string",
+   "status": "string",
+   "artifactURL": "string?",
+   "note": "string?",
+   "version": "string",
+   "lessonCount": "int",
+   "questionCount": "int",
+   "quizCount": "int",
+   "minutes": "int",
+   "web": "string?"
+  },
+  "Catalog": {
+   "schemaVersion": "int",
+   "courses": "CourseSummary[]"
+  },
+  "Course": {
+   "_opaque": "Content schema v1, see kb/00-core/04-content-schema.md"
+  },
+  "ProgressRecord": {
+   "courseId": "string",
+   "kind": "ProgressKind",
+   "itemId": "string",
+   "done": "bool",
+   "score": "int?",
+   "total": "int?",
+   "updatedAt": "datetime"
+  },
+  "ProgressPush": {
+   "records": "ProgressRecord[]"
+  },
+  "ProgressPushResult": {
+   "applied": "int",
+   "stale": "int",
+   "cursor": "int"
+  },
+  "Health": {
+   "status": "string",
+   "database": "string",
+   "courses": "int"
+  },
+  "AiUsage": {
+   "enabled": "bool",
+   "requestsToday": "int",
+   "dailyLimit": "int",
+   "monthCostCents": "int",
+   "monthlyCapCents": "int"
+  },
+  "SectionRef": {
+   "blockIndex": "int",
+   "title": "string"
+  },
+  "AskBody": {
+   "courseId": "string",
+   "lessonId": "string",
+   "mode": "AskMode",
+   "question": "string?",
+   "blockIndex": "int?",
+   "depth": "string?"
+  },
+  "AskResult": {
+   "answer": "string",
+   "covered": "bool",
+   "sections": "SectionRef[]",
+   "usage": "AiUsage"
+  },
+  "QuizBody": {
+   "courseId": "string",
+   "lessonId": "string",
+   "count": "int?"
+  },
+  "QuizResult": {
+   "questions": "string[]",
+   "usage": "AiUsage"
+  },
+  "MarkBody": {
+   "courseId": "string",
+   "kind": "MarkKind",
+   "lessonId": "string?",
+   "itemId": "string?",
+   "question": "string?",
+   "answer": "string"
+  },
+  "MarkResult": {
+   "score": "int",
+   "verdict": "string",
+   "strengths": "string[]",
+   "gaps": "string[]",
+   "feedback": "string",
+   "usage": "AiUsage"
+  }
+ },
+ "tables": {
+  "users": {
+   "module": "auth",
+   "columns": "id uuid pk, email text unique (lowercased), display_name text, password_hash text (scrypt), created_at timestamptz, deleted_at timestamptz null"
+  },
+  "sessions": {
+   "module": "auth",
+   "columns": "id uuid pk, user_id uuid, device_name text, refresh_hash text unique (sha256), prev_refresh_hash text null, expires_at timestamptz, revoked_at timestamptz null, created_at timestamptz"
+  },
+  "courses": {
+   "module": "content",
+   "columns": "id text pk, version text, summary json, body text (course JSON), position int, updated_at timestamptz"
+  },
+  "progress_records": {
+   "module": "progress",
+   "columns": "user_id uuid, course_id text, kind text, item_id text, done bool, score int null, total int null, client_updated_at timestamptz, seq bigint; pk (user_id, course_id, kind, item_id); index (user_id, seq)"
+  },
+  "sync_counters": {
+   "module": "progress",
+   "columns": "user_id uuid pk, value bigint"
+  },
+  "ai_usage": {
+   "module": "ai",
+   "columns": "id uuid pk, day text (UTC yyyy-mm-dd) index, mode text, model text, input_tokens int, output_tokens int, cost_microusd bigint, created_at timestamptz"
+  }
+ },
+ "operations": [
+  {
+   "id": "getHealth",
+   "method": "GET",
+   "path": "/health",
+   "module": "ops",
+   "auth": "public",
+   "tier": "unlimited",
+   "response": "Health",
+   "summary": "Liveness and database check"
+  },
+  {
+   "id": "registerUser",
+   "method": "POST",
+   "path": "/auth/users",
+   "module": "auth",
+   "auth": "public",
+   "tier": "auth",
+   "body": "RegisterBody",
+   "response": "AuthResult",
+   "status": 201,
+   "summary": "Create an account and its first session"
+  },
+  {
+   "id": "createSession",
+   "method": "POST",
+   "path": "/auth/sessions",
+   "module": "auth",
+   "auth": "public",
+   "tier": "auth",
+   "body": "SessionBody",
+   "response": "AuthResult",
+   "status": 201,
+   "summary": "Sign in with email and password"
+  },
+  {
+   "id": "refreshSession",
+   "method": "POST",
+   "path": "/auth/sessions/refresh",
+   "module": "auth",
+   "auth": "public",
+   "tier": "auth",
+   "body": "RefreshBody",
+   "response": "Tokens",
+   "summary": "Rotate the refresh token; a reused token ends the session"
+  },
+  {
+   "id": "deleteSession",
+   "method": "DELETE",
+   "path": "/auth/sessions/current",
+   "module": "auth",
+   "auth": "user",
+   "tier": "standard",
+   "status": 204,
+   "summary": "Sign out of this session"
+  },
+  {
+   "id": "getMe",
+   "method": "GET",
+   "path": "/me",
+   "module": "auth",
+   "auth": "user",
+   "tier": "standard",
+   "response": "User",
+   "summary": "The signed-in user"
+  },
+  {
+   "id": "deleteMe",
+   "method": "DELETE",
+   "path": "/me",
+   "module": "auth",
+   "auth": "user",
+   "tier": "standard",
+   "status": 204,
+   "summary": "Delete the account, its sessions and its progress"
+  },
+  {
+   "id": "listCourses",
+   "method": "GET",
+   "path": "/courses",
+   "module": "content",
+   "auth": "public",
+   "tier": "standard",
+   "response": "Catalog",
+   "summary": "Course catalog with content versions"
+  },
+  {
+   "id": "getCourse",
+   "method": "GET",
+   "path": "/courses/{courseId}",
+   "module": "content",
+   "auth": "public",
+   "tier": "standard",
+   "response": "Course",
+   "etag": true,
+   "summary": "Full content of one course; supports If-None-Match"
+  },
+  {
+   "id": "listProgress",
+   "method": "GET",
+   "path": "/progress",
+   "module": "progress",
+   "auth": "user",
+   "tier": "standard",
+   "query": {
+    "since": "int?",
+    "limit": "int?"
+   },
+   "response": "ProgressRecord[]",
+   "paged": true,
+   "summary": "Progress records changed after a cursor"
+  },
+  {
+   "id": "pushProgress",
+   "method": "PUT",
+   "path": "/progress",
+   "module": "progress",
+   "auth": "user",
+   "tier": "standard",
+   "body": "ProgressPush",
+   "response": "ProgressPushResult",
+   "summary": "Upsert progress records; newest updatedAt wins"
+  },
+  {
+   "id": "askLesson",
+   "method": "POST",
+   "path": "/ai/ask",
+   "module": "ai",
+   "auth": "appkey",
+   "tier": "ai",
+   "body": "AskBody",
+   "response": "AskResult",
+   "summary": "Answer a question about a lesson, or explain one of its code blocks, from the lesson text only"
+  },
+  {
+   "id": "makeQuiz",
+   "method": "POST",
+   "path": "/ai/quiz",
+   "module": "ai",
+   "auth": "appkey",
+   "tier": "ai",
+   "body": "QuizBody",
+   "response": "QuizResult",
+   "summary": "Fresh open questions on a lesson"
+  },
+  {
+   "id": "markAnswer",
+   "method": "POST",
+   "path": "/ai/mark",
+   "module": "ai",
+   "auth": "appkey",
+   "tier": "ai",
+   "body": "MarkBody",
+   "response": "MarkResult",
+   "summary": "Mark a typed answer to a quiz question, a lesson task or an interview question"
+  },
+  {
+   "id": "getAiUsage",
+   "method": "GET",
+   "path": "/ai/usage",
+   "module": "ai",
+   "auth": "appkey",
+   "tier": "standard",
+   "response": "AiUsage",
+   "summary": "AI requests used today and cost this month against the limits"
+  }
+ ],
+ "rateTiers": {
+  "unlimited": null,
+  "auth": "10 per minute per IP",
+  "standard": "120 per minute per user or IP",
+  "ai": "20 per minute per IP, plus the daily request limit and monthly cost cap in the server settings"
+ }
+}

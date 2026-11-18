@@ -1,0 +1,2615 @@
+<!doctype html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"></head><body>
+<title>PWA Field Guide</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700&family=IBM+Plex+Sans:wght@400;500;600&family=JetBrains+Mono:wght@400;600&display=swap">
+<style>
+/* Layout: one reading column with a sticky chapter strip; the hero pairs the thesis with a phone running the app. */
+:root {
+  --bg: #f3f1f8; --surface: #ffffff; --ink: #17132a; --muted: #5d5775; --line: #d9d4e8;
+  --accent: #5a0fc8; --accent-soft: #ece4fb; --on-accent: #ffffff;
+  --ok: #0b7a4b; --ok-soft: #dcf3e8; --warn: #8a5200; --warn-soft: #fbecd0; --bad: #b3261e; --bad-soft: #fbe1df;
+  --c-cache: #2f6fd8; --c-net: #d9622b;
+  --display: "Bricolage Grotesque", "Avenir Next", "Segoe UI", sans-serif;
+  --body: "IBM Plex Sans", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --mono: "JetBrains Mono", ui-monospace, "SF Mono", Menlo, monospace;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    color-scheme: dark;
+    --bg: #131022; --surface: #1c1831; --ink: #ece8fb; --muted: #a69fc2; --line: #342d54;
+    --accent: #b79cff; --accent-soft: #2a2148; --on-accent: #17132a;
+    --ok: #5fd6a2; --ok-soft: #12382b; --warn: #f1b755; --warn-soft: #3d2e10; --bad: #ff8f86; --bad-soft: #45191a;
+    --c-cache: #4a8cec; --c-net: #dd7436;
+  }
+}
+:root[data-theme="dark"] {
+  color-scheme: dark;
+  --bg: #131022; --surface: #1c1831; --ink: #ece8fb; --muted: #a69fc2; --line: #342d54;
+  --accent: #b79cff; --accent-soft: #2a2148; --on-accent: #17132a;
+  --ok: #5fd6a2; --ok-soft: #12382b; --warn: #f1b755; --warn-soft: #3d2e10; --bad: #ff8f86; --bad-soft: #45191a;
+  --c-cache: #4a8cec; --c-net: #dd7436;
+}
+* { box-sizing: border-box; }
+body { background: var(--bg); color: var(--ink); font: 16px/1.6 var(--body); }
+.wrap { max-width: 980px; margin: 0 auto; padding-block: 28px 48px; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); }
+h1, h2, h3 { font-family: var(--display); line-height: 1.15; text-wrap: balance; margin: 0; }
+h1 { font-size: clamp(2.1rem, 6vw, 3.4rem); font-weight: 700; letter-spacing: -0.02em; }
+h2 { font-size: 1.7rem; font-weight: 700; letter-spacing: -0.01em; }
+h3 { font-size: 1.15rem; font-weight: 700; margin-top: 8px; }
+p, ul, ol { margin: 0; }
+p, li { max-width: 68ch; }
+a { color: var(--accent); }
+code { font-family: var(--mono); font-size: .88em; background: var(--accent-soft); padding: 1px 5px; border-radius: 4px; overflow-wrap: anywhere; }
+.eyebrow { font: 600 .74rem/1.4 var(--mono); letter-spacing: .08em; text-transform: uppercase; color: var(--accent); }
+.top { display: grid; gap: 10px; margin-bottom: 18px; }
+.lede { font-size: 1.08rem; color: var(--muted); }
+.tabs { position: sticky; top: env(safe-area-inset-top, 0px); z-index: 5; display: flex; gap: 6px; overflow-x: auto; padding: 8px 0; background: var(--bg); border-bottom: 1px solid var(--line); scrollbar-width: none; }
+.tabs a { flex: none; padding: 7px 13px; border-radius: 999px; font-weight: 500; font-size: .92rem; color: var(--muted); text-decoration: none; border: 1px solid transparent; }
+.tabs a:hover { color: var(--ink); border-color: var(--line); }
+.tabs a[aria-current="page"] { background: var(--accent); color: var(--on-accent); }
+:focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; }
+main > section { display: none; padding-top: 28px; }
+main > section.on { display: grid; gap: 18px; }
+main > section > * { min-width: 0; }
+section ul, section ol { padding-left: 1.25rem; display: grid; gap: 6px; }
+.level { justify-self: start; font: 600 .72rem var(--mono); letter-spacing: .06em; text-transform: uppercase; padding: 3px 9px; border-radius: 4px; background: var(--accent-soft); color: var(--accent); }
+.plain { font-size: 1.1rem; }
+.note { border-left: 3px solid var(--accent); padding: 4px 0 4px 14px; color: var(--muted); }
+.note.warn { border-color: var(--warn); }
+.note b, .note strong { color: var(--ink); }
+.cols { display: grid; gap: 18px; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); }
+.cols > * { min-width: 0; display: grid; gap: 10px; align-content: start; }
+
+/* hero */
+.hero { display: grid; gap: 28px; grid-template-columns: minmax(0, 1fr) 300px; align-items: start; }
+.hero > div:first-child { display: grid; gap: 14px; }
+@media (max-width: 720px) { .hero { grid-template-columns: minmax(0, 1fr); } .phone { justify-self: center; } }
+.phone { width: 300px; max-width: 100%; border: 10px solid var(--ink); border-radius: 34px; background: var(--surface); overflow: hidden; display: grid; }
+.ph-bar { background: var(--accent); color: var(--on-accent); padding: 14px 14px 10px; display: flex; justify-content: space-between; align-items: center; font-weight: 600; }
+.ph-chip { font-size: .72rem; padding: 2px 9px; border-radius: 999px; background: var(--surface); color: var(--ok); font-weight: 600; }
+.ph-chip[data-s="off"], .ph-chip[data-s="pend"] { color: var(--warn); }
+.ph-body { padding: 12px; display: grid; gap: 8px; }
+.ph-add { display: flex; gap: 6px; }
+.ph-add input { flex: 1; min-width: 0; font: inherit; font-size: .9rem; padding: 7px 10px; border: 1px solid var(--line); border-radius: 9px; background: var(--bg); color: var(--ink); }
+.btn { font: 600 .88rem var(--body); padding: 7px 13px; border-radius: 9px; border: 1px solid var(--line); background: var(--surface); color: var(--ink); cursor: pointer; }
+.btn.pri { background: var(--accent); color: var(--on-accent); border-color: transparent; }
+.btn[aria-pressed="true"] { border-color: var(--accent); color: var(--accent); }
+.ph-list { list-style: none; padding: 0 !important; margin: 0; display: grid; gap: 5px; }
+.ph-list li { display: flex; gap: 8px; align-items: center; font-size: .9rem; padding: 6px 9px; border: 1px solid var(--line); border-radius: 9px; }
+.ph-list li.done span { text-decoration: line-through; color: var(--muted); }
+.ph-list input { accent-color: var(--accent); }
+.ph-net { display: flex; align-items: center; justify-content: space-between; gap: 8px; padding: 9px 12px; border-top: 1px solid var(--line); font-size: .82rem; color: var(--muted); }
+.ph-log { margin: 0; padding: 9px 12px; height: 96px; overflow-y: auto; background: #1d1830; color: #d9d2f3; font: .7rem/1.5 var(--mono); white-space: pre-wrap; }
+.cap { font-size: .82rem; color: var(--muted); }
+
+/* tables */
+.scroll { overflow-x: auto; }
+table { border-collapse: collapse; width: 100%; font-size: .92rem; }
+th, td { text-align: left; padding: 8px 10px; border-bottom: 1px solid var(--line); vertical-align: top; }
+th { font: 600 .74rem var(--mono); letter-spacing: .05em; text-transform: uppercase; color: var(--muted); white-space: nowrap; }
+.pill { display: inline-block; font: 600 .72rem var(--mono); padding: 2px 8px; border-radius: 4px; white-space: nowrap; }
+.pill.y { background: var(--ok-soft); color: var(--ok); } .pill.p { background: var(--warn-soft); color: var(--warn); } .pill.n { background: var(--bad-soft); color: var(--bad); }
+
+/* code */
+figure { margin: 0; }
+.code { border-radius: 10px; overflow: hidden; background: #1d1830; }
+.code figcaption { display: flex; align-items: center; gap: 10px; padding: 7px 10px 7px 14px; background: #2a2344; color: #cfc7ea; font: .76rem var(--mono); }
+.code .fname { font-weight: 600; color: #ffffff; }
+.code .ran { color: #7fe0b3; } .code .ran.no { color: #f1b755; }
+.code .copy { margin-left: auto; font: 600 .72rem var(--mono); color: #ffffff; background: #40376a; border: 0; border-radius: 6px; padding: 5px 10px; cursor: pointer; }
+.code pre { margin: 0; padding: 14px; overflow-x: auto; font: .8rem/1.6 var(--mono); color: #e6e1f7; tab-size: 2; }
+.code pre code { font: inherit; background: none; padding: 0; overflow-wrap: normal; }
+.hljs-comment { color: #9a91bd; font-style: italic; } .hljs-keyword, .hljs-literal, .hljs-built_in { color: #c9a8ff; }
+.hljs-string, .hljs-attr { color: #8fe3b5; } .hljs-number { color: #ffb86b; } .hljs-title, .hljs-name, .hljs-tag { color: #7fc4ff; }
+.hljs-attribute, .hljs-property, .hljs-variable { color: #ffd98a; }
+details { border: 1px solid var(--line); border-radius: 10px; background: var(--surface); }
+details > summary { cursor: pointer; padding: 10px 14px; font-weight: 600; }
+details > :not(summary) { margin: 0 14px 14px; }
+details > .code { margin: 0 8px 8px; }
+
+/* diagrams */
+.dia { border: 1px solid var(--line); border-radius: 12px; background: var(--surface); padding: 12px; overflow-x: auto; }
+.dia svg { display: block; width: 100%; min-width: 620px; height: auto; font-family: var(--body); }
+.dia .bx { fill: var(--bg); stroke: var(--line); stroke-width: 1.5; } .dia .bx.hi { fill: var(--accent-soft); stroke: var(--accent); }
+.dia .t { fill: var(--ink); font-size: 14px; font-weight: 600; } .dia .s { fill: var(--muted); font-size: 12px; }
+.dia .ln { stroke: var(--muted); stroke-width: 1.5; fill: none; } .dia .hd { fill: var(--muted); }
+.dia .ln.act { stroke: var(--accent); stroke-width: 3; } .dia .life { stroke: var(--line); stroke-width: 1.5; stroke-dasharray: 4 4; }
+.dia .num { fill: var(--accent); } .dia .numt { fill: var(--on-accent); font-size: 11px; font-weight: 700; }
+.flow { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+.flow > span { border: 1.5px solid var(--line); background: var(--surface); border-radius: 8px; padding: 7px 11px; font-size: .9rem; font-weight: 500; }
+.flow > span.hi { border-color: var(--accent); background: var(--accent-soft); }
+.flow > i { font-style: normal; color: var(--muted); font-size: .8rem; } .flow > i::after { content: " →"; color: var(--accent); font-weight: 700; }
+
+/* simulator + chart */
+.sim { border: 1px solid var(--line); border-radius: 12px; background: var(--surface); padding: 14px; display: grid; gap: 14px; }
+.sim > * { min-width: 0; }
+.row { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; }
+.row > b { font: 600 .74rem var(--mono); letter-spacing: .05em; text-transform: uppercase; color: var(--muted); width: 84px; }
+.steps { list-style: none; padding: 0 !important; counter-reset: s; }
+.steps li { counter-increment: s; padding: 5px 8px; border-radius: 6px; opacity: .35; font-size: .93rem; }
+.steps li::before { content: counter(s); font: 600 .75rem var(--mono); margin-right: 8px; color: var(--accent); }
+.steps li.on { opacity: 1; } .steps li.last { background: var(--accent-soft); }
+.chart { display: grid; gap: 7px; }
+.bar-row { display: grid; grid-template-columns: 172px minmax(0, 1fr); gap: 10px; align-items: center; font-size: .86rem; }
+@media (max-width: 520px) { .bar-row { grid-template-columns: minmax(0, 1fr); gap: 2px; } }
+.bar-row.cur .bl { font-weight: 600; color: var(--accent); }
+.track { display: flex; align-items: center; gap: 8px; min-height: 22px; border-left: 1px solid var(--line); }
+.bar { height: 14px; min-width: 3px; border-radius: 0 4px 4px 0; background: var(--c-net); }
+.bar.cache { background: var(--c-cache); }
+.bv { font-variant-numeric: tabular-nums; color: var(--muted); white-space: nowrap; font-size: .8rem; }
+.legend { display: flex; flex-wrap: wrap; gap: 14px; font-size: .82rem; color: var(--muted); }
+.legend i { display: inline-block; width: 10px; height: 10px; border-radius: 2px; margin-right: 5px; background: var(--c-net); } .legend i.cache { background: var(--c-cache); }
+.meter { height: 12px; border-radius: 6px; background: var(--line); overflow: hidden; } .meter > div { height: 100%; background: var(--accent); min-width: 2px; }
+
+/* path + q&a */
+.path { list-style: none; padding: 0 !important; display: grid; gap: 0; }
+.path li { display: grid; grid-template-columns: 34px minmax(0, 1fr); gap: 12px; padding-bottom: 14px; position: relative; max-width: none; }
+.path li::before { content: ""; position: absolute; left: 16px; top: 30px; bottom: 0; width: 2px; background: var(--line); }
+.path li:last-child::before { display: none; }
+.path .n { width: 34px; height: 34px; border-radius: 50%; display: grid; place-items: center; background: var(--accent); color: var(--on-accent); font: 600 .85rem var(--mono); }
+.path small { color: var(--muted); display: block; font-size: .88rem; }
+.qa-tools { display: grid; gap: 10px; }
+.qa-tools input { font: inherit; padding: 9px 12px; border-radius: 10px; border: 1px solid var(--line); background: var(--surface); color: var(--ink); width: 100%; max-width: 420px; }
+.qa-list { display: grid; gap: 8px; }
+.qa-list summary small { font: 600 .68rem var(--mono); letter-spacing: .05em; text-transform: uppercase; color: var(--accent); display: block; }
+.foot { margin-top: 36px; padding-top: 14px; border-top: 1px solid var(--line); color: var(--muted); font-size: .85rem; }
+@media (prefers-reduced-motion: no-preference) { .steps li { transition: opacity .25s; } .dia .ln { transition: stroke .2s; } }
+
+</style>
+<div class="wrap">
+<header class="top">
+  <p class="eyebrow">Web App Manifest · Service Worker · Cache · Push</p>
+  <h1>PWA Field Guide</h1>
+  <p class="lede">Build a web app that installs, opens with no connection and sends notifications. Every code sample below comes from one small task manager that was run and tested before this page was written.</p>
+</header>
+<nav class="tabs" id="tabs" aria-label="Chapters">
+  <a href="#start">Start</a><a href="#manifest">1 Manifest</a><a href="#sw">2 Service worker</a><a href="#caching">3 Caching</a><a href="#data">4 Offline data</a><a href="#push">5 Push</a><a href="#native">6 Native feel</a><a href="#build">Build the app</a><a href="#advanced">Advanced</a><a href="#qa">Q&amp;A</a>
+</nav>
+<main>
+<section id="start">
+  <div class="hero">
+    <div>
+      <span class="level">Start here · Basic</span>
+      <h2>A PWA is a website that the phone treats like an app</h2>
+      <p class="plain">It is still HTML, CSS and JavaScript served from a URL. Three additions change how it behaves: a <b>manifest</b> file tells the phone how to install it, a <b>service worker</b> script lets it open with no connection, and the <b>Push API</b> lets your server wake it up to show a notification.</p>
+      <p>Try the phone on the right. Add a task, switch the network off, add another, then switch it back on. The log shows what the real app does at each step. Chapter 4 explains every line of it.</p>
+      <p class="note">You already know this shape from mobile work. The manifest is the web's <code>Info.plist</code> / <code>AndroidManifest.xml</code>. The service worker is a background isolate with no UI access. IndexedDB is the on-device database. Push goes through APNs and FCM, the same services native apps use.</p>
+    </div>
+    <div class="phone" aria-label="Simulated task app">
+      <div class="ph-bar"><span>Tasks</span><span class="ph-chip" id="d-chip">Synced</span></div>
+      <div class="ph-body">
+        <form class="ph-add" id="d-form"><input id="d-input" placeholder="Add a task" aria-label="New task" maxlength="40"><button class="btn pri">Add</button></form>
+        <ul class="ph-list" id="d-list"></ul>
+      </div>
+      <div class="ph-net"><span>Network</span><button class="btn" id="d-net" type="button" aria-pressed="true">Online</button></div>
+      <pre class="ph-log" id="d-log" aria-live="polite"></pre>
+    </div>
+  </div>
+  <p class="cap">The phone is a simulation that runs inside this page with example tasks. The real app, with a real service worker, is in the <a href="#build">Build the app</a> chapter.</p>
+
+  <h3>How the pieces fit</h3>
+  <div class="dia"><svg viewBox="0 0 860 330" role="img" aria-label="Architecture of a PWA: the page talks to a service worker, which sits between the page and the network and uses Cache Storage; both use IndexedDB; a push service delivers messages from your server to the service worker">
+    <defs><marker id="ah" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0 10 5 0 10z" class="hd"/></marker></defs>
+    <rect class="bx" x="20" y="24" width="190" height="78" rx="10"/><text class="t" x="36" y="56">Your page</text><text class="s" x="36" y="78">UI thread · app.js</text>
+    <rect class="bx hi" x="330" y="24" width="200" height="78" rx="10"/><text class="t" x="346" y="56">Service worker</text><text class="s" x="346" y="78">own thread · sw.js · no DOM</text>
+    <rect class="bx" x="650" y="24" width="190" height="78" rx="10"/><text class="t" x="666" y="56">Your server</text><text class="s" x="666" y="78">files · /api · push sender</text>
+    <rect class="bx" x="20" y="212" width="190" height="78" rx="10"/><text class="t" x="36" y="244">IndexedDB</text><text class="s" x="36" y="266">tasks · outbox of changes</text>
+    <rect class="bx" x="330" y="212" width="200" height="78" rx="10"/><text class="t" x="346" y="244">Cache Storage</text><text class="s" x="346" y="266">HTML · CSS · JS · icons</text>
+    <rect class="bx" x="650" y="212" width="190" height="78" rx="10"/><text class="t" x="666" y="244">Push service</text><text class="s" x="666" y="266">FCM · APNs · Mozilla</text>
+    <path class="ln" d="M210 52H326" marker-end="url(#ah)"/><text class="s" x="222" y="44">every request</text>
+    <path class="ln" d="M330 80H214" marker-end="url(#ah)"/><text class="s" x="232" y="98">response</text>
+    <path class="ln" d="M530 62H646" marker-end="url(#ah)" marker-start="url(#ah)"/><text class="s" x="556" y="54">network</text>
+    <path class="ln" d="M430 102V208" marker-end="url(#ah)" marker-start="url(#ah)"/><text class="s" x="440" y="160">read / write</text>
+    <path class="ln" d="M115 102V208" marker-end="url(#ah)" marker-start="url(#ah)"/><text class="s" x="125" y="160">read / write</text>
+    <path class="ln" d="M330 100 214 214" marker-end="url(#ah)"/><text class="s" x="274" y="178">sync</text>
+    <path class="ln" d="M745 102V208" marker-end="url(#ah)"/><text class="s" x="755" y="160">send push</text>
+    <path class="ln" d="M650 236 534 100" marker-end="url(#ah)"/><text class="s" x="602" y="150">push event</text>
+  </svg></div>
+  <p>The service worker is the centre of the design. Once it is installed, every request the page makes passes through it first, and it decides whether to answer from the cache, from the network, or both.</p>
+
+  <h3>Website, PWA or native app</h3>
+  <div class="scroll"><table>
+    <tr><th>Ability</th><th>Plain website</th><th>PWA</th><th>Native app</th></tr>
+    <tr><td>Reach a user with one link, no store</td><td><span class="pill y">Yes</span></td><td><span class="pill y">Yes</span></td><td><span class="pill n">No</span></td></tr>
+    <tr><td>Icon on the home screen, own window</td><td><span class="pill n">No</span></td><td><span class="pill y">Yes</span></td><td><span class="pill y">Yes</span></td></tr>
+    <tr><td>Opens with no connection</td><td><span class="pill n">No</span></td><td><span class="pill y">Yes</span></td><td><span class="pill y">Yes</span></td></tr>
+    <tr><td>Push notifications</td><td><span class="pill p">Desktop, Android</span></td><td><span class="pill y">Yes</span></td><td><span class="pill y">Yes</span></td></tr>
+    <tr><td>Update without store review</td><td><span class="pill y">Yes</span></td><td><span class="pill y">Yes</span></td><td><span class="pill n">No</span></td></tr>
+    <tr><td>Bluetooth, NFC, widgets, Live Activities, background location</td><td><span class="pill n">No</span></td><td><span class="pill p">Some, Chromium</span></td><td><span class="pill y">Yes</span></td></tr>
+    <tr><td>Listed in App Store / Play Store</td><td><span class="pill n">No</span></td><td><span class="pill p">With a wrapper</span></td><td><span class="pill y">Yes</span></td></tr>
+  </table></div>
+
+  <h3>The path, basic to advanced</h3>
+  <ol class="path">
+    <li><span class="n">1</span><div><a href="#manifest"><b>Manifest</b></a><small>Basic. One JSON file. After this the browser offers to install your site.</small></div></li>
+    <li><span class="n">2</span><div><a href="#sw"><b>Service worker</b></a><small>Basic. Register a worker and learn its life cycle: install, wait, activate.</small></div></li>
+    <li><span class="n">3</span><div><a href="#caching"><b>Caching strategies</b></a><small>Intermediate. Five ways to answer a request, with a simulator to compare them.</small></div></li>
+    <li><span class="n">4</span><div><a href="#data"><b>Offline data</b></a><small>Intermediate. IndexedDB, saving locally first, and an outbox that syncs later.</small></div></li>
+    <li><span class="n">5</span><div><a href="#push"><b>Push notifications</b></a><small>Intermediate. Permission, subscription, a server that sends, a worker that shows.</small></div></li>
+    <li><span class="n">6</span><div><a href="#native"><b>Native feel</b></a><small>Intermediate. Safe areas, tap behaviour, install button, icon badge.</small></div></li>
+    <li><span class="n">7</span><div><a href="#build"><b>Build the app</b></a><small>All of the above in eleven steps, with the complete files.</small></div></li>
+    <li><span class="n">8</span><div><a href="#advanced"><b>Advanced</b></a><small>Update strategy, storage limits, debugging, security, store listing, iOS limits.</small></div></li>
+    <li><span class="n">9</span><div><a href="#qa"><b>Q&amp;A</b></a><small>Questions with answers, searchable. Use it to test yourself.</small></div></li>
+  </ol>
+
+  <h3>What works where</h3>
+  <div class="scroll"><table id="support">
+    <tr><th>Feature</th><th>Chrome Android</th><th>Safari iPhone</th><th>Firefox Android</th><th>Chrome / Edge desktop</th><th>Safari Mac</th><th>Firefox desktop</th></tr>
+  </table></div>
+  <p class="cap">"Installed only" means the feature exists only after the user adds the app to the Home Screen. Rows reflect what was known in November 2026.</p>
+
+  <h3>Storage on this device</h3>
+  <div class="cols"><div>
+    <p id="quota-text">Reading how much storage this page may use.</p>
+    <div class="meter" aria-hidden="true"><div id="quota-bar" style="width:0%"></div></div>
+    <p class="cap">Live numbers from <code>navigator.storage.estimate()</code> in your browser. Caches and IndexedDB share this budget. See <a href="#advanced">Advanced</a> for what happens when it runs out.</p>
+  </div></div>
+</section>
+
+<section id="manifest">
+  <span class="level">Pillar 1 · Basic</span>
+  <h2>Web App Manifest</h2>
+  <p class="plain">The manifest is a small JSON file that describes your app to the operating system: its name, its icons, which page opens first, and whether it shows browser controls. Without it the browser sees a website. With it the browser sees something it can install.</p>
+
+  <h3>The manifest of the task app</h3>
+  <figure class="code"><figcaption><span class="fname">manifest.webmanifest</span><span class="ran" title="This code is copied from the app files that were run in a browser">from the app</span><button class="copy" type="button">Copy</button></figcaption><pre><code class="language-json">{
+  "id": "/",
+  "name": "Tasks: Offline Task Manager",
+  "short_name": "Tasks",
+  "description": "A task list that keeps working with no connection and syncs when you are back online.",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "background_color": "#f4f2fa",
+  "theme_color": "#5a0fc8",
+  "categories": ["productivity"],
+  "icons": [
+    { "src": "/icons/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "/icons/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "/icons/maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ],
+  "shortcuts": [
+    {
+      "name": "New task",
+      "short_name": "New",
+      "url": "/?new=1",
+      "icons": [{ "src": "/icons/icon-192.png", "sizes": "192x192", "type": "image/png" }]
+    }
+  ]
+}</code></pre></figure>
+
+  <div class="scroll"><table>
+    <tr><th>Field</th><th>What it does</th><th>Get it wrong and</th></tr>
+    <tr><td><code>name</code>, <code>short_name</code></td><td>Full name for the install dialog and splash screen; short name under the icon (aim for 12 characters or fewer).</td><td>The name is cut off with "…" on the home screen.</td></tr>
+    <tr><td><code>start_url</code></td><td>The page that opens when the icon is tapped.</td><td>The app opens on whichever page the user installed from, or shows the offline page because that URL was never cached.</td></tr>
+    <tr><td><code>id</code></td><td>The app's identity. Lets you change <code>start_url</code> later without the browser treating it as a different app.</td><td>A changed start URL produces a second install.</td></tr>
+    <tr><td><code>scope</code></td><td>Which URLs belong to the app. Links outside it open in a browser view.</td><td>Your own pages open with a browser bar on top.</td></tr>
+    <tr><td><code>display</code></td><td><code>standalone</code> hides browser controls. Others: <code>fullscreen</code>, <code>minimal-ui</code>, <code>browser</code>.</td><td><code>browser</code> means no install prompt in Chrome.</td></tr>
+    <tr><td><code>icons</code></td><td>PNG at 192 and 512 pixels at least. A <code>maskable</code> icon fills the whole square so Android can crop it to any shape.</td><td>No install prompt, or a small icon inside a white circle on Android.</td></tr>
+    <tr><td><code>theme_color</code>, <code>background_color</code></td><td>Colour of the status bar and title bar; colour of the splash screen before your CSS loads.</td><td>A white flash on launch in dark mode.</td></tr>
+    <tr><td><code>shortcuts</code></td><td>Entries shown on long-press of the icon (Android, desktop).</td><td>Nothing breaks; the menu is just missing.</td></tr>
+  </table></div>
+
+  <h3>Linking it from the page</h3>
+  <p>The page points at the manifest with one <code>&lt;link&gt;</code> tag. iPhone needs a few extra tags because Safari takes its home-screen icon from <code>apple-touch-icon</code>.</p>
+  <figure class="code"><figcaption><span class="fname">index.html</span><span class="ran" title="This code is copied from the app files that were run in a browser">from the app</span><button class="copy" type="button">Copy</button></figcaption><pre><code class="language-xml">&lt;!-- viewport-fit=cover lets the page draw under the notch; CSS then pads with safe-area insets. --&gt;
+&lt;meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover"&gt;
+
+&lt;!-- The manifest: name, icons, start URL and display mode. This is what makes the site installable. --&gt;
+&lt;link rel="manifest" href="/manifest.webmanifest"&gt;
+
+&lt;!-- Colour of the browser toolbar / status bar area, one per colour scheme. --&gt;
+&lt;meta name="theme-color" content="#5a0fc8" media="(prefers-color-scheme: light)"&gt;
+&lt;meta name="theme-color" content="#17132a" media="(prefers-color-scheme: dark)"&gt;
+
+&lt;!-- iOS reads these instead of (or as well as) the manifest. --&gt;
+&lt;link rel="apple-touch-icon" href="/icons/apple-touch-icon.png"&gt;
+&lt;meta name="apple-mobile-web-app-title" content="Tasks"&gt;
+&lt;meta name="mobile-web-app-capable" content="yes"&gt;
+
+&lt;link rel="icon" href="/icons/icon-192.png"&gt;
+&lt;link rel="stylesheet" href="/styles.css"&gt;</code></pre></figure>
+
+  <h3>What makes an app installable</h3>
+  <div class="cols">
+    <div><b>Chrome and Edge</b>
+      <ul><li>Served over HTTPS (or <code>localhost</code>).</li><li>Manifest with <code>name</code> or <code>short_name</code>, <code>start_url</code>, icons at 192 and 512 px, and <code>display</code> set to <code>standalone</code>, <code>fullscreen</code> or <code>minimal-ui</code>.</li><li>A service worker is no longer required for the prompt. You still need one for offline.</li></ul></div>
+    <div><b>Safari on iPhone and iPad</b>
+      <ul><li>The user installs from Share, then Add to Home Screen. There is no prompt you can trigger. On iOS 26 Share sits under the ••• button, and Add to Home Screen is behind More in the share sheet.</li><li>From iOS 26, a site added to the Home Screen opens as a web app by default, even without a manifest. Seen on the iOS 26 simulator: the Add to Home Screen sheet has an "Open as Web App" switch that is already on, and it took the name and icon from the task app's tags. On iOS 16.4 to 18 it needs <code>display: standalone</code>.</li><li>Other iPhone browsers can add to the Home Screen too (since iOS 16.4).</li></ul></div>
+  </div>
+
+  <h3>Maskable icons</h3>
+  <p>Android crops icons into circles, squircles and other shapes. A maskable icon has a full-bleed background and keeps its artwork inside the central 80% circle, so nothing important is cut. Provide one normal icon (<code>purpose: "any"</code>) and one maskable. Do not mark a single file as <code>"any maskable"</code>: it will look too small in one place or cropped in the other.</p>
+
+  <h3>Common mistakes</h3>
+  <ul>
+    <li>Serving the manifest from a path that redirects to a login page. Open the manifest URL directly and check it returns JSON.</li>
+    <li>A <code>start_url</code> outside <code>scope</code>. The browser ignores the manifest.</li>
+    <li>Only an SVG or a 144 px icon. Chrome wants PNG at 192 and 512.</li>
+    <li>Forgetting <code>apple-touch-icon</code>. iPhone then uses a screenshot of the page as the icon.</li>
+  </ul>
+  <p class="note"><b>Check it.</b> Chrome DevTools, Application panel, Manifest. It lists every field it read, shows the icons, previews the maskable crop and prints installability warnings.</p>
+</section>
+
+<section id="sw">
+  <span class="level">Pillar 2 · Basic</span>
+  <h2>Service Workers</h2>
+  <p class="plain">A service worker is a JavaScript file the browser runs in the background, separate from your page. It sits between your app and the network. Every request the page makes reaches the worker first, and the worker decides how to answer. That is what makes offline possible.</p>
+
+  <div class="cols">
+    <div><b>What it can do</b><ul><li>Intercept requests (<code>fetch</code> event).</li><li>Read and write Cache Storage and IndexedDB.</li><li>Receive push messages and show notifications.</li><li>Run when no tab is open (push, background sync).</li></ul></div>
+    <div><b>What it cannot do</b><ul><li>Touch the DOM, <code>window</code> or <code>localStorage</code>.</li><li>Stay alive. The browser stops it after about 30 seconds of idle and restarts it for the next event, so global variables are lost.</li><li>Run on plain HTTP (except <code>localhost</code>).</li><li>Control pages outside its scope (the folder it is served from).</li></ul></div>
+  </div>
+
+  <h3>Life cycle</h3>
+  <div class="dia"><svg viewBox="0 0 860 250" role="img" aria-label="Service worker life cycle: register, installing, installed and waiting, activating, activated, then idle and stopped between events; a failed install becomes redundant">
+    <defs><marker id="ah2" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0 10 5 0 10z" class="hd"/></marker></defs>
+    <rect class="bx" x="14" y="40" width="130" height="64" rx="10"/><text class="t" x="28" y="68">register()</text><text class="s" x="28" y="88">page calls it</text>
+    <rect class="bx" x="184" y="40" width="130" height="64" rx="10"/><text class="t" x="198" y="68">installing</text><text class="s" x="198" y="88">fill the cache</text>
+    <rect class="bx hi" x="354" y="40" width="150" height="64" rx="10"/><text class="t" x="368" y="68">installed (waiting)</text><text class="s" x="368" y="88">old worker still rules</text>
+    <rect class="bx" x="544" y="40" width="130" height="64" rx="10"/><text class="t" x="558" y="68">activating</text><text class="s" x="558" y="88">delete old caches</text>
+    <rect class="bx" x="714" y="40" width="132" height="64" rx="10"/><text class="t" x="728" y="68">activated</text><text class="s" x="728" y="88">handles events</text>
+    <path class="ln" d="M144 72H180" marker-end="url(#ah2)"/><path class="ln" d="M314 72H350" marker-end="url(#ah2)"/><path class="ln" d="M504 72H540" marker-end="url(#ah2)"/><path class="ln" d="M674 72H710" marker-end="url(#ah2)"/>
+    <rect class="bx" x="184" y="166" width="130" height="64" rx="10"/><text class="t" x="198" y="194">redundant</text><text class="s" x="198" y="214">thrown away</text>
+    <path class="ln" d="M249 104V162" marker-end="url(#ah2)"/><text class="s" x="258" y="138">a file failed to cache</text>
+    <rect class="bx" x="714" y="166" width="132" height="64" rx="10"/><text class="t" x="728" y="194">stopped</text><text class="s" x="728" y="214">idle ~30 s</text>
+    <path class="ln" d="M765 104V162" marker-end="url(#ah2)"/><path class="ln" d="M800 166V108" marker-end="url(#ah2)"/><text class="s" x="610" y="138">no events → sleep</text><text class="s" x="808" y="150">event</text>
+    <text class="s" x="368" y="26">waits until every old tab is closed, or skipWaiting()</text>
+  </svg></div>
+
+  <div class="cols">
+    <div><b>First visit</b><ol><li>The page loads from the network as usual and calls <code>register()</code>.</li><li><code>install</code> runs. The worker downloads the app shell into a cache.</li><li>There is no older worker, so it activates straight away.</li><li><code>clients.claim()</code> makes it control the page that is already open. Without that call, control starts on the next page load.</li></ol></div>
+    <div><b>You deploy a new version</b><ol><li>On the next visit the browser re-downloads <code>sw.js</code>. If even one byte differs, it is a new worker.</li><li>The new worker installs into a new cache while the old one keeps serving the old files.</li><li>It waits. Two versions of your code never run in the same tab.</li><li>When all old tabs close, or the user accepts your "Reload" prompt, it activates and deletes the old cache.</li></ol></div>
+  </div>
+
+  <h3>Step 1: register it from the page</h3>
+  <p>Registration is one call. Most of this code handles the update prompt, explained under <a href="#advanced">Advanced</a>.</p>
+  <figure class="code"><figcaption><span class="fname">app.js</span><span class="ran" title="This code is copied from the app files that were run in a browser">from the app</span><button class="copy" type="button">Copy</button></figcaption><pre><code class="language-js">async function registerServiceWorker() {
+  if (!('serviceWorker' in navigator)) return; // very old browser: the app still works online
+
+  // If the page had a controller when it loaded, a later controller change means "an update took over".
+  const hadController = Boolean(navigator.serviceWorker.controller);
+
+  const registration = await navigator.serviceWorker.register('/sw.js', {
+    scope: '/',
+    updateViaCache: 'none', // always fetch sw.js and its imports from the network when checking for updates
+  });
+
+  const offerUpdate = (worker) =&gt;
+    showToast('A new version is ready.', 'Reload', () =&gt; worker.postMessage({ type: 'SKIP_WAITING' }));
+
+  // A new worker was already installed and waiting when this page opened.
+  if (registration.waiting &amp;&amp; navigator.serviceWorker.controller) offerUpdate(registration.waiting);
+
+  // A new worker shows up while the page is open.
+  registration.addEventListener('updatefound', () =&gt; {
+    const incoming = registration.installing;
+    incoming?.addEventListener('statechange', () =&gt; {
+      // "installed" + an existing controller = an update (not the very first install).
+      if (incoming.state === 'installed' &amp;&amp; navigator.serviceWorker.controller) offerUpdate(incoming);
+    });
+  });
+
+  // The new worker has taken over: reload once so the page and the worker are the same version.
+  let reloaded = false;
+  navigator.serviceWorker.addEventListener('controllerchange', () =&gt; {
+    if (!hadController || reloaded) return; // first install claims the page too: no reload needed
+    reloaded = true;
+    location.reload();
+  });
+
+  // Tabs can stay open for days. Check for a new sw.js whenever the app comes back to the front.
+  document.addEventListener('visibilitychange', () =&gt; {
+    if (document.visibilityState === 'visible') registration.update().catch(() =&gt; {});
+  });
+}</code></pre></figure>
+
+  <h3>Step 2: install, the moment to fill the cache</h3>
+  <figure class="code"><figcaption><span class="fname">sw.js</span><span class="ran" title="This code is copied from the app files that were run in a browser">from the app</span><button class="copy" type="button">Copy</button></figcaption><pre><code class="language-js">// Change VERSION whenever a precached file changes. A new version means a new cache,
+// filled during install while the old worker keeps serving the old files.
+const VERSION = 'v1';
+const STATIC_CACHE = `static-${VERSION}`;
+const RUNTIME_CACHE = `runtime-${VERSION}`;
+
+// The app shell: the minimum set of files needed to draw the UI with no network.
+const PRECACHE_URLS = [
+  '/index.html',
+  '/offline.html',
+  '/styles.css',
+  '/app.js',
+  '/db.js',
+  '/manifest.webmanifest',
+  '/icons/icon-192.png',
+  '/icons/icon-512.png',
+];</code></pre></figure>
+  <figure class="code"><figcaption><span class="fname">sw.js</span><span class="ran" title="This code is copied from the app files that were run in a browser">from the app</span><button class="copy" type="button">Copy</button></figcaption><pre><code class="language-js">self.addEventListener('install', (event) =&gt; {
+  // waitUntil keeps the worker alive until the promise settles.
+  // If any file fails to download, addAll rejects, install fails, and the old worker stays in charge.
+  event.waitUntil(
+    caches.open(STATIC_CACHE).then((cache) =&gt;
+      // cache: 'reload' skips the browser's HTTP cache so we store fresh copies.
+      cache.addAll(PRECACHE_URLS.map((url) =&gt; new Request(url, { cache: 'reload' })))
+    )
+  );
+  // No skipWaiting() here: the page asks for it when the user taps "Reload" (see the message handler).
+});</code></pre></figure>
+  <p class="note"><b><code>event.waitUntil(promise)</code></b> appears in every handler. It tells the browser "do not stop me until this promise settles". Work started without it can be cut off halfway.</p>
+
+  <h3>Step 3: activate, the moment to clean up</h3>
+  <figure class="code"><figcaption><span class="fname">sw.js</span><span class="ran" title="This code is copied from the app files that were run in a browser">from the app</span><button class="copy" type="button">Copy</button></figcaption><pre><code class="language-js">self.addEventListener('activate', (event) =&gt; {
+  event.waitUntil(
+    (async () =&gt; {
+      // Delete caches left behind by older versions of this worker.
+      const keep = [STATIC_CACHE, RUNTIME_CACHE];
+      const names = await caches.keys();
+      await Promise.all(names.filter((name) =&gt; !keep.includes(name)).map((name) =&gt; caches.delete(name)));
+      // Take control of pages that are already open (otherwise they are controlled only after a reload).
+      await self.clients.claim();
+    })()
+  );
+});</code></pre></figure>
+
+  <h3>Step 4: fetch, the moment to answer requests</h3>
+  <p>The handler below is a router. It looks at each request and picks a strategy. The strategies themselves are the next chapter.</p>
+  <figure class="code"><figcaption><span class="fname">sw.js</span><span class="ran" title="This code is copied from the app files that were run in a browser">from the app</span><button class="copy" type="button">Copy</button></figcaption><pre><code class="language-js">self.addEventListener('fetch', (event) =&gt; {
+  const { request } = event;
+  const url = new URL(request.url);
+
+  // Not calling respondWith() means "browser, handle this one as usual".
+  if (request.method !== 'GET') return;            // writes always go to the network
+  if (url.origin !== self.location.origin) return; // other sites: not our business
+  if (url.pathname.startsWith('/api/')) return;    // task data lives in IndexedDB, not in the HTTP cache
+
+  // A page load (typing the URL, tapping the icon, following a link).
+  if (request.mode === 'navigate') {
+    event.respondWith(networkFirst(request, { fallbackUrl: '/index.html' }));
+    return;
+  }
+
+  // Files from the precache list.
+  if (PRECACHE_URLS.includes(url.pathname)) {
+    event.respondWith(cacheFirst(request));
+    return;
+  }
+
+  // Everything else on our origin (extra icons, images added later).
+  event.respondWith(staleWhileRevalidate(request, event));
+});</code></pre></figure>
+
+  <h3>Common mistakes</h3>
+  <ul>
+    <li><b>Putting <code>sw.js</code> in a subfolder.</b> A worker at <code>/js/sw.js</code> controls only <code>/js/</code>. Serve it from the root.</li>
+    <li><b>Caching <code>sw.js</code> itself for a long time.</b> Send it with <code>Cache-Control: no-cache</code>. Browsers cap the HTTP cache for the worker script at 24 hours anyway, but a day-long stale worker is still painful.</li>
+    <li><b>Keeping state in a global variable.</b> The worker is stopped and restarted often. Persist to IndexedDB or the Cache.</li>
+    <li><b>Changing a cached file without changing <code>VERSION</code>.</b> The worker file is byte-identical, so the browser sees no update and users keep the old file.</li>
+    <li><b>Calling <code>respondWith()</code> after an <code>await</code>.</b> It must be called synchronously inside the event handler.</li>
+  </ul>
+  <p class="note"><b>Check it.</b> DevTools, Application, Service workers shows the state (activated, waiting), lets you tick "Update on reload" while developing, and has an Offline checkbox. Application, Cache storage shows exactly what was stored.</p>
+</section>
+
+<section id="caching">
+  <span class="level">Pillar 3 · Intermediate</span>
+  <h2>Caching strategies</h2>
+  <p class="plain">A caching strategy is the rule a service worker follows to answer one request: look in the cache, ask the network, or both, and in which order. There are five classic rules. A real app uses several, one per kind of file.</p>
+
+  <h3>Try each strategy</h3>
+  <div class="sim">
+    <div class="row"><b>Strategy</b><span id="sim-strat" class="row"></span></div>
+    <div class="row"><b>Network</b><span id="sim-net" class="row"></span></div>
+    <div class="row"><b>Cache</b><span id="sim-cache" class="row"></span></div>
+    <div class="dia" style="border:0;padding:0"><svg viewBox="0 0 860 210" role="img" aria-label="Request path between page, service worker, cache and network for the chosen strategy">
+      <defs><marker id="ah3" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M0 0 10 5 0 10z" class="hd"/></marker></defs>
+      <rect class="bx" x="14" y="70" width="150" height="70" rx="10"/><text class="t" x="30" y="100">Page</text><text class="s" x="30" y="120">fetch('/styles.css')</text>
+      <rect class="bx hi" x="330" y="70" width="170" height="70" rx="10"/><text class="t" x="346" y="100">Service worker</text><text class="s" x="346" y="120" id="sim-name">cache first</text>
+      <rect class="bx" x="680" y="10" width="166" height="70" rx="10"/><text class="t" x="696" y="40">Cache</text><text class="s" x="696" y="60" id="sim-cstate">has a copy</text>
+      <rect class="bx" x="680" y="130" width="166" height="70" rx="10"/><text class="t" x="696" y="160">Network</text><text class="s" x="696" y="180" id="sim-nstate">fast · 120 ms</text>
+      <path class="ln" id="e-req" d="M164 94H326" marker-end="url(#ah3)"/>
+      <path class="ln" id="e-res" d="M330 118H168" marker-end="url(#ah3)"/>
+      <path class="ln" id="e-cache" d="M500 90 676 50" marker-end="url(#ah3)"/>
+      <path class="ln" id="e-net" d="M500 120 676 160" marker-end="url(#ah3)"/>
+      <path class="ln" id="e-put" d="M763 130V84" marker-end="url(#ah3)"/>
+      <text class="s" x="210" y="86">request</text><text class="s" x="206" y="136">response</text><text class="s" x="772" y="112">save copy</text>
+    </svg></div>
+    <ol class="steps" id="sim-steps"></ol>
+    <p id="sim-result" class="note"></p>
+    <div>
+      <p class="cap" style="margin-bottom:8px"><b id="chart-title">Time until the page gets a response</b></p>
+      <div class="chart" id="sim-chart"></div>
+      <div class="legend" style="margin-top:8px"><span><i class="cache"></i>answered from cache</span><span><i></i>answered from network</span></div>
+      <p class="cap">Numbers come from a simple model (cache read 5 ms, the network delay you picked, a 2.5 second timeout for network first). They are not measurements of a real site. For scale, in the task app on this Mac a cache-first hit took 0.8 ms and a network call to the local server 1.8 ms (median of 30 requests in Chromium), so the 5 ms cache figure is cautious. A real network adds tens to thousands of milliseconds; a cache read does not change.</p>
+    </div>
+  </div>
+
+  <h3>Which strategy for which file</h3>
+  <div class="scroll"><table>
+    <tr><th>Strategy</th><th>Speed</th><th>Freshness</th><th>Works offline</th><th>Use it for</th></tr>
+    <tr><td><b>Cache first</b></td><td>Instant</td><td>Old until the cache name changes</td><td><span class="pill y">Yes</span></td><td>The app shell, fonts, hashed JS and CSS, icons</td></tr>
+    <tr><td><b>Network first</b></td><td>Network speed; slow links wait for the timeout</td><td>Always latest when online</td><td><span class="pill y">If cached before</span></td><td>HTML pages, an account balance, a feed's first page</td></tr>
+    <tr><td><b>Stale while revalidate</b></td><td>Instant after the first visit</td><td>One visit behind</td><td><span class="pill y">If cached before</span></td><td>Avatars, product images, config that changes rarely</td></tr>
+    <tr><td><b>Cache only</b></td><td>Instant</td><td>Never updates</td><td><span class="pill y">Yes</span></td><td>Files you precached and never fetch any other way</td></tr>
+    <tr><td><b>Network only</b></td><td>Network speed</td><td>Always latest</td><td><span class="pill n">No</span></td><td>POST, PUT, DELETE, payments, analytics, anything per-user and sensitive</td></tr>
+  </table></div>
+
+  <h3>The three the task app uses</h3>
+  <figure class="code"><figcaption><span class="fname">sw.js</span><span class="ran" title="This code is copied from the app files that were run in a browser">from the app</span><button class="copy" type="button">Copy</button></figcaption><pre><code class="language-js">// CACHE FIRST: answer from the cache; go to the network only on a miss.
+// Fastest. Right for files that only change when VERSION changes.
+async function cacheFirst(request) {
+  const cached = await caches.match(request);
+  if (cached) return cached;
+  const response = await fetch(request);
+  if (response.ok) {
+    const cache = await caches.open(RUNTIME_CACHE);
+    cache.put(request, response.clone()); // a Response body can be read once, so store a copy
+  }
+  return response;
+}
+
+// NETWORK FIRST: try the network, fall back to the cache if it fails or takes too long.
+// Freshest. Right for HTML, where an old copy is acceptable but a new one is better.
+async function networkFirst(request, { timeoutMs = 2500, fallbackUrl } = {}) {
+  const cache = await caches.open(RUNTIME_CACHE);
+  try {
+    const response = await fetch(request, { signal: AbortSignal.timeout(timeoutMs) });
+    if (response.ok) cache.put(request, response.clone());
+    return response;
+  } catch (error) {
+    // Offline, DNS failure or timeout. Try this exact URL, then the precached shell.
+    return (await caches.match(request)) || (await caches.match(fallbackUrl)) || (await caches.match('/offline.html'));
+  }
+}
+
+// STALE WHILE REVALIDATE: answer from the cache at once, and refresh the cache in the background.
+// Fast, and at most one visit out of date. Right for avatars, article images, non-critical data.
+async function staleWhileRevalidate(request, event) {
+  const cache = await caches.open(RUNTIME_CACHE);
+  const cached = await cache.match(request);
+  const refresh = fetch(request)
+    .then((response) =&gt; {
+      if (response.ok) cache.put(request, response.clone());
+      return response;
+    })
+    .catch(() =&gt; undefined);
+  // Keep the worker alive until the background refresh has finished.
+  event.waitUntil(refresh);
+  return cached || (await refresh) || Response.error();
+}</code></pre></figure>
+  <p>Cache only and network only need no helper. Cache only is <code>event.respondWith(caches.match(request))</code>. Network only is not calling <code>respondWith()</code> at all, which is what the task app does for <code>/api/</code> and for every non-GET request.</p>
+
+  <h3>Precache and runtime cache</h3>
+  <div class="cols">
+    <div><b>Precache</b><p>A fixed list of files stored during <code>install</code>, before the user needs them. This is the app shell. It guarantees that the second visit works offline. Keep it small: every byte is downloaded by every user on first visit.</p></div>
+    <div><b>Runtime cache</b><p>Responses stored as the user browses, by the strategies above. It can grow without limit, so real apps cap it (for example, keep the 50 newest entries) and delete it by name when the version changes.</p></div>
+  </div>
+
+  <h3>Rules that prevent hard bugs</h3>
+  <ul>
+    <li><b>Clone before you store.</b> A response body is a stream that can be read once. <code>cache.put(request, response.clone())</code> keeps the original for the page.</li>
+    <li><b>Check <code>response.ok</code> before caching.</b> Otherwise a 404 or 500 page is saved and served forever.</li>
+    <li><b>Only GET can be cached.</b> <code>cache.put</code> throws on a POST request.</li>
+    <li><b>Be careful with cross-origin files.</b> A response fetched without CORS is "opaque": you cannot read its status, so you may cache an error, and Chrome counts each opaque entry as about 7 MB against your storage budget. Ask the other server for CORS headers, or host the file yourself.</li>
+    <li><b>Never cache per-user responses under a shared URL</b> unless you clear the caches on logout. The next person to sign in on that device would see them.</li>
+    <li><b><code>cache.addAll</code> is all or nothing.</b> One 404 in the precache list fails the whole install.</li>
+  </ul>
+  <p class="note"><b>Check it.</b> DevTools Network panel: the Size column says "(ServiceWorker)" for responses the worker answered. Tick Offline and reload to see which requests still succeed.</p>
+</section>
+
+<section id="data">
+  <span class="level">Pillar 3, continued · Intermediate</span>
+  <h2>Offline data</h2>
+  <p class="plain">Caching files makes the app open offline. It does not make the app useful offline. For that, the user's data must live on the device, and every change must be saved locally first and sent to the server later. This is called local-first, and it is also what makes an app feel instant when online.</p>
+
+  <h3>Where to keep what</h3>
+  <div class="scroll"><table>
+    <tr><th>Storage</th><th>Holds</th><th>Use in a PWA</th></tr>
+    <tr><td><b>Cache Storage</b></td><td>Request and response pairs</td><td>Files: HTML, CSS, JS, images. Readable from page and worker.</td></tr>
+    <tr><td><b>IndexedDB</b></td><td>JavaScript objects, with indexes and transactions</td><td>App data: tasks, drafts, the outbox. Readable from page and worker.</td></tr>
+    <tr><td><code>localStorage</code></td><td>Small strings</td><td>A theme preference at most. It blocks the main thread and service workers cannot read it.</td></tr>
+    <tr><td>Cookies</td><td>Tiny strings sent with every request</td><td>Session identity only.</td></tr>
+  </table></div>
+
+  <h3>The write path</h3>
+  <div class="flow"><span>User taps Add</span><i>one transaction</i><span class="hi">Save task + queue change in outbox</span><i>instant</i><span>Redraw list</span><i>then</i><span>Try to send outbox</span><i>success</i><span>Remove from outbox</span></div>
+  <div class="flow"><span>Send fails (offline)</span><i>change stays queued</i><span class="hi">Outbox keeps it</span><i>connection returns</i><span>Background Sync or page retry</span><i>in order</i><span>Server catches up</span></div>
+  <p>The UI never waits for the network. The outbox is a list of changes the server has not confirmed yet. It survives closing the tab, restarting the phone and losing power, because it is in IndexedDB.</p>
+
+  <h3>Opening the database</h3>
+  <p>IndexedDB uses events instead of promises, so the first job is a small wrapper. Stores are created in <code>onupgradeneeded</code>, which runs only when the version number rises. That is your migration hook.</p>
+  <figure class="code"><figcaption><span class="fname">db.js</span><span class="ran" title="This code is copied from the app files that were run in a browser">from the app</span><button class="copy" type="button">Copy</button></figcaption><pre><code class="language-js">// IndexedDB is event-based; wrap a request in a Promise so we can use await.
+const promisify = (request) =&gt;
+  new Promise((resolve, reject) =&gt; {
+    request.onsuccess = () =&gt; resolve(request.result);
+    request.onerror = () =&gt; reject(request.error);
+  });
+
+function openDB() {
+  if (dbPromise) return dbPromise;
+  const request = indexedDB.open(DB_NAME, DB_VERSION);
+
+  // Runs only when DB_VERSION is higher than what the browser has stored.
+  // This is the one place where object stores and indexes may be created.
+  request.onupgradeneeded = () =&gt; {
+    const db = request.result;
+    if (!db.objectStoreNames.contains('tasks')) {
+      db.createObjectStore('tasks', { keyPath: 'id' });
+    }
+    if (!db.objectStoreNames.contains('outbox')) {
+      // autoIncrement gives each queued change a rising number, so we can replay them in order.
+      db.createObjectStore('outbox', { keyPath: 'key', autoIncrement: true });
+    }
+  };
+
+  dbPromise = promisify(request);
+  return dbPromise;
+}
+
+// Run `work` inside one transaction and resolve when the transaction has committed.
+async function withTx(storeNames, mode, work) {
+  const db = await openDB();
+  return new Promise((resolve, reject) =&gt; {
+    const tx = db.transaction(storeNames, mode);
+    let result;
+    tx.oncomplete = () =&gt; resolve(result);
+    tx.onerror = () =&gt; reject(tx.error);
+    tx.onabort = () =&gt; reject(tx.error || new Error('Transaction aborted'));
+    const out = work(tx);
+    if (out instanceof IDBRequest) out.onsuccess = () =&gt; { result = out.result; };
+    else result = out;
+  });
+}</code></pre></figure>
+
+  <h3>Saving a task and queuing the change together</h3>
+  <p>The key detail: the task and its outbox entry are written in one transaction. If the app crashed between two separate writes, you could have a task the server never hears about.</p>
+  <figure class="code"><figcaption><span class="fname">db.js</span><span class="ran" title="This code is copied from the app files that were run in a browser">from the app</span><button class="copy" type="button">Copy</button></figcaption><pre><code class="language-js">function getAllTasks() {
+  return withTx(['tasks'], 'readonly', (tx) =&gt; tx.objectStore('tasks').getAll());
+}
+
+// Save the task AND queue the change for the server in the same transaction.
+// Either both are stored or neither is, so the outbox can never miss a change.
+function saveTask(task) {
+  return withTx(['tasks', 'outbox'], 'readwrite', (tx) =&gt; {
+    tx.objectStore('tasks').put(task);
+    tx.objectStore('outbox').add({ op: 'put', taskId: task.id, task, queuedAt: Date.now() });
+  });
+}
+
+function deleteTask(id) {
+  return withTx(['tasks', 'outbox'], 'readwrite', (tx) =&gt; {
+    tx.objectStore('tasks').delete(id);
+    tx.objectStore('outbox').add({ op: 'delete', taskId: id, queuedAt: Date.now() });
+  });
+}
+
+function getOutbox() {
+  return withTx(['outbox'], 'readonly', (tx) =&gt; tx.objectStore('outbox').getAll());
+}
+
+function removeFromOutbox(key) {
+  return withTx(['outbox'], 'readwrite', (tx) =&gt; tx.objectStore('outbox').delete(key));
+}
+
+// Replace local tasks with the server's list. Only called when the outbox is empty,
+// so there is no local change that this could overwrite.
+function replaceAllTasks(tasks) {
+  return withTx(['tasks'], 'readwrite', (tx) =&gt; {
+    const store = tx.objectStore('tasks');
+    store.clear();
+    tasks.forEach((task) =&gt; store.put(task));
+  });
+}</code></pre></figure>
+
+  <h3>The page: write locally, redraw, sync</h3>
+  <figure class="code"><figcaption><span class="fname">app.js</span><span class="ran" title="This code is copied from the app files that were run in a browser">from the app</span><button class="copy" type="button">Copy</button></figcaption><pre><code class="language-js">async function refreshFromDB() {
+  state.tasks = await TaskDB.getAllTasks();
+  render();
+  renderSyncChip();
+}
+
+// Every change follows the same three steps:
+// 1. write to IndexedDB (instant, works offline)  2. redraw  3. try to sync.
+async function addTask(title) {
+  const now = Date.now();
+  await TaskDB.saveTask({
+    id: crypto.randomUUID(), // the client picks the id, so the server can accept the same PUT twice safely
+    title,
+    done: false,
+    createdAt: now,
+    updatedAt: now,
+  });
+  await refreshFromDB();
+  sync();
+}
+
+async function toggleTask(id) {
+  const task = state.tasks.find((t) =&gt; t.id === id);
+  if (!task) return;
+  await TaskDB.saveTask({ ...task, done: !task.done, updatedAt: Date.now() });
+  await refreshFromDB();
+  sync();
+}
+
+async function removeTask(id) {
+  await TaskDB.deleteTask(id);
+  await refreshFromDB();
+  sync();
+}</code></pre></figure>
+
+  <h3>Sending the outbox</h3>
+  <p>Changes are replayed oldest first. A network failure or a 5xx response stops the loop and keeps the entry. A 4xx response means the server rejected the change for good, so it is dropped rather than retried forever.</p>
+  <figure class="code"><figcaption><span class="fname">db.js</span><span class="ran" title="This code is copied from the app files that were run in a browser">from the app</span><button class="copy" type="button">Copy</button></figcaption><pre><code class="language-js">// Send queued changes to the server, oldest first.
+// Throws on a network failure or a 5xx, which tells the caller "try again later".
+async function sendOutbox() {
+  const entries = await getOutbox();
+  for (const entry of entries) {
+    const url = '/api/tasks/' + encodeURIComponent(entry.taskId);
+    const response = entry.op === 'delete'
+      ? await fetch(url, { method: 'DELETE' })
+      : await fetch(url, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(entry.task),
+        });
+
+    // 5xx = the server is having a bad moment: keep the entry and retry later.
+    if (response.status &gt;= 500) throw new Error('Server error ' + response.status);
+    // 2xx = stored. 4xx = the server will never accept this change, so retrying is pointless.
+    await removeFromOutbox(entry.key);
+  }
+  return entries.length;
+}
+
+// The page and the service worker may both try to flush at the same moment.
+// A Web Lock makes them take turns; the second caller finds an empty outbox.
+function flushOutbox() {
+  if (scope.navigator &amp;&amp; scope.navigator.locks) {
+    return scope.navigator.locks.request('outbox-flush', sendOutbox);
+  }
+  return sendOutbox(); // No Web Locks: PUT and DELETE by id are safe to repeat anyway.
+}
+
+// Ask the server for the current list, but only if nothing local is waiting to be sent.
+async function pullFromServer() {
+  if ((await getOutbox()).length &gt; 0) return false;
+  const response = await fetch('/api/tasks', { cache: 'no-store' });
+  if (!response.ok) throw new Error('Server error ' + response.status);
+  const tasks = await response.json();
+  // A change may have been queued while we were waiting for the response.
+  if ((await getOutbox()).length &gt; 0) return false;
+  await replaceAllTasks(tasks);
+  return true;
+}</code></pre></figure>
+
+  <h3>When to try: Background Sync plus a fallback</h3>
+  <p>Background Sync lets the worker send the outbox after the tab is closed, as soon as the device is online. Only Chromium browsers have it. Safari and Firefox need the page to retry, so the app does both.</p>
+  <figure class="code"><figcaption><span class="fname">app.js</span><span class="ran" title="This code is copied from the app files that were run in a browser">from the app</span><button class="copy" type="button">Copy</button></figcaption><pre><code class="language-js">async function sync() {
+  // Safety net first: ask the browser to wake the service worker when the connection
+  // returns, even if this tab has been closed by then. (Chromium only.)
+  try {
+    const registration = await navigator.serviceWorker?.ready;
+    if (registration &amp;&amp; 'sync' in registration) await registration.sync.register('flush-outbox');
+  } catch { /* permission denied or unsupported: the direct attempt below still runs */ }
+
+  // Then try right now from the page. This is the only path in Safari and Firefox.
+  try {
+    await TaskDB.flushOutbox();
+    const changed = await TaskDB.pullFromServer();
+    state.syncError = false;
+    if (changed) state.tasks = await TaskDB.getAllTasks();
+    render();
+  } catch {
+    state.syncError = true; // offline or server down: changes stay in the outbox
+  }
+  renderSyncChip();
+}
+
+// Moments when a retry is likely to succeed.
+window.addEventListener('online', sync);
+window.addEventListener('offline', renderSyncChip);
+document.addEventListener('visibilitychange', () =&gt; { if (document.visibilityState === 'visible') sync(); });
+$('sync-chip').addEventListener('click', sync);
+// The service worker finished a background sync while this page was open.
+navigator.serviceWorker?.addEventListener('message', (event) =&gt; {
+  if (event.data?.type === 'OUTBOX_FLUSHED') sync();
+});</code></pre></figure>
+  <figure class="code"><figcaption><span class="fname">sw.js</span><span class="ran" title="This code is copied from the app files that were run in a browser">from the app</span><button class="copy" type="button">Copy</button></figcaption><pre><code class="language-js">// Background Sync: the browser fires this once it believes there is a connection,
+// even if the user closed the tab after making changes offline.
+self.addEventListener('sync', (event) =&gt; {
+  if (event.tag !== 'flush-outbox') return;
+  // If this promise rejects, the browser schedules another attempt with a growing delay.
+  event.waitUntil(TaskDB.flushOutbox().then(() =&gt; tellPages({ type: 'OUTBOX_FLUSHED' })));
+});
+
+async function tellPages(message) {
+  const pages = await self.clients.matchAll({ type: 'window', includeUncontrolled: true });
+  pages.forEach((page) =&gt; page.postMessage(message));
+}</code></pre></figure>
+
+  <h3>Why retrying is safe: the server side</h3>
+  <p>A request can reach the server while its response is lost on the way back. The client then sends it again. This is harmless only if the server treats a repeat as a no-op. The client creates the task id, and the server stores by that id.</p>
+  <figure class="code"><figcaption><span class="fname">server.js</span><span class="ran" title="This code is copied from the app files that were run in a browser">from the app</span><button class="copy" type="button">Copy</button></figcaption><pre><code class="language-js">async function handleTasks(req, res, pathname) {
+  const id = decodeURIComponent(pathname.slice('/api/tasks/'.length));
+
+  if (req.method === 'GET' &amp;&amp; pathname === '/api/tasks') return send(res, 200, [...tasks.values()]);
+
+  // PUT is an upsert keyed by the client's id, so receiving the same request twice changes nothing.
+  // That is what makes "retry until it works" safe.
+  if (req.method === 'PUT' &amp;&amp; id) {
+    const task = await readBody(req);
+    if (typeof task.title !== 'string' || !task.title.trim() || task.id !== id) {
+      return send(res, 400, { error: 'A task needs an id that matches the URL and a title.' });
+    }
+    const current = tasks.get(id);
+    // Last write wins: ignore a change that is older than what we already hold.
+    if (!current || task.updatedAt &gt;= current.updatedAt) {
+      tasks.set(id, { id, title: task.title.trim().slice(0, 140), done: Boolean(task.done), createdAt: task.createdAt, updatedAt: task.updatedAt });
+      saveTasks();
+    }
+    return send(res, 200, tasks.get(id));
+  }
+
+  // Deleting something that is already gone is still a success.
+  if (req.method === 'DELETE' &amp;&amp; id) {
+    tasks.delete(id);
+    saveTasks();
+    return send(res, 204);
+  }
+  return send(res, 404, { error: 'Not found' });
+}</code></pre></figure>
+
+  <h3>Conflicts</h3>
+  <p>The app uses <b>last write wins</b>: each task carries <code>updatedAt</code>, and the server ignores a change older than what it has. That is enough for one person on two devices. It silently loses an edit when two people change the same task while offline. The <a href="#advanced">Advanced</a> chapter lists the stronger options.</p>
+
+  <h3>Common mistakes</h3>
+  <ul>
+    <li><b>Trusting <code>navigator.onLine</code>.</b> <code>true</code> only means a network interface is up. Hotel Wi-Fi with a login page reports online. The reliable test is whether the request succeeded.</li>
+    <li><b>Ids made by the server.</b> An offline-created task then has no id until sync, and every reference to it must be rewritten. Use <code>crypto.randomUUID()</code> on the client.</li>
+    <li><b>A POST that creates a row on every call.</b> Retries create duplicates. Use PUT by id, or send an idempotency key.</li>
+    <li><b>Awaiting something else in the middle of a transaction.</b> An IndexedDB transaction closes itself when the event loop goes idle. Do all the store calls synchronously, as <code>withTx</code> does.</li>
+  </ul>
+  <p class="note"><b>Check it.</b> DevTools, Application, IndexedDB shows both stores. Stop the server, add a task, and watch a row appear in <code>outbox</code>. Start the server and it disappears.</p>
+</section>
+
+<section id="push">
+  <span class="level">Pillar 4 · Intermediate</span>
+  <h2>Push notifications</h2>
+  <p class="plain">Push lets your server send a message to a user's device when your app is closed. The browser vendor runs a push service that holds a connection to the device. Your server hands the message to that service, the service delivers it, the browser starts your service worker, and the worker shows a notification.</p>
+  <p class="note"><b>Run end to end on 13 November 2026</b> in Chrome 157 on macOS, in a clean profile with notifications allowed. The app subscribed with Google's push service, the server sent a reminder 5 seconds later with the tab closed, and the notification arrived with the right title, body and tag. A second push replaced the first instead of stacking. After unsubscribing, the next send got a "gone" answer and the server deleted the subscription. Still not run: tapping the notification (it is an operating-system banner a script cannot click), and push on a real iPhone.</p>
+
+  <div class="cols">
+    <div><b>Two different APIs</b><ul><li><b>Notifications API</b> draws the banner. It works without any server.</li><li><b>Push API</b> delivers a message from a server to the worker. It draws nothing.</li></ul><p>A push notification is the two used together.</p></div>
+    <div><b>Three sets of keys</b><ul><li><b>VAPID key pair</b>: your server's identity. The public half goes to the browser, the private half signs each push.</li><li><b>Subscription keys</b> (<code>p256dh</code>, <code>auth</code>): made by the browser, used by your server to encrypt the payload so the push service cannot read it.</li></ul></div>
+  </div>
+
+  <h3>The whole flow</h3>
+  <div class="dia"><svg viewBox="0 0 860 430" role="img" aria-label="Sequence: the page asks permission and subscribes with the push service, sends the subscription to your server; later the server sends an encrypted message to the push service, which wakes the service worker, which shows a notification">
+    <defs><marker id="ah4" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0 10 5 0 10z" class="hd"/></marker></defs>
+    <rect class="bx" x="30" y="10" width="140" height="40" rx="8"/><text class="t" x="74" y="35">Page</text>
+    <rect class="bx hi" x="250" y="10" width="140" height="40" rx="8"/><text class="t" x="264" y="35">Service worker</text>
+    <rect class="bx" x="470" y="10" width="140" height="40" rx="8"/><text class="t" x="490" y="35">Push service</text>
+    <rect class="bx" x="690" y="10" width="140" height="40" rx="8"/><text class="t" x="716" y="35">Your server</text>
+    <path class="life" d="M100 50V420M320 50V420M540 50V420M760 50V420"/>
+    <text class="s" x="14" y="76">SET UP (once, app open)</text>
+    <path class="ln" d="M100 96H756" marker-end="url(#ah4)"/><text class="s" x="150" y="90">1  GET the VAPID public key</text>
+    <path class="ln" d="M100 132H160V150H104" marker-end="url(#ah4)"/><text class="s" x="170" y="146">2  Notification.requestPermission() after a tap</text>
+    <path class="ln" d="M100 186H536" marker-end="url(#ah4)"/><text class="s" x="150" y="180">3  pushManager.subscribe(public key)</text>
+    <path class="ln" d="M540 218H104" marker-end="url(#ah4)"/><text class="s" x="150" y="212">4  subscription: endpoint URL + p256dh + auth</text>
+    <path class="ln" d="M100 252H756" marker-end="url(#ah4)"/><text class="s" x="150" y="246">5  POST the subscription; server stores it</text>
+    <text class="s" x="14" y="290">SEND (any time, app may be closed)</text>
+    <path class="ln" d="M760 314H544" marker-end="url(#ah4)"/><text class="s" x="556" y="308">6  POST endpoint: encrypted, signed</text>
+    <path class="ln" d="M540 350H324" marker-end="url(#ah4)"/><text class="s" x="336" y="344">7  push event wakes the worker</text>
+    <path class="ln" d="M320 384H380V402H324" marker-end="url(#ah4)"/><text class="s" x="390" y="398">8  showNotification(); a tap fires notificationclick</text>
+  </svg></div>
+
+  <h3>The page: ask, subscribe, send to the server</h3>
+  <figure class="code"><figcaption><span class="fname">app.js</span><span class="ran" title="This code is copied from the app files that were run in a browser">from the app</span><button class="copy" type="button">Copy</button></figcaption><pre><code class="language-js">// The server's public key arrives as base64url text; subscribe() wants raw bytes.
+function base64UrlToBytes(text) {
+  const padded = (text + '='.repeat((4 - (text.length % 4)) % 4)).replace(/-/g, '+').replace(/_/g, '/');
+  return Uint8Array.from(atob(padded), (ch) =&gt; ch.charCodeAt(0));
+}
+
+async function setUpPushUI() {
+  const supported = 'serviceWorker' in navigator &amp;&amp; 'PushManager' in window &amp;&amp; 'Notification' in window;
+  if (!supported) {
+    // On iPhone, push exists only inside the installed (home screen) app.
+    if (isIOS &amp;&amp; !isStandalone) {
+      $('push-note').textContent = 'Reminders work after you add this app to your Home Screen.';
+      $('push-note').hidden = false;
+    }
+    return;
+  }
+  const registration = await navigator.serviceWorker.ready;
+  const existing = await registration.pushManager.getSubscription();
+  $('push-btn').hidden = Boolean(existing);
+  $('push-test-btn').hidden = !existing;
+}
+
+async function enablePush() {
+  // 1. Ask permission. Call this from a tap, never on page load: browsers ignore or punish that.
+  const permission = await Notification.requestPermission();
+  if (permission !== 'granted') {
+    showToast(permission === 'denied' ? 'Notifications are blocked in your browser settings.' : 'No reminders for now.');
+    return;
+  }
+
+  // 2. Get the server's public key and subscribe with the browser's push service.
+  const keyResponse = await fetch('/api/push/public-key');
+  if (!keyResponse.ok) { showToast('The server is not set up for push yet.'); return; }
+  const { publicKey } = await keyResponse.json();
+
+  const registration = await navigator.serviceWorker.ready;
+  const subscription = await registration.pushManager.subscribe({
+    userVisibleOnly: true, // a promise that every push will show a notification; required
+    applicationServerKey: base64UrlToBytes(publicKey),
+  });
+
+  // 3. Send the subscription (an endpoint URL plus two keys) to our server to store.
+  await fetch('/api/push/subscribe', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(subscription),
+  });
+
+  showToast('Reminders are on.');
+  setUpPushUI();
+}
+
+$('push-btn').addEventListener('click', () =&gt; enablePush().catch(() =&gt; showToast('Could not turn on reminders.')));
+
+$('push-test-btn').addEventListener('click', async () =&gt; {
+  const open = state.tasks.filter((t) =&gt; !t.done).length;
+  const response = await fetch('/api/push/test', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ title: 'Tasks', body: `${open} task${open === 1 ? '' : 's'} still open.`, delaySeconds: 5 }),
+  }).catch(() =&gt; null);
+  showToast(response?.ok ? 'A reminder arrives in 5 seconds. Try closing the app.' : 'Could not reach the server.');
+});</code></pre></figure>
+
+  <h3>The worker: receive, show, handle the tap</h3>
+  <figure class="code"><figcaption><span class="fname">sw.js</span><span class="ran" title="This code is copied from the app files that were run in a browser">from the app</span><button class="copy" type="button">Copy</button></figcaption><pre><code class="language-js">// A push message arrived from the server (the app may be closed).
+self.addEventListener('push', (event) =&gt; {
+  let data = {};
+  try { data = event.data ? event.data.json() : {}; } catch { data = { body: event.data.text() }; }
+
+  // You must show a notification for every push. Browsers revoke the subscription of sites
+  // that receive pushes silently.
+  event.waitUntil(
+    self.registration.showNotification(data.title || 'Tasks', {
+      body: data.body || 'You have tasks waiting.',
+      icon: '/icons/icon-192.png',
+      badge: '/icons/badge-96.png', // small monochrome icon in the Android status bar
+      tag: data.tag || 'tasks-reminder', // same tag = replace the previous notification instead of stacking
+      data: { url: data.url || '/' },
+    })
+  );
+});
+
+// The user tapped the notification.
+self.addEventListener('notificationclick', (event) =&gt; {
+  event.notification.close();
+  const target = new URL(event.notification.data.url, self.location.origin).href;
+  event.waitUntil(
+    (async () =&gt; {
+      const pages = await self.clients.matchAll({ type: 'window', includeUncontrolled: true });
+      // Reuse an open window if there is one, otherwise open a new one.
+      const open = pages.find((page) =&gt; new URL(page.url).origin === self.location.origin);
+      if (open) {
+        await open.focus();
+        if (open.url !== target &amp;&amp; 'navigate' in open) await open.navigate(target);
+      } else {
+        await self.clients.openWindow(target);
+      }
+    })()
+  );
+});</code></pre></figure>
+
+  <h3>The server: keys, subscriptions, sending</h3>
+  <p>The <code>web-push</code> package does the encryption and signing. Your job is storing subscriptions and removing dead ones.</p>
+  <figure class="code"><figcaption><span class="fname">server.js</span><span class="ran" title="This code is copied from the app files that were run in a browser">from the app</span><button class="copy" type="button">Copy</button></figcaption><pre><code class="language-js">// Web Push needs a key pair (VAPID). The public half goes to the browser, the private half
+// signs every push so the push service knows it came from this server.
+let webpush = null;
+try { webpush = require('web-push'); } catch { /* run `npm install` to enable push */ }
+
+let vapid = readJSON('vapid.json', null);
+if (webpush) {
+  if (!vapid) { vapid = webpush.generateVAPIDKeys(); writeJSON('vapid.json', vapid); } // keep this file private
+  // The subject is a contact address the push service can use if your server misbehaves.
+  webpush.setVapidDetails('mailto:you@example.com', vapid.publicKey, vapid.privateKey);
+}
+
+let subscriptions = readJSON('subscriptions.json', []);
+const saveSubscriptions = () =&gt; writeJSON('subscriptions.json', subscriptions);
+
+async function sendToAll(payload) {
+  const results = await Promise.allSettled(
+    subscriptions.map((sub) =&gt; webpush.sendNotification(sub, JSON.stringify(payload), { TTL: 60 * 60 }))
+  );
+  // 404 or 410 from the push service means this subscription is gone for good: forget it.
+  subscriptions = subscriptions.filter((_, i) =&gt; {
+    const r = results[i];
+    return !(r.status === 'rejected' &amp;&amp; [404, 410].includes(r.reason?.statusCode));
+  });
+  saveSubscriptions();
+  return results.filter((r) =&gt; r.status === 'fulfilled').length;
+}
+
+async function handlePush(req, res, pathname) {
+  if (!webpush) return send(res, 501, { error: 'Push is off. Run "npm install" in the project folder, then restart.' });
+
+  if (req.method === 'GET' &amp;&amp; pathname === '/api/push/public-key') {
+    return send(res, 200, { publicKey: vapid.publicKey });
+  }
+  if (req.method === 'POST' &amp;&amp; pathname === '/api/push/subscribe') {
+    const sub = await readBody(req);
+    if (!sub.endpoint || !sub.keys) return send(res, 400, { error: 'Not a push subscription.' });
+    if (!subscriptions.some((s) =&gt; s.endpoint === sub.endpoint)) { subscriptions.push(sub); saveSubscriptions(); }
+    return send(res, 201, { ok: true });
+  }
+  if (req.method === 'POST' &amp;&amp; pathname === '/api/push/test') {
+    const { title = 'Tasks', body = 'Test reminder', delaySeconds = 0 } = await readBody(req);
+    const delay = Math.min(Number(delaySeconds) || 0, 60) * 1000;
+    setTimeout(() =&gt; sendToAll({ title, body, url: '/' }).catch(console.error), delay);
+    return send(res, 202, { queued: subscriptions.length });
+  }
+  return send(res, 404, { error: 'Not found' });
+}</code></pre></figure>
+
+  <h3>Platform rules</h3>
+  <div class="scroll"><table>
+    <tr><th>Rule</th><th>Detail</th></tr>
+    <tr><td>Ask from a user action</td><td>Call <code>requestPermission()</code> inside a tap handler. Safari requires it. Chrome hides the prompt for sites people usually deny.</td></tr>
+    <tr><td>Every push shows a notification</td><td><code>userVisibleOnly: true</code> is a promise. Chrome shows a generic "site updated in the background" banner if you break it. Safari cancels the subscription after a few silent pushes.</td></tr>
+    <tr><td>iPhone and iPad</td><td>Web push exists only inside an app added to the Home Screen (iOS 16.4 and later). In a Safari tab, <code>PushManager</code> does not exist. Tell users to install first.</td></tr>
+    <tr><td>Denied is final</td><td>After "Block" you cannot ask again. The user must change it in browser settings. Ask at a moment when the value is obvious.</td></tr>
+    <tr><td>Subscriptions expire</td><td>The push service answers 404 or 410 for a dead endpoint. Delete it. Re-send the current subscription to your server on each app start in case it changed.</td></tr>
+    <tr><td>iPhone simulator</td><td>Checked on the iOS 26 simulator: the "Turn on reminders" button is missing in a Safari tab and appears once the app is opened from the Home Screen, and the system permission prompt shows. The subscription itself did not complete there. Use a real iPhone to test delivery.</td></tr>
+    <tr><td>Headless Chrome</td><td>In headless Chrome <code>pushManager.subscribe()</code> never settles: no error, no result. Automated push checks need a normal Chrome window.</td></tr>
+    <tr><td>Payload size</td><td>About 4 KB. Send an id and a short text, and let the app fetch the rest.</td></tr>
+  </table></div>
+
+  <h3>Asking well</h3>
+  <ul>
+    <li>Explain first, in your own UI: "Get a reminder when a task is due". Show the browser prompt only after the user taps your button.</li>
+    <li>Let people pick what they receive. One irrelevant notification gets the whole app blocked.</li>
+    <li>Use <code>tag</code> so a newer message replaces the older one instead of stacking five banners.</li>
+    <li>A tap should land on the exact screen the message was about, not the home page.</li>
+  </ul>
+
+  <h3>Try it</h3>
+  <ol>
+    <li>Run <code>npm install</code> then <code>node server.js</code> in the app folder and open <code>http://localhost:5199</code> in Chrome.</li>
+    <li>Tap "Turn on reminders" and allow notifications. On a Mac, also allow Chrome in System Settings, Notifications.</li>
+    <li>Tap "Send a test reminder", then close the tab within 5 seconds. The notification should still arrive.</li>
+    <li>Tap the notification. The app should open or come to the front.</li>
+  </ol>
+  <p class="note"><b>Check it.</b> DevTools, Application, Service workers has a "Push" box that fires a fake push event at your worker, so you can test the display code without a server.</p>
+</section>
+
+<section id="native">
+  <span class="level">Polish · Intermediate</span>
+  <h2>Making it feel native</h2>
+  <p class="plain">Installing and working offline make a PWA behave like an app. Feeling like one is mostly small details: no browser bar, content that respects the notch, taps that respond at once, and no web habits such as text selection on buttons or a page that bounces.</p>
+
+  <h3>The CSS that does most of the work</h3>
+  <figure class="code"><figcaption><span class="fname">styles.css</span><span class="ran" title="This code is copied from the app files that were run in a browser">from the app</span><button class="copy" type="button">Copy</button></figcaption><pre><code class="language-css">* { box-sizing: border-box; }
+
+html {
+  /* Stop iOS from enlarging text when the phone rotates. */
+  -webkit-text-size-adjust: 100%;
+  /* Remove the grey flash a browser draws on every tap. */
+  -webkit-tap-highlight-color: transparent;
+}
+
+body {
+  margin: 0;
+  /* dvh follows the visible area as mobile toolbars slide in and out; vh does not. */
+  min-height: 100dvh;
+  font: 16px/1.45 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  /* No pull-to-refresh and no rubber-band scroll chaining out of the app. */
+  overscroll-behavior-y: none;
+}
+
+/* Keep content clear of the notch, rounded corners and home indicator. */
+.bar {
+  position: sticky; top: 0; z-index: 2;
+  display: flex; align-items: center; justify-content: space-between; gap: 12px;
+  padding: calc(12px + env(safe-area-inset-top)) max(16px, env(safe-area-inset-right)) 12px max(16px, env(safe-area-inset-left));
+  background: var(--accent); color: var(--on-accent);
+}
+main {
+  display: grid; gap: 16px;
+  max-width: 34rem; margin: 0 auto;
+  padding: 16px max(16px, env(safe-area-inset-right)) calc(24px + env(safe-area-inset-bottom)) max(16px, env(safe-area-inset-left));
+}
+
+/* App chrome is not selectable text; task titles still are. */
+.bar, .filters, button { -webkit-user-select: none; user-select: none; }
+
+button, input {
+  font: inherit;            /* 16px or more: below that iOS zooms the page when an input gets focus */
+  min-height: 44px;         /* comfortable touch target */
+  touch-action: manipulation; /* no double-tap-to-zoom delay */
+}
+
+/* Rules that apply only when launched from the home screen. */
+@media (display-mode: standalone) {
+  #install-btn, #ios-hint { display: none; }
+}</code></pre></figure>
+
+  <div class="scroll"><table>
+    <tr><th>Native behaviour</th><th>How to get it on the web</th></tr>
+    <tr><td>Opens instantly</td><td>Precache the app shell and draw from local data first. Fetch fresh data after the first paint.</td></tr>
+    <tr><td>No browser bar</td><td><code>"display": "standalone"</code> in the manifest.</td></tr>
+    <tr><td>Content clear of notch and home indicator</td><td><code>viewport-fit=cover</code> plus <code>env(safe-area-inset-*)</code> padding.</td></tr>
+    <tr><td>Status bar matches the app</td><td><code>&lt;meta name="theme-color"&gt;</code>, one per colour scheme.</td></tr>
+    <tr><td>Taps respond immediately</td><td><code>touch-action: manipulation</code>, targets of 44 px or more, a pressed state in CSS.</td></tr>
+    <tr><td>No accidental zoom on input focus (iPhone)</td><td>Inputs with a font size of 16 px or more.</td></tr>
+    <tr><td>No pull-to-refresh or page bounce</td><td><code>overscroll-behavior-y: none</code> on the body.</td></tr>
+    <tr><td>Screen transitions</td><td>The View Transitions API (<code>document.startViewTransition</code>), with a plain swap as the fallback.</td></tr>
+    <tr><td>Number on the app icon</td><td>The Badging API, below.</td></tr>
+    <tr><td>Share sheet</td><td><code>navigator.share({ title, text, url })</code> from a tap.</td></tr>
+    <tr><td>Dark mode</td><td><code>prefers-color-scheme</code> media query and <code>color-scheme</code>.</td></tr>
+  </table></div>
+
+  <h3>Your own install button</h3>
+  <p>Chromium fires <code>beforeinstallprompt</code> when the app is installable. Keep the event and show a button at a moment that makes sense, for example after the user has added a few tasks. Safari has no such event, so detect iPhone and explain the manual steps.</p>
+  <figure class="code"><figcaption><span class="fname">app.js</span><span class="ran" title="This code is copied from the app files that were run in a browser">from the app</span><button class="copy" type="button">Copy</button></figcaption><pre><code class="language-js">let installEvent = null;
+
+// Chromium fires this when the app can be installed. Keep the event; show our own button.
+window.addEventListener('beforeinstallprompt', (event) =&gt; {
+  event.preventDefault(); // stop the browser's own mini-infobar
+  installEvent = event;
+  $('install-btn').hidden = false;
+});
+
+$('install-btn').addEventListener('click', async () =&gt; {
+  if (!installEvent) return;
+  installEvent.prompt(); // must be called from a user gesture; can be used once
+  const { outcome } = await installEvent.userChoice; // 'accepted' or 'dismissed'
+  installEvent = null;
+  $('install-btn').hidden = true;
+  if (outcome === 'accepted') showToast('Installing Tasks.');
+});
+
+window.addEventListener('appinstalled', () =&gt; { $('install-btn').hidden = true; });
+
+// Safari on iPhone has no install event. Detect it and explain the manual steps instead.
+const isStandalone = matchMedia('(display-mode: standalone)').matches || navigator.standalone === true;
+const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) || (navigator.platform === 'MacIntel' &amp;&amp; navigator.maxTouchPoints &gt; 1);
+if (isIOS &amp;&amp; !isStandalone) $('ios-hint').hidden = false;</code></pre></figure>
+
+  <h3>A badge on the icon</h3>
+  <figure class="code"><figcaption><span class="fname">app.js</span><span class="ran" title="This code is copied from the app files that were run in a browser">from the app</span><button class="copy" type="button">Copy</button></figcaption><pre><code class="language-js">// A number on the app icon, like a native app. Chromium desktop and installed iOS apps.
+function updateBadge() {
+  if (!('setAppBadge' in navigator)) return;
+  const open = state.tasks.filter((t) =&gt; !t.done).length;
+  (open ? navigator.setAppBadge(open) : navigator.clearAppBadge()).catch(() =&gt; {});
+}</code></pre></figure>
+
+  <h3>Layout differences when installed</h3>
+  <ul>
+    <li><b>No back button.</b> In standalone mode there is no browser chrome. Every screen needs its own way back.</li>
+    <li><b>No address bar.</b> Users cannot copy the URL. Add a share action where a link matters.</li>
+    <li><b>No reload button.</b> This is why the update prompt in the app matters: without it users may run an old version for weeks.</li>
+    <li><b>External links</b> open in an in-app browser view on Android and in Safari on iPhone. Keep your own pages inside <code>scope</code>.</li>
+  </ul>
+
+  <h3>Common mistakes</h3>
+  <ul>
+    <li>Using <code>100vh</code> for a full-height layout. On mobile it is taller than the visible area. Use <code>100dvh</code>.</li>
+    <li>Hiding the install button with user-agent checks. Use the <code>display-mode</code> media query, as the stylesheet does.</li>
+    <li>Disabling zoom with <code>user-scalable=no</code>. It breaks accessibility, and iOS ignores it.</li>
+    <li>Showing the install prompt on first visit. People dismiss it, and Chrome will not offer it again for a while.</li>
+  </ul>
+  <p class="note"><b>Check it.</b> DevTools device toolbar previews notches for common phones. For the real thing on a phone, the app must be served over HTTPS: deploy it or use a tunnel.</p>
+</section>
+
+<section id="build">
+  <span class="level">Project · Basic to intermediate</span>
+  <h2>Build the task manager</h2>
+  <p class="plain">Eleven steps take you from an empty folder to an installable task manager that works offline, syncs when the connection returns and sends reminders. There is no framework and no build tool, so nothing hides what the browser is doing.</p>
+  <p class="note"><b>The finished app is on this Mac</b> at <code>~/Documents/pwa-task-manager</code>. Run <code>node server.js</code> there and open <code>http://localhost:5199</code>. Steps 1 to 9 were run in a Chromium browser on 13 November 2026: install, offline reload, an offline add that synced after the server came back, and an update from v1 to v2 with the reload prompt. Step 10 (push) was run end to end in Chrome on the same day. Step 11 was run on the iOS 26 simulator in Safari: load, an offline add, sync after the server came back, and Add to Home Screen. No real phone, Android device or Firefox has been used.</p>
+
+  <div class="scroll"><table>
+    <tr><th>File</th><th>Lines</th><th>Job</th></tr>
+    <tr><td><code>public/index.html</code></td><td>67</td><td>The app shell and the manifest link</td></tr>
+    <tr><td><code>public/manifest.webmanifest</code></td><td>25</td><td>Name, icons, start URL, display mode</td></tr>
+    <tr><td><code>public/styles.css</code></td><td>114</td><td>Look, plus the native-feel rules</td></tr>
+    <tr><td><code>public/db.js</code></td><td>142</td><td>IndexedDB, outbox, sync. Shared by page and worker</td></tr>
+    <tr><td><code>public/app.js</code></td><td>326</td><td>UI, local-first writes, registration, install, push opt-in</td></tr>
+    <tr><td><code>public/sw.js</code></td><td>187</td><td>Precache, strategies, background sync, push</td></tr>
+    <tr><td><code>server.js</code></td><td>154</td><td>Static files, task API, push sender</td></tr>
+  </table></div>
+
+  <ol class="path">
+    <li><span class="n">1</span><div><b>A folder and a server</b><small>Service workers need HTTPS or <code>localhost</code>, so opening the file directly will not work. The server sends <code>Cache-Control: no-cache</code> so the service worker, not the HTTP cache, decides what is stored.</small>
+      <details><summary>server.js, complete</summary><figure class="code"><figcaption><span class="fname">server.js</span><span class="ran" title="This code is copied from the app files that were run in a browser">from the app</span><button class="copy" type="button">Copy</button></figcaption><pre><code class="language-js">// Development server for the Tasks app. No framework: Node's http module only.
+//   node server.js          -&gt; http://localhost:5199
+// Serves ./public, a tiny JSON API for tasks, and (if the web-push package is installed)
+// the three push endpoints.
+'use strict';
+const http = require('http');
+const fs = require('fs');
+const path = require('path');
+
+const PORT = Number(process.env.PORT || process.argv[2] || 5199);
+const PUBLIC_DIR = path.join(__dirname, 'public');
+const DATA_DIR = path.join(__dirname, 'data');
+fs.mkdirSync(DATA_DIR, { recursive: true });
+
+const readJSON = (name, fallback) =&gt; {
+  try { return JSON.parse(fs.readFileSync(path.join(DATA_DIR, name), 'utf8')); } catch { return fallback; }
+};
+const writeJSON = (name, value) =&gt; fs.writeFileSync(path.join(DATA_DIR, name), JSON.stringify(value, null, 2));
+
+const tasks = new Map(readJSON('tasks.json', []).map((t) =&gt; [t.id, t]));
+const saveTasks = () =&gt; writeJSON('tasks.json', [...tasks.values()]);
+
+const MIME = {
+  '.html': 'text/html; charset=utf-8', '.css': 'text/css; charset=utf-8', '.js': 'text/javascript; charset=utf-8',
+  '.webmanifest': 'application/manifest+json', '.json': 'application/json', '.png': 'image/png', '.svg': 'image/svg+xml',
+};
+
+const send = (res, status, body, headers = {}) =&gt; {
+  const payload = body === undefined ? '' : typeof body === 'string' || Buffer.isBuffer(body) ? body : JSON.stringify(body);
+  const type = typeof body === 'object' &amp;&amp; !Buffer.isBuffer(body) ? { 'Content-Type': 'application/json' } : {};
+  res.writeHead(status, { ...type, ...headers });
+  res.end(payload);
+};
+
+const readBody = (req) =&gt;
+  new Promise((resolve, reject) =&gt; {
+    let raw = '';
+    req.on('data', (part) =&gt; { raw += part; if (raw.length &gt; 1e6) req.destroy(); });
+    req.on('end', () =&gt; { try { resolve(raw ? JSON.parse(raw) : {}); } catch (e) { reject(e); } });
+    req.on('error', reject);
+  });
+
+// Web Push needs a key pair (VAPID). The public half goes to the browser, the private half
+// signs every push so the push service knows it came from this server.
+let webpush = null;
+try { webpush = require('web-push'); } catch { /* run `npm install` to enable push */ }
+
+let vapid = readJSON('vapid.json', null);
+if (webpush) {
+  if (!vapid) { vapid = webpush.generateVAPIDKeys(); writeJSON('vapid.json', vapid); } // keep this file private
+  // The subject is a contact address the push service can use if your server misbehaves.
+  webpush.setVapidDetails('mailto:you@example.com', vapid.publicKey, vapid.privateKey);
+}
+
+let subscriptions = readJSON('subscriptions.json', []);
+const saveSubscriptions = () =&gt; writeJSON('subscriptions.json', subscriptions);
+
+async function sendToAll(payload) {
+  const results = await Promise.allSettled(
+    subscriptions.map((sub) =&gt; webpush.sendNotification(sub, JSON.stringify(payload), { TTL: 60 * 60 }))
+  );
+  // 404 or 410 from the push service means this subscription is gone for good: forget it.
+  subscriptions = subscriptions.filter((_, i) =&gt; {
+    const r = results[i];
+    return !(r.status === 'rejected' &amp;&amp; [404, 410].includes(r.reason?.statusCode));
+  });
+  saveSubscriptions();
+  return results.filter((r) =&gt; r.status === 'fulfilled').length;
+}
+
+async function handlePush(req, res, pathname) {
+  if (!webpush) return send(res, 501, { error: 'Push is off. Run "npm install" in the project folder, then restart.' });
+
+  if (req.method === 'GET' &amp;&amp; pathname === '/api/push/public-key') {
+    return send(res, 200, { publicKey: vapid.publicKey });
+  }
+  if (req.method === 'POST' &amp;&amp; pathname === '/api/push/subscribe') {
+    const sub = await readBody(req);
+    if (!sub.endpoint || !sub.keys) return send(res, 400, { error: 'Not a push subscription.' });
+    if (!subscriptions.some((s) =&gt; s.endpoint === sub.endpoint)) { subscriptions.push(sub); saveSubscriptions(); }
+    return send(res, 201, { ok: true });
+  }
+  if (req.method === 'POST' &amp;&amp; pathname === '/api/push/test') {
+    const { title = 'Tasks', body = 'Test reminder', delaySeconds = 0 } = await readBody(req);
+    const delay = Math.min(Number(delaySeconds) || 0, 60) * 1000;
+    setTimeout(() =&gt; sendToAll({ title, body, url: '/' }).catch(console.error), delay);
+    return send(res, 202, { queued: subscriptions.length });
+  }
+  return send(res, 404, { error: 'Not found' });
+}
+
+async function handleTasks(req, res, pathname) {
+  const id = decodeURIComponent(pathname.slice('/api/tasks/'.length));
+
+  if (req.method === 'GET' &amp;&amp; pathname === '/api/tasks') return send(res, 200, [...tasks.values()]);
+
+  // PUT is an upsert keyed by the client's id, so receiving the same request twice changes nothing.
+  // That is what makes "retry until it works" safe.
+  if (req.method === 'PUT' &amp;&amp; id) {
+    const task = await readBody(req);
+    if (typeof task.title !== 'string' || !task.title.trim() || task.id !== id) {
+      return send(res, 400, { error: 'A task needs an id that matches the URL and a title.' });
+    }
+    const current = tasks.get(id);
+    // Last write wins: ignore a change that is older than what we already hold.
+    if (!current || task.updatedAt &gt;= current.updatedAt) {
+      tasks.set(id, { id, title: task.title.trim().slice(0, 140), done: Boolean(task.done), createdAt: task.createdAt, updatedAt: task.updatedAt });
+      saveTasks();
+    }
+    return send(res, 200, tasks.get(id));
+  }
+
+  // Deleting something that is already gone is still a success.
+  if (req.method === 'DELETE' &amp;&amp; id) {
+    tasks.delete(id);
+    saveTasks();
+    return send(res, 204);
+  }
+  return send(res, 404, { error: 'Not found' });
+}
+
+function serveStatic(req, res, pathname) {
+  const relative = pathname === '/' ? '/index.html' : pathname;
+  const file = path.normalize(path.join(PUBLIC_DIR, relative));
+  if (!file.startsWith(PUBLIC_DIR + path.sep)) return send(res, 403, 'Forbidden');
+  fs.readFile(file, (error, data) =&gt; {
+    if (error) return send(res, 404, 'Not found');
+    send(res, 200, data, {
+      'Content-Type': MIME[path.extname(file)] || 'application/octet-stream',
+      // The service worker owns caching. Tell the HTTP cache to always revalidate,
+      // so a new sw.js or index.html is never hidden behind an old copy.
+      'Cache-Control': 'no-cache',
+    });
+  });
+}
+
+http
+  .createServer(async (req, res) =&gt; {
+    const { pathname } = new URL(req.url, 'http://localhost');
+    try {
+      if (pathname.startsWith('/api/push/')) return await handlePush(req, res, pathname);
+      if (pathname === '/api/tasks' || pathname.startsWith('/api/tasks/')) return await handleTasks(req, res, pathname);
+      if (req.method !== 'GET' &amp;&amp; req.method !== 'HEAD') return send(res, 405, 'Method not allowed');
+      serveStatic(req, res, pathname);
+    } catch (error) {
+      console.error(error);
+      send(res, 500, { error: 'Server error' });
+    }
+  })
+  .listen(PORT, () =&gt; console.log(`Tasks app: http://localhost:${PORT}  (push ${webpush ? 'on' : 'off: run npm install'})`));</code></pre></figure></details>
+      <small><b>Check:</b> <code>node server.js</code> prints the address, and <code>curl localhost:5199/api/tasks</code> returns <code>[]</code>.</small></div></li>
+    <li><span class="n">2</span><div><b>The app shell</b><small>One HTML page with the header, the add form, the filters and an empty list. JavaScript fills in the tasks. This shell is what gets precached.</small>
+      <details><summary>index.html, complete</summary><figure class="code"><figcaption><span class="fname">index.html</span><span class="ran" title="This code is copied from the app files that were run in a browser">from the app</span><button class="copy" type="button">Copy</button></figcaption><pre><code class="language-xml">&lt;!doctype html&gt;
+&lt;html lang="en"&gt;
+&lt;head&gt;
+  &lt;meta charset="utf-8"&gt;
+  &lt;title&gt;Tasks&lt;/title&gt;
+
+  &lt;!-- viewport-fit=cover lets the page draw under the notch; CSS then pads with safe-area insets. --&gt;
+  &lt;meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover"&gt;
+
+  &lt;!-- The manifest: name, icons, start URL and display mode. This is what makes the site installable. --&gt;
+  &lt;link rel="manifest" href="/manifest.webmanifest"&gt;
+
+  &lt;!-- Colour of the browser toolbar / status bar area, one per colour scheme. --&gt;
+  &lt;meta name="theme-color" content="#5a0fc8" media="(prefers-color-scheme: light)"&gt;
+  &lt;meta name="theme-color" content="#17132a" media="(prefers-color-scheme: dark)"&gt;
+
+  &lt;!-- iOS reads these instead of (or as well as) the manifest. --&gt;
+  &lt;link rel="apple-touch-icon" href="/icons/apple-touch-icon.png"&gt;
+  &lt;meta name="apple-mobile-web-app-title" content="Tasks"&gt;
+  &lt;meta name="mobile-web-app-capable" content="yes"&gt;
+
+  &lt;link rel="icon" href="/icons/icon-192.png"&gt;
+  &lt;link rel="stylesheet" href="/styles.css"&gt;
+&lt;/head&gt;
+&lt;body&gt;
+  &lt;header class="bar"&gt;
+    &lt;h1&gt;Tasks&lt;/h1&gt;
+    &lt;button id="sync-chip" class="chip" type="button" aria-live="polite"&gt;Loading&lt;/button&gt;
+  &lt;/header&gt;
+
+  &lt;main&gt;
+    &lt;form id="add-form" class="add" autocomplete="off"&gt;
+      &lt;label class="sr-only" for="new-task"&gt;New task&lt;/label&gt;
+      &lt;input id="new-task" name="title" type="text" placeholder="Add a task" maxlength="140" enterkeyhint="done" required&gt;
+      &lt;button type="submit"&gt;Add&lt;/button&gt;
+    &lt;/form&gt;
+
+    &lt;div class="filters" role="tablist" aria-label="Filter tasks"&gt;
+      &lt;button role="tab" data-filter="all" aria-selected="true" type="button"&gt;All&lt;/button&gt;
+      &lt;button role="tab" data-filter="active" aria-selected="false" type="button"&gt;Active&lt;/button&gt;
+      &lt;button role="tab" data-filter="done" aria-selected="false" type="button"&gt;Done&lt;/button&gt;
+    &lt;/div&gt;
+
+    &lt;ul id="task-list" class="tasks"&gt;&lt;/ul&gt;
+    &lt;p id="empty" class="empty" hidden&gt;Nothing here yet. Add your first task above.&lt;/p&gt;
+
+    &lt;section class="panel" aria-label="App settings"&gt;
+      &lt;button id="install-btn" type="button" hidden&gt;Install app&lt;/button&gt;
+      &lt;p id="ios-hint" class="hint" hidden&gt;To install on iPhone: tap Share, then Add to Home Screen.&lt;/p&gt;
+      &lt;button id="push-btn" type="button" hidden&gt;Turn on reminders&lt;/button&gt;
+      &lt;button id="push-test-btn" type="button" hidden&gt;Send a test reminder&lt;/button&gt;
+      &lt;p id="push-note" class="hint" hidden&gt;&lt;/p&gt;
+    &lt;/section&gt;
+  &lt;/main&gt;
+
+  &lt;div id="toast" class="toast" role="status" hidden&gt;
+    &lt;span id="toast-text"&gt;&lt;/span&gt;
+    &lt;button id="toast-action" type="button" hidden&gt;&lt;/button&gt;
+  &lt;/div&gt;
+
+  &lt;!-- db.js is a classic script on purpose: the service worker loads the same file with importScripts(). --&gt;
+  &lt;script src="/db.js"&gt;&lt;/script&gt;
+  &lt;script src="/app.js"&gt;&lt;/script&gt;
+&lt;/body&gt;
+&lt;/html&gt;</code></pre></figure></details>
+      <details><summary>styles.css, complete</summary><figure class="code"><figcaption><span class="fname">styles.css</span><span class="ran" title="This code is copied from the app files that were run in a browser">from the app</span><button class="copy" type="button">Copy</button></figcaption><pre><code class="language-css">:root {
+  --bg: #f4f2fa; --surface: #ffffff; --text: #1b1630; --muted: #645d7c;
+  --line: #ddd8ec; --accent: #5a0fc8; --on-accent: #ffffff;
+  --ok: #0b7a4b; --warn: #9a5b00;
+  color-scheme: light dark;
+}
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #17132a; --surface: #221d3a; --text: #ece8fb; --muted: #a79fc4;
+    --line: #382f5c; --accent: #b79cff; --on-accent: #1b1630;
+    --ok: #5fd6a2; --warn: #f1b755;
+  }
+}
+
+* { box-sizing: border-box; }
+
+html {
+  /* Stop iOS from enlarging text when the phone rotates. */
+  -webkit-text-size-adjust: 100%;
+  /* Remove the grey flash a browser draws on every tap. */
+  -webkit-tap-highlight-color: transparent;
+}
+
+body {
+  margin: 0;
+  /* dvh follows the visible area as mobile toolbars slide in and out; vh does not. */
+  min-height: 100dvh;
+  font: 16px/1.45 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  /* No pull-to-refresh and no rubber-band scroll chaining out of the app. */
+  overscroll-behavior-y: none;
+}
+
+/* Keep content clear of the notch, rounded corners and home indicator. */
+.bar {
+  position: sticky; top: 0; z-index: 2;
+  display: flex; align-items: center; justify-content: space-between; gap: 12px;
+  padding: calc(12px + env(safe-area-inset-top)) max(16px, env(safe-area-inset-right)) 12px max(16px, env(safe-area-inset-left));
+  background: var(--accent); color: var(--on-accent);
+}
+main {
+  display: grid; gap: 16px;
+  max-width: 34rem; margin: 0 auto;
+  padding: 16px max(16px, env(safe-area-inset-right)) calc(24px + env(safe-area-inset-bottom)) max(16px, env(safe-area-inset-left));
+}
+
+/* App chrome is not selectable text; task titles still are. */
+.bar, .filters, button { -webkit-user-select: none; user-select: none; }
+
+button, input {
+  font: inherit;            /* 16px or more: below that iOS zooms the page when an input gets focus */
+  min-height: 44px;         /* comfortable touch target */
+  touch-action: manipulation; /* no double-tap-to-zoom delay */
+}
+
+/* Rules that apply only when launched from the home screen. */
+@media (display-mode: standalone) {
+  #install-btn, #ios-hint { display: none; }
+}
+
+h1 { margin: 0; font-size: 1.25rem; }
+
+.chip {
+  min-height: 32px; padding: 4px 12px; border-radius: 999px; border: 1px solid transparent;
+  background: color-mix(in srgb, var(--on-accent) 18%, transparent); color: inherit; font-size: .85rem;
+}
+.chip[data-state="pending"], .chip[data-state="offline"] { background: var(--surface); color: var(--warn); }
+
+.add { display: flex; gap: 8px; }
+.add input {
+  flex: 1; min-width: 0; padding: 0 14px; border-radius: 12px;
+  border: 1px solid var(--line); background: var(--surface); color: var(--text);
+}
+button {
+  padding: 0 16px; border-radius: 12px; border: 1px solid var(--line);
+  background: var(--surface); color: var(--text); cursor: pointer;
+}
+.add button, .toast button { background: var(--accent); color: var(--on-accent); border-color: transparent; }
+:focus-visible { outline: 3px solid color-mix(in srgb, var(--accent) 60%, transparent); outline-offset: 2px; }
+
+.filters { display: flex; gap: 8px; }
+.filters button { flex: 1; }
+.filters button[aria-selected="true"] { border-color: var(--accent); color: var(--accent); font-weight: 600; }
+
+.tasks { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; }
+.task {
+  display: flex; align-items: center; gap: 12px; padding: 6px 6px 6px 14px;
+  background: var(--surface); border: 1px solid var(--line); border-radius: 12px;
+}
+.task input[type="checkbox"] { width: 22px; height: 22px; min-height: 0; accent-color: var(--accent); flex: none; }
+.task .title { flex: 1; min-width: 0; overflow-wrap: anywhere; }
+.task.done .title { color: var(--muted); text-decoration: line-through; }
+.task .del { border: 0; background: none; color: var(--muted); min-width: 44px; padding: 0; font-size: 1.2rem; }
+
+.empty, .hint { color: var(--muted); margin: 0; }
+.panel { display: grid; gap: 8px; }
+
+.toast {
+  position: fixed; left: 16px; right: 16px; bottom: calc(16px + env(safe-area-inset-bottom));
+  max-width: 32rem; margin: 0 auto; padding: 10px 10px 10px 16px;
+  display: flex; align-items: center; justify-content: space-between; gap: 12px;
+  background: var(--text); color: var(--bg); border-radius: 14px;
+}
+.toast[hidden] { display: none; }
+.toast button { min-height: 36px; }
+
+.sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); }
+
+@media (prefers-reduced-motion: no-preference) {
+  .task { transition: opacity .15s; }
+}</code></pre></figure></details></div></li>
+    <li><span class="n">3</span><div><b>Manifest and icons</b><small>Add <code>manifest.webmanifest</code> (shown in <a href="#manifest">chapter 1</a>) and PNG icons at 192 and 512 px plus a maskable one. The app folder has a script, <code>tools/make-icons.js</code>, that draws them with no dependencies.</small>
+      <small><b>Check:</b> DevTools, Application, Manifest shows no errors, and Chrome's address bar shows an install icon.</small></div></li>
+    <li><span class="n">4</span><div><b>Local data first</b><small>Write <code>db.js</code> and make the UI read and write IndexedDB only. At this point the app works with no server API at all, and tasks survive a reload.</small>
+      <details><summary>db.js, complete</summary><figure class="code"><figcaption><span class="fname">db.js</span><span class="ran" title="This code is copied from the app files that were run in a browser">from the app</span><button class="copy" type="button">Copy</button></figcaption><pre><code class="language-js">// TaskDB: every read and write of task data goes through here.
+// Loaded twice: by the page (&lt;script src&gt;) and by the service worker (importScripts),
+// so both sides share one copy of the storage and sync code.
+(function (scope) {
+  'use strict';
+
+  const DB_NAME = 'tasks-db';
+  const DB_VERSION = 1;
+  let dbPromise;
+
+  // IndexedDB is event-based; wrap a request in a Promise so we can use await.
+  const promisify = (request) =&gt;
+    new Promise((resolve, reject) =&gt; {
+      request.onsuccess = () =&gt; resolve(request.result);
+      request.onerror = () =&gt; reject(request.error);
+    });
+
+  function openDB() {
+    if (dbPromise) return dbPromise;
+    const request = indexedDB.open(DB_NAME, DB_VERSION);
+
+    // Runs only when DB_VERSION is higher than what the browser has stored.
+    // This is the one place where object stores and indexes may be created.
+    request.onupgradeneeded = () =&gt; {
+      const db = request.result;
+      if (!db.objectStoreNames.contains('tasks')) {
+        db.createObjectStore('tasks', { keyPath: 'id' });
+      }
+      if (!db.objectStoreNames.contains('outbox')) {
+        // autoIncrement gives each queued change a rising number, so we can replay them in order.
+        db.createObjectStore('outbox', { keyPath: 'key', autoIncrement: true });
+      }
+    };
+
+    dbPromise = promisify(request);
+    return dbPromise;
+  }
+
+  // Run `work` inside one transaction and resolve when the transaction has committed.
+  async function withTx(storeNames, mode, work) {
+    const db = await openDB();
+    return new Promise((resolve, reject) =&gt; {
+      const tx = db.transaction(storeNames, mode);
+      let result;
+      tx.oncomplete = () =&gt; resolve(result);
+      tx.onerror = () =&gt; reject(tx.error);
+      tx.onabort = () =&gt; reject(tx.error || new Error('Transaction aborted'));
+      const out = work(tx);
+      if (out instanceof IDBRequest) out.onsuccess = () =&gt; { result = out.result; };
+      else result = out;
+    });
+  }
+
+  function getAllTasks() {
+    return withTx(['tasks'], 'readonly', (tx) =&gt; tx.objectStore('tasks').getAll());
+  }
+
+  // Save the task AND queue the change for the server in the same transaction.
+  // Either both are stored or neither is, so the outbox can never miss a change.
+  function saveTask(task) {
+    return withTx(['tasks', 'outbox'], 'readwrite', (tx) =&gt; {
+      tx.objectStore('tasks').put(task);
+      tx.objectStore('outbox').add({ op: 'put', taskId: task.id, task, queuedAt: Date.now() });
+    });
+  }
+
+  function deleteTask(id) {
+    return withTx(['tasks', 'outbox'], 'readwrite', (tx) =&gt; {
+      tx.objectStore('tasks').delete(id);
+      tx.objectStore('outbox').add({ op: 'delete', taskId: id, queuedAt: Date.now() });
+    });
+  }
+
+  function getOutbox() {
+    return withTx(['outbox'], 'readonly', (tx) =&gt; tx.objectStore('outbox').getAll());
+  }
+
+  function removeFromOutbox(key) {
+    return withTx(['outbox'], 'readwrite', (tx) =&gt; tx.objectStore('outbox').delete(key));
+  }
+
+  // Replace local tasks with the server's list. Only called when the outbox is empty,
+  // so there is no local change that this could overwrite.
+  function replaceAllTasks(tasks) {
+    return withTx(['tasks'], 'readwrite', (tx) =&gt; {
+      const store = tx.objectStore('tasks');
+      store.clear();
+      tasks.forEach((task) =&gt; store.put(task));
+    });
+  }
+
+  // Send queued changes to the server, oldest first.
+  // Throws on a network failure or a 5xx, which tells the caller "try again later".
+  async function sendOutbox() {
+    const entries = await getOutbox();
+    for (const entry of entries) {
+      const url = '/api/tasks/' + encodeURIComponent(entry.taskId);
+      const response = entry.op === 'delete'
+        ? await fetch(url, { method: 'DELETE' })
+        : await fetch(url, {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(entry.task),
+          });
+
+      // 5xx = the server is having a bad moment: keep the entry and retry later.
+      if (response.status &gt;= 500) throw new Error('Server error ' + response.status);
+      // 2xx = stored. 4xx = the server will never accept this change, so retrying is pointless.
+      await removeFromOutbox(entry.key);
+    }
+    return entries.length;
+  }
+
+  // The page and the service worker may both try to flush at the same moment.
+  // A Web Lock makes them take turns; the second caller finds an empty outbox.
+  function flushOutbox() {
+    if (scope.navigator &amp;&amp; scope.navigator.locks) {
+      return scope.navigator.locks.request('outbox-flush', sendOutbox);
+    }
+    return sendOutbox(); // No Web Locks: PUT and DELETE by id are safe to repeat anyway.
+  }
+
+  // Ask the server for the current list, but only if nothing local is waiting to be sent.
+  async function pullFromServer() {
+    if ((await getOutbox()).length &gt; 0) return false;
+    const response = await fetch('/api/tasks', { cache: 'no-store' });
+    if (!response.ok) throw new Error('Server error ' + response.status);
+    const tasks = await response.json();
+    // A change may have been queued while we were waiting for the response.
+    if ((await getOutbox()).length &gt; 0) return false;
+    await replaceAllTasks(tasks);
+    return true;
+  }
+
+  scope.TaskDB = { getAllTasks, saveTask, deleteTask, getOutbox, flushOutbox, pullFromServer };
+})(self);</code></pre></figure></details>
+      <small><b>Check:</b> add a task, reload, it is still there. DevTools, Application, IndexedDB shows it.</small></div></li>
+    <li><span class="n">5</span><div><b>Register a service worker that precaches the shell</b><small>Start with only the <code>install</code> and <code>activate</code> handlers from <a href="#sw">chapter 2</a>.</small>
+      <small><b>Check:</b> Application, Cache storage lists <code>static-v1</code> with 8 files.</small></div></li>
+    <li><span class="n">6</span><div><b>Answer requests from the worker</b><small>Add the <code>fetch</code> router and the three strategies from <a href="#caching">chapter 3</a>.</small>
+      <details><summary>sw.js, complete</summary><figure class="code"><figcaption><span class="fname">sw.js</span><span class="ran" title="This code is copied from the app files that were run in a browser">from the app</span><button class="copy" type="button">Copy</button></figcaption><pre><code class="language-js">// Service worker for the Tasks app.
+// It runs on its own thread, has no access to the DOM, and can be stopped by the
+// browser at any moment, so it keeps no state in variables between events.
+
+importScripts('/db.js'); // gives us self.TaskDB (same file the page uses)
+
+// Change VERSION whenever a precached file changes. A new version means a new cache,
+// filled during install while the old worker keeps serving the old files.
+const VERSION = 'v1';
+const STATIC_CACHE = `static-${VERSION}`;
+const RUNTIME_CACHE = `runtime-${VERSION}`;
+
+// The app shell: the minimum set of files needed to draw the UI with no network.
+const PRECACHE_URLS = [
+  '/index.html',
+  '/offline.html',
+  '/styles.css',
+  '/app.js',
+  '/db.js',
+  '/manifest.webmanifest',
+  '/icons/icon-192.png',
+  '/icons/icon-512.png',
+];
+
+self.addEventListener('install', (event) =&gt; {
+  // waitUntil keeps the worker alive until the promise settles.
+  // If any file fails to download, addAll rejects, install fails, and the old worker stays in charge.
+  event.waitUntil(
+    caches.open(STATIC_CACHE).then((cache) =&gt;
+      // cache: 'reload' skips the browser's HTTP cache so we store fresh copies.
+      cache.addAll(PRECACHE_URLS.map((url) =&gt; new Request(url, { cache: 'reload' })))
+    )
+  );
+  // No skipWaiting() here: the page asks for it when the user taps "Reload" (see the message handler).
+});
+
+self.addEventListener('activate', (event) =&gt; {
+  event.waitUntil(
+    (async () =&gt; {
+      // Delete caches left behind by older versions of this worker.
+      const keep = [STATIC_CACHE, RUNTIME_CACHE];
+      const names = await caches.keys();
+      await Promise.all(names.filter((name) =&gt; !keep.includes(name)).map((name) =&gt; caches.delete(name)));
+      // Take control of pages that are already open (otherwise they are controlled only after a reload).
+      await self.clients.claim();
+    })()
+  );
+});
+
+// CACHE FIRST: answer from the cache; go to the network only on a miss.
+// Fastest. Right for files that only change when VERSION changes.
+async function cacheFirst(request) {
+  const cached = await caches.match(request);
+  if (cached) return cached;
+  const response = await fetch(request);
+  if (response.ok) {
+    const cache = await caches.open(RUNTIME_CACHE);
+    cache.put(request, response.clone()); // a Response body can be read once, so store a copy
+  }
+  return response;
+}
+
+// NETWORK FIRST: try the network, fall back to the cache if it fails or takes too long.
+// Freshest. Right for HTML, where an old copy is acceptable but a new one is better.
+async function networkFirst(request, { timeoutMs = 2500, fallbackUrl } = {}) {
+  const cache = await caches.open(RUNTIME_CACHE);
+  try {
+    const response = await fetch(request, { signal: AbortSignal.timeout(timeoutMs) });
+    if (response.ok) cache.put(request, response.clone());
+    return response;
+  } catch (error) {
+    // Offline, DNS failure or timeout. Try this exact URL, then the precached shell.
+    return (await caches.match(request)) || (await caches.match(fallbackUrl)) || (await caches.match('/offline.html'));
+  }
+}
+
+// STALE WHILE REVALIDATE: answer from the cache at once, and refresh the cache in the background.
+// Fast, and at most one visit out of date. Right for avatars, article images, non-critical data.
+async function staleWhileRevalidate(request, event) {
+  const cache = await caches.open(RUNTIME_CACHE);
+  const cached = await cache.match(request);
+  const refresh = fetch(request)
+    .then((response) =&gt; {
+      if (response.ok) cache.put(request, response.clone());
+      return response;
+    })
+    .catch(() =&gt; undefined);
+  // Keep the worker alive until the background refresh has finished.
+  event.waitUntil(refresh);
+  return cached || (await refresh) || Response.error();
+}
+
+self.addEventListener('fetch', (event) =&gt; {
+  const { request } = event;
+  const url = new URL(request.url);
+
+  // Not calling respondWith() means "browser, handle this one as usual".
+  if (request.method !== 'GET') return;            // writes always go to the network
+  if (url.origin !== self.location.origin) return; // other sites: not our business
+  if (url.pathname.startsWith('/api/')) return;    // task data lives in IndexedDB, not in the HTTP cache
+
+  // A page load (typing the URL, tapping the icon, following a link).
+  if (request.mode === 'navigate') {
+    event.respondWith(networkFirst(request, { fallbackUrl: '/index.html' }));
+    return;
+  }
+
+  // Files from the precache list.
+  if (PRECACHE_URLS.includes(url.pathname)) {
+    event.respondWith(cacheFirst(request));
+    return;
+  }
+
+  // Everything else on our origin (extra icons, images added later).
+  event.respondWith(staleWhileRevalidate(request, event));
+});
+
+// Background Sync: the browser fires this once it believes there is a connection,
+// even if the user closed the tab after making changes offline.
+self.addEventListener('sync', (event) =&gt; {
+  if (event.tag !== 'flush-outbox') return;
+  // If this promise rejects, the browser schedules another attempt with a growing delay.
+  event.waitUntil(TaskDB.flushOutbox().then(() =&gt; tellPages({ type: 'OUTBOX_FLUSHED' })));
+});
+
+async function tellPages(message) {
+  const pages = await self.clients.matchAll({ type: 'window', includeUncontrolled: true });
+  pages.forEach((page) =&gt; page.postMessage(message));
+}
+
+self.addEventListener('message', (event) =&gt; {
+  // Sent by the page when the user accepts an update.
+  if (event.data &amp;&amp; event.data.type === 'SKIP_WAITING') self.skipWaiting();
+});
+
+// A push message arrived from the server (the app may be closed).
+self.addEventListener('push', (event) =&gt; {
+  let data = {};
+  try { data = event.data ? event.data.json() : {}; } catch { data = { body: event.data.text() }; }
+
+  // You must show a notification for every push. Browsers revoke the subscription of sites
+  // that receive pushes silently.
+  event.waitUntil(
+    self.registration.showNotification(data.title || 'Tasks', {
+      body: data.body || 'You have tasks waiting.',
+      icon: '/icons/icon-192.png',
+      badge: '/icons/badge-96.png', // small monochrome icon in the Android status bar
+      tag: data.tag || 'tasks-reminder', // same tag = replace the previous notification instead of stacking
+      data: { url: data.url || '/' },
+    })
+  );
+});
+
+// The user tapped the notification.
+self.addEventListener('notificationclick', (event) =&gt; {
+  event.notification.close();
+  const target = new URL(event.notification.data.url, self.location.origin).href;
+  event.waitUntil(
+    (async () =&gt; {
+      const pages = await self.clients.matchAll({ type: 'window', includeUncontrolled: true });
+      // Reuse an open window if there is one, otherwise open a new one.
+      const open = pages.find((page) =&gt; new URL(page.url).origin === self.location.origin);
+      if (open) {
+        await open.focus();
+        if (open.url !== target &amp;&amp; 'navigate' in open) await open.navigate(target);
+      } else {
+        await self.clients.openWindow(target);
+      }
+    })()
+  );
+});</code></pre></figure></details>
+      <small><b>Check:</b> stop the server with Ctrl+C and reload. The app still opens and shows your tasks. This is the moment it becomes a PWA.</small></div></li>
+    <li><span class="n">7</span><div><b>Sync with the server</b><small>Add the outbox, <code>flushOutbox</code>, the retry triggers and the <code>sync</code> event from <a href="#data">chapter 4</a>.</small>
+      <small><b>Check:</b> with the server stopped, add a task. The chip reads "1 to sync". Start the server and tap the chip or return to the tab: it reads "Synced", and <code>curl localhost:5199/api/tasks</code> shows the task.</small></div></li>
+    <li><span class="n">8</span><div><b>Ship an update</b><small>Change <code>VERSION</code> to <code>'v2'</code> in <code>sw.js</code>, then switch away from the tab and back.</small>
+      <small><b>Check:</b> a "new version is ready" toast appears. Tap Reload: the page reloads and Cache storage now holds only <code>static-v2</code> and <code>runtime-v2</code>.</small></div></li>
+    <li><span class="n">9</span><div><b>Install button and badge</b><small>Add the code from <a href="#native">chapter 6</a>.</small>
+      <details><summary>app.js, complete</summary><figure class="code"><figcaption><span class="fname">app.js</span><span class="ran" title="This code is copied from the app files that were run in a browser">from the app</span><button class="copy" type="button">Copy</button></figcaption><pre><code class="language-js">// Page script for the Tasks app: draws the list, saves changes locally first,
+// then syncs them. Storage and sync code lives in db.js (TaskDB).
+'use strict';
+
+const $ = (id) =&gt; document.getElementById(id);
+const state = { tasks: [], filter: 'all', syncError: false };
+
+// ---------- Rendering ----------
+
+function render() {
+  const visible = state.tasks
+    .filter((t) =&gt; state.filter === 'all' || (state.filter === 'done') === t.done)
+    .sort((a, b) =&gt; b.createdAt - a.createdAt);
+
+  const list = $('task-list');
+  list.replaceChildren(
+    ...visible.map((task) =&gt; {
+      const item = document.createElement('li');
+      item.className = 'task' + (task.done ? ' done' : '');
+
+      const box = document.createElement('input');
+      box.type = 'checkbox';
+      box.checked = task.done;
+      box.id = 'task-' + task.id;
+      box.addEventListener('change', () =&gt; toggleTask(task.id));
+
+      const title = document.createElement('label');
+      title.className = 'title';
+      title.htmlFor = box.id;
+      title.textContent = task.title; // textContent, never innerHTML, for user-typed text
+
+      const del = document.createElement('button');
+      del.className = 'del';
+      del.type = 'button';
+      del.textContent = '✕';
+      del.setAttribute('aria-label', 'Delete ' + task.title);
+      del.addEventListener('click', () =&gt; removeTask(task.id));
+
+      item.append(box, title, del);
+      return item;
+    })
+  );
+  $('empty').hidden = visible.length &gt; 0;
+  updateBadge();
+}
+
+async function renderSyncChip() {
+  const waiting = (await TaskDB.getOutbox()).length;
+  const chip = $('sync-chip');
+  if (!navigator.onLine) {
+    chip.dataset.state = 'offline';
+    chip.textContent = waiting ? `Offline · ${waiting} to sync` : 'Offline';
+  } else if (waiting) {
+    chip.dataset.state = 'pending';
+    chip.textContent = state.syncError ? `${waiting} to sync · tap to retry` : `Syncing ${waiting}`;
+  } else {
+    chip.dataset.state = 'synced';
+    chip.textContent = 'Synced';
+  }
+}
+
+// ---------- Local-first writes ----------
+
+async function refreshFromDB() {
+  state.tasks = await TaskDB.getAllTasks();
+  render();
+  renderSyncChip();
+}
+
+// Every change follows the same three steps:
+// 1. write to IndexedDB (instant, works offline)  2. redraw  3. try to sync.
+async function addTask(title) {
+  const now = Date.now();
+  await TaskDB.saveTask({
+    id: crypto.randomUUID(), // the client picks the id, so the server can accept the same PUT twice safely
+    title,
+    done: false,
+    createdAt: now,
+    updatedAt: now,
+  });
+  await refreshFromDB();
+  sync();
+}
+
+async function toggleTask(id) {
+  const task = state.tasks.find((t) =&gt; t.id === id);
+  if (!task) return;
+  await TaskDB.saveTask({ ...task, done: !task.done, updatedAt: Date.now() });
+  await refreshFromDB();
+  sync();
+}
+
+async function removeTask(id) {
+  await TaskDB.deleteTask(id);
+  await refreshFromDB();
+  sync();
+}
+
+// ---------- Sync ----------
+
+async function sync() {
+  // Safety net first: ask the browser to wake the service worker when the connection
+  // returns, even if this tab has been closed by then. (Chromium only.)
+  try {
+    const registration = await navigator.serviceWorker?.ready;
+    if (registration &amp;&amp; 'sync' in registration) await registration.sync.register('flush-outbox');
+  } catch { /* permission denied or unsupported: the direct attempt below still runs */ }
+
+  // Then try right now from the page. This is the only path in Safari and Firefox.
+  try {
+    await TaskDB.flushOutbox();
+    const changed = await TaskDB.pullFromServer();
+    state.syncError = false;
+    if (changed) state.tasks = await TaskDB.getAllTasks();
+    render();
+  } catch {
+    state.syncError = true; // offline or server down: changes stay in the outbox
+  }
+  renderSyncChip();
+}
+
+// Moments when a retry is likely to succeed.
+window.addEventListener('online', sync);
+window.addEventListener('offline', renderSyncChip);
+document.addEventListener('visibilitychange', () =&gt; { if (document.visibilityState === 'visible') sync(); });
+$('sync-chip').addEventListener('click', sync);
+// The service worker finished a background sync while this page was open.
+navigator.serviceWorker?.addEventListener('message', (event) =&gt; {
+  if (event.data?.type === 'OUTBOX_FLUSHED') sync();
+});
+
+// ---------- Service worker registration and updates ----------
+
+async function registerServiceWorker() {
+  if (!('serviceWorker' in navigator)) return; // very old browser: the app still works online
+
+  // If the page had a controller when it loaded, a later controller change means "an update took over".
+  const hadController = Boolean(navigator.serviceWorker.controller);
+
+  const registration = await navigator.serviceWorker.register('/sw.js', {
+    scope: '/',
+    updateViaCache: 'none', // always fetch sw.js and its imports from the network when checking for updates
+  });
+
+  const offerUpdate = (worker) =&gt;
+    showToast('A new version is ready.', 'Reload', () =&gt; worker.postMessage({ type: 'SKIP_WAITING' }));
+
+  // A new worker was already installed and waiting when this page opened.
+  if (registration.waiting &amp;&amp; navigator.serviceWorker.controller) offerUpdate(registration.waiting);
+
+  // A new worker shows up while the page is open.
+  registration.addEventListener('updatefound', () =&gt; {
+    const incoming = registration.installing;
+    incoming?.addEventListener('statechange', () =&gt; {
+      // "installed" + an existing controller = an update (not the very first install).
+      if (incoming.state === 'installed' &amp;&amp; navigator.serviceWorker.controller) offerUpdate(incoming);
+    });
+  });
+
+  // The new worker has taken over: reload once so the page and the worker are the same version.
+  let reloaded = false;
+  navigator.serviceWorker.addEventListener('controllerchange', () =&gt; {
+    if (!hadController || reloaded) return; // first install claims the page too: no reload needed
+    reloaded = true;
+    location.reload();
+  });
+
+  // Tabs can stay open for days. Check for a new sw.js whenever the app comes back to the front.
+  document.addEventListener('visibilitychange', () =&gt; {
+    if (document.visibilityState === 'visible') registration.update().catch(() =&gt; {});
+  });
+}
+
+// ---------- Install ----------
+
+let installEvent = null;
+
+// Chromium fires this when the app can be installed. Keep the event; show our own button.
+window.addEventListener('beforeinstallprompt', (event) =&gt; {
+  event.preventDefault(); // stop the browser's own mini-infobar
+  installEvent = event;
+  $('install-btn').hidden = false;
+});
+
+$('install-btn').addEventListener('click', async () =&gt; {
+  if (!installEvent) return;
+  installEvent.prompt(); // must be called from a user gesture; can be used once
+  const { outcome } = await installEvent.userChoice; // 'accepted' or 'dismissed'
+  installEvent = null;
+  $('install-btn').hidden = true;
+  if (outcome === 'accepted') showToast('Installing Tasks.');
+});
+
+window.addEventListener('appinstalled', () =&gt; { $('install-btn').hidden = true; });
+
+// Safari on iPhone has no install event. Detect it and explain the manual steps instead.
+const isStandalone = matchMedia('(display-mode: standalone)').matches || navigator.standalone === true;
+const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) || (navigator.platform === 'MacIntel' &amp;&amp; navigator.maxTouchPoints &gt; 1);
+if (isIOS &amp;&amp; !isStandalone) $('ios-hint').hidden = false;
+
+// ---------- Push notifications ----------
+
+// The server's public key arrives as base64url text; subscribe() wants raw bytes.
+function base64UrlToBytes(text) {
+  const padded = (text + '='.repeat((4 - (text.length % 4)) % 4)).replace(/-/g, '+').replace(/_/g, '/');
+  return Uint8Array.from(atob(padded), (ch) =&gt; ch.charCodeAt(0));
+}
+
+async function setUpPushUI() {
+  const supported = 'serviceWorker' in navigator &amp;&amp; 'PushManager' in window &amp;&amp; 'Notification' in window;
+  if (!supported) {
+    // On iPhone, push exists only inside the installed (home screen) app.
+    if (isIOS &amp;&amp; !isStandalone) {
+      $('push-note').textContent = 'Reminders work after you add this app to your Home Screen.';
+      $('push-note').hidden = false;
+    }
+    return;
+  }
+  const registration = await navigator.serviceWorker.ready;
+  const existing = await registration.pushManager.getSubscription();
+  $('push-btn').hidden = Boolean(existing);
+  $('push-test-btn').hidden = !existing;
+}
+
+async function enablePush() {
+  // 1. Ask permission. Call this from a tap, never on page load: browsers ignore or punish that.
+  const permission = await Notification.requestPermission();
+  if (permission !== 'granted') {
+    showToast(permission === 'denied' ? 'Notifications are blocked in your browser settings.' : 'No reminders for now.');
+    return;
+  }
+
+  // 2. Get the server's public key and subscribe with the browser's push service.
+  const keyResponse = await fetch('/api/push/public-key');
+  if (!keyResponse.ok) { showToast('The server is not set up for push yet.'); return; }
+  const { publicKey } = await keyResponse.json();
+
+  const registration = await navigator.serviceWorker.ready;
+  const subscription = await registration.pushManager.subscribe({
+    userVisibleOnly: true, // a promise that every push will show a notification; required
+    applicationServerKey: base64UrlToBytes(publicKey),
+  });
+
+  // 3. Send the subscription (an endpoint URL plus two keys) to our server to store.
+  await fetch('/api/push/subscribe', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(subscription),
+  });
+
+  showToast('Reminders are on.');
+  setUpPushUI();
+}
+
+$('push-btn').addEventListener('click', () =&gt; enablePush().catch(() =&gt; showToast('Could not turn on reminders.')));
+
+$('push-test-btn').addEventListener('click', async () =&gt; {
+  const open = state.tasks.filter((t) =&gt; !t.done).length;
+  const response = await fetch('/api/push/test', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ title: 'Tasks', body: `${open} task${open === 1 ? '' : 's'} still open.`, delaySeconds: 5 }),
+  }).catch(() =&gt; null);
+  showToast(response?.ok ? 'A reminder arrives in 5 seconds. Try closing the app.' : 'Could not reach the server.');
+});
+
+// ---------- Small extras ----------
+
+// A number on the app icon, like a native app. Chromium desktop and installed iOS apps.
+function updateBadge() {
+  if (!('setAppBadge' in navigator)) return;
+  const open = state.tasks.filter((t) =&gt; !t.done).length;
+  (open ? navigator.setAppBadge(open) : navigator.clearAppBadge()).catch(() =&gt; {});
+}
+
+let toastTimer;
+function showToast(text, actionLabel, onAction) {
+  $('toast-text').textContent = text;
+  const action = $('toast-action');
+  action.hidden = !actionLabel;
+  action.textContent = actionLabel || '';
+  action.onclick = onAction || null;
+  $('toast').hidden = false;
+  clearTimeout(toastTimer);
+  if (!actionLabel) toastTimer = setTimeout(() =&gt; { $('toast').hidden = true; }, 4000);
+}
+
+$('add-form').addEventListener('submit', (event) =&gt; {
+  event.preventDefault();
+  const input = $('new-task');
+  const title = input.value.trim();
+  if (!title) return;
+  input.value = '';
+  addTask(title);
+});
+
+document.querySelectorAll('.filters button').forEach((button) =&gt; {
+  button.addEventListener('click', () =&gt; {
+    state.filter = button.dataset.filter;
+    document.querySelectorAll('.filters button').forEach((b) =&gt; b.setAttribute('aria-selected', String(b === button)));
+    render();
+  });
+});
+
+// ---------- Start ----------
+
+(async function start() {
+  await refreshFromDB();          // draw from local data first: instant, and works offline
+  // Opened from the "New task" home-screen shortcut (see "shortcuts" in the manifest).
+  if (new URLSearchParams(location.search).has('new')) $('new-task').focus();
+  await registerServiceWorker().catch((error) =&gt; console.warn('Service worker registration failed', error));
+  setUpPushUI().catch(() =&gt; {});
+  sync();                         // then catch up with the server
+})();</code></pre></figure></details>
+      <small><b>Check:</b> in Chrome, "Install app" appears; after installing, the app opens in its own window with no address bar.</small></div></li>
+    <li><span class="n">10</span><div><b>Push reminders</b><small>Run <code>npm install</code> to add <code>web-push</code>, restart the server, and follow "Try it" in <a href="#push">chapter 5</a>.</small></div></li>
+    <li><span class="n">11</span><div><b>Put it on a phone</b><small>Deploy the folder to any host with HTTPS and Node, or open a tunnel to your Mac. Then install it from Chrome on Android (menu, Install app) and from Safari on iPhone (the ••• button, Share, More, Add to Home Screen on iOS 26). Turn on airplane mode and open it.</small></div></li>
+  </ol>
+
+  <h3>Ideas to extend it</h3>
+  <ul>
+    <li>Due dates, with the server sending a push when one is near.</li>
+    <li>Edit a task's title in place.</li>
+    <li>A "Share to Tasks" entry using the manifest's <code>share_target</code>.</li>
+    <li>A per-user login, with caches and IndexedDB cleared on logout.</li>
+    <li>Swap last-write-wins for per-field merging.</li>
+  </ul>
+</section>
+
+<section id="advanced">
+  <span class="level">Advanced</span>
+  <h2>Advanced topics</h2>
+  <p class="plain">These are the problems that appear after launch: users stuck on an old version, storage that disappears, bugs that only happen on one phone. The four snippets in this chapter are not part of the task app. Each was copied from this page and run in Chrome 157 on 13 November 2026; the result is under it.</p>
+
+  <h3>1. Updates without breaking open tabs</h3>
+  <div class="flow"><span>Deploy new files</span><i>next visit</i><span>Browser fetches sw.js, sees a change</span><i>install</i><span class="hi">New worker waits</span><i>user taps Reload</i><span>skipWaiting()</span><i>controllerchange</i><span>Page reloads once</span></div>
+  <div class="scroll"><table>
+    <tr><th>Approach</th><th>Behaviour</th><th>Risk</th></tr>
+    <tr><td>Do nothing</td><td>The new version takes over after every tab of the app is closed.</td><td>Installed apps are rarely fully closed. Users stay on old code for a long time.</td></tr>
+    <tr><td><code>skipWaiting()</code> inside <code>install</code></td><td>The new worker takes over at once.</td><td>An open page built from v1 HTML starts receiving v2 files. Lazy-loaded scripts can fail.</td></tr>
+    <tr><td><b>Prompt, then skip and reload</b> (the task app)</td><td>The user chooses the moment.</td><td>Slightly more code. This is the safe default.</td></tr>
+  </table></div>
+  <p>Bigger apps give files hashed names (<code>app.3f9a1c.js</code>) and generate the precache list at build time, so a file's URL changes whenever its content does. Then cache first is always correct and you never bump a version by hand.</p>
+
+  <h3>2. A kill switch</h3>
+  <p>If a bad worker ships, you cannot ask users to clear their browser. Deploy this as <code>sw.js</code>: it removes itself and every cache, then reloads open pages.</p>
+  <figure class="code"><figcaption><span class="fname">sw.js (emergency replacement)</span><span class="ran">run in Chrome</span><button class="copy" type="button">Copy</button></figcaption><pre><code class="language-js">self.addEventListener('install', () =&gt; self.skipWaiting());
+
+self.addEventListener('activate', (event) =&gt; {
+  event.waitUntil((async () =&gt; {
+    const names = await caches.keys();
+    await Promise.all(names.map((name) =&gt; caches.delete(name)));
+    await self.registration.unregister();
+    const pages = await self.clients.matchAll({ type: 'window' });
+    pages.forEach((page) =&gt; page.navigate(page.url)); // reload without a worker
+  })());
+});</code></pre></figure>
+  <p class="note"><b>Result.</b> Deployed over the task app's v1 worker: the cache list went from <code>static-v1</code> to empty, the registration count from 1 to 0, and the open page reloaded once with no controller.</p>
+
+  <h3>3. Storage limits and eviction</h3>
+  <ul>
+    <li>Cache Storage and IndexedDB share one budget per origin. Chromium allows up to about 60% of the disk; Safari and Firefox are in the same order of size for normal sites. The <a href="#start">Start</a> chapter shows your live number.</li>
+    <li>Storage is "best effort" by default: under disk pressure the browser may delete an origin's data, least recently used first.</li>
+    <li>Safari deletes script-written storage for a site not visited in 7 days of browser use. Apps added to the Home Screen are exempt, which is one more reason to encourage installing.</li>
+    <li>Ask for persistence. Chrome grants it automatically to installed or often-used sites; Firefox asks the user.</li>
+    <li>Handle <code>QuotaExceededError</code> on writes: delete the runtime cache and retry.</li>
+  </ul>
+  <figure class="code"><figcaption><span class="fname">app.js (optional addition)</span><span class="ran">run in Chrome</span><button class="copy" type="button">Copy</button></figcaption><pre><code class="language-js">// Ask the browser not to evict this origin's data under storage pressure.
+if (navigator.storage?.persist) {
+  const alreadyPersistent = await navigator.storage.persisted();
+  if (!alreadyPersistent) {
+    const granted = await navigator.storage.persist();
+    console.log(granted ? 'Storage will not be evicted.' : 'Storage is still best-effort.');
+  }
+}
+
+// Keep a runtime cache from growing forever: delete the oldest entries beyond a limit.
+async function trimCache(cacheName, maxEntries) {
+  const cache = await caches.open(cacheName);
+  const keys = await cache.keys(); // oldest first
+  await Promise.all(keys.slice(0, Math.max(0, keys.length - maxEntries)).map((key) =&gt; cache.delete(key)));
+}</code></pre></figure>
+  <p class="note"><b>Result.</b> In a brand-new Chrome profile <code>persist()</code> returned false and logged "Storage is still best-effort", which is expected for a site with no engagement yet. <code>trimCache</code> on a cache of 5 entries with a limit of 3 kept the 3 newest.</p>
+
+  <h3>4. Navigation preload</h3>
+  <p>When a user opens the app after a pause, the browser must start the worker before it can even begin the page request. Navigation preload starts the network request in parallel with worker start-up. It only helps strategies that go to the network for HTML. It is not in Firefox's or Safari's oldest supported versions, so feature-test it.</p>
+  <figure class="code"><figcaption><span class="fname">sw.js (optional addition)</span><span class="ran">run in Chrome</span><button class="copy" type="button">Copy</button></figcaption><pre><code class="language-js">self.addEventListener('activate', (event) =&gt; {
+  event.waitUntil(self.registration.navigationPreload?.enable());
+});
+
+self.addEventListener('fetch', (event) =&gt; {
+  if (event.request.mode !== 'navigate') return;
+  event.respondWith((async () =&gt; {
+    try {
+      // The request the browser already started while the worker was booting.
+      const preloaded = await event.preloadResponse;
+      return preloaded || (await fetch(event.request));
+    } catch {
+      return caches.match('/index.html');
+    }
+  })());
+});</code></pre></figure>
+  <p class="note"><b>Result.</b> <code>navigationPreload.getState()</code> reported enabled, and the server received the page request with the header <code>Service-Worker-Navigation-Preload: true</code>. With the server stopped, a reload returned the cached <code>/index.html</code>. The snippet has no install step, so the run added one that caches <code>/index.html</code>; without it the fallback has nothing to return.</p>
+
+  <h3>5. Workbox</h3>
+  <p>Workbox is Google's library for service workers. It gives you the same strategies as tested, configurable classes, builds the precache list with file hashes, and handles cache expiry and a background-sync queue. Write a worker by hand once, as in this guide, so you can debug one. Then use Workbox in real projects. It needs a bundler such as Vite or webpack.</p>
+  <figure class="code"><figcaption><span class="fname">sw.js with Workbox 7</span><span class="ran">run in Chrome</span><button class="copy" type="button">Copy</button></figcaption><pre><code class="language-js">import { precacheAndRoute } from 'workbox-precaching';
+import { registerRoute } from 'workbox-routing';
+import { NetworkFirst, StaleWhileRevalidate } from 'workbox-strategies';
+import { ExpirationPlugin } from 'workbox-expiration';
+
+// The build tool replaces __WB_MANIFEST with [{ url, revision }, ...] for every built file.
+precacheAndRoute(self.__WB_MANIFEST);
+
+registerRoute(
+  ({ request }) =&gt; request.mode === 'navigate',
+  new NetworkFirst({ cacheName: 'pages', networkTimeoutSeconds: 3 })
+);
+
+registerRoute(
+  ({ request }) =&gt; request.destination === 'image',
+  new StaleWhileRevalidate({
+    cacheName: 'images',
+    plugins: [new ExpirationPlugin({ maxEntries: 50, maxAgeSeconds: 30 * 24 * 60 * 60 })],
+  })
+);</code></pre></figure>
+  <p class="note"><b>Result.</b> Bundled with esbuild (about 105 KB before minifying) with a two-file manifest. Workbox created its precache with both files and an <code>images</code> cache, and with the server stopped the page and its image still loaded. One thing to know: the <code>pages</code> cache stayed empty, because <code>precacheAndRoute</code> is registered first and answers <code>/</code> from the precache before the network-first route is tried. Network first only applies to pages that are not in the precache list.</p>
+
+  <h3>6. Conflicts beyond last write wins</h3>
+  <div class="scroll"><table>
+    <tr><th>Approach</th><th>How it works</th><th>Good for</th></tr>
+    <tr><td>Last write wins</td><td>The newest timestamp replaces the record. Device clocks can be wrong, so prefer a server-assigned version number.</td><td>Personal data on a few devices</td></tr>
+    <tr><td>Per-field merge</td><td>Send only changed fields with the version they were based on; merge fields that do not collide.</td><td>Forms, settings, task details</td></tr>
+    <tr><td>Reject and ask</td><td>The server answers 409 when the base version is old; the app shows both versions.</td><td>Documents where silent loss is unacceptable</td></tr>
+    <tr><td>CRDT (Yjs, Automerge)</td><td>A data type built so that any order of merges gives the same result.</td><td>Real-time shared editing</td></tr>
+  </table></div>
+
+  <h3>7. Security</h3>
+  <ul>
+    <li><b>HTTPS everywhere.</b> A service worker can rewrite every response, so browsers refuse to install one over HTTP.</li>
+    <li><b>A worker outlives your deploy.</b> An XSS hole that lets an attacker register a worker gives them lasting control of the origin. Keep a strict Content-Security-Policy and never serve user uploads from the app's origin.</li>
+    <li><b>Clear on logout.</b> Delete caches and IndexedDB that hold a user's data, and unsubscribe their push subscription.</li>
+    <li><b>Do not cache responses to authenticated requests</b> unless you key them per user and clear them on logout.</li>
+    <li><b>Treat push payloads as untrusted</b> when choosing the URL to open: only open paths on your own origin, as the task app's <code>notificationclick</code> does by resolving against <code>self.location.origin</code>.</li>
+  </ul>
+
+  <h3>8. Debugging</h3>
+  <div class="scroll"><table>
+    <tr><th>Where</th><th>What you get</th></tr>
+    <tr><td>Chrome DevTools, Application</td><td>Manifest check, worker state, "Update on reload", "Bypass for network", fake Push and Sync events, Cache storage, IndexedDB, "Clear site data".</td></tr>
+    <tr><td><code>chrome://inspect/#service-workers</code></td><td>Every worker in the browser, with a console for each, including ones with no open tab.</td></tr>
+    <tr><td>Android phone</td><td>Plug in by USB, enable USB debugging, open <code>chrome://inspect</code> on the computer to debug the phone's tab or installed app.</td></tr>
+    <tr><td>iPhone</td><td>Settings, Safari, Advanced, Web Inspector on. Connect to a Mac; Safari's Develop menu lists the phone's pages, Home Screen apps and service workers.</td></tr>
+    <tr><td>Lighthouse (DevTools tab)</td><td>Performance, accessibility and best-practice audits. Its separate PWA category was removed in 2024; use the Application panel for installability.</td></tr>
+  </table></div>
+  <p class="note"><b>The classic trap:</b> you change a file and nothing happens, because the worker serves the cached copy. While developing, tick "Update on reload", or use a private window, which starts with no worker and no cache.</p>
+
+  <h3>9. Getting into the stores</h3>
+  <ul>
+    <li><b>Google Play:</b> a Trusted Web Activity wraps your PWA in a thin Android app with no browser bar. Bubblewrap or PWABuilder generates it. You prove you own the site with a Digital Asset Links file.</li>
+    <li><b>Microsoft Store:</b> PWABuilder packages the PWA directly.</li>
+    <li><b>Apple App Store:</b> there is no direct route. You need a native wrapper around a web view, and Apple rejects apps that are only a repackaged website, so it must add something native.</li>
+  </ul>
+
+  <h3>10. iPhone limits to design around</h3>
+  <ul>
+    <li>No install prompt API. Installing is always Share, then Add to Home Screen.</li>
+    <li>No Background Sync or Periodic Background Sync. Sync when the app is opened or returns to the front.</li>
+    <li>Push only for Home Screen apps, and only after a tap-triggered permission request.</li>
+    <li>A Home Screen app has its own storage, separate from Safari. A user signed in on the website is not signed in inside the installed app.</li>
+    <li>Every browser on iPhone uses WebKit (outside the EU's alternative-engine rules), so a WebKit limit applies to Chrome and Firefox there too.</li>
+  </ul>
+
+  <h3>11. More capabilities worth knowing</h3>
+  <div class="scroll"><table>
+    <tr><th>API</th><th>Gives you</th><th>Support</th></tr>
+    <tr><td><code>share_target</code> (manifest)</td><td>Your app appears in the system share sheet and receives text, links, files.</td><td>Chromium on Android and desktop</td></tr>
+    <tr><td>Periodic Background Sync</td><td>Refresh content on a schedule the browser chooses.</td><td>Chromium, installed apps only</td></tr>
+    <tr><td>Background Fetch</td><td>Large downloads that continue after the app closes.</td><td>Chromium</td></tr>
+    <tr><td>File handlers, Window Controls Overlay</td><td>Open files from the OS; draw into the desktop title bar.</td><td>Chromium desktop</td></tr>
+    <tr><td>Screen Wake Lock</td><td>Keep the screen on, for example during a recipe or a workout.</td><td>All major browsers</td></tr>
+    <tr><td>Declarative Web Push</td><td>Notifications from a JSON payload with no service worker code.</td><td>Safari 18.4 and later only</td></tr>
+  </table></div>
+
+  <h3>Launch checklist</h3>
+  <ul>
+    <li>Second visit opens with airplane mode on, on a real phone.</li>
+    <li>A change made offline reaches the server after reconnecting, exactly once.</li>
+    <li>A deploy reaches an already-open installed app within one session.</li>
+    <li>The app works with the service worker unregistered (first visit, private windows).</li>
+    <li>Logout leaves no personal data in Cache storage or IndexedDB.</li>
+    <li>The notification prompt appears only after a tap, and a denied state is explained.</li>
+    <li>You have a kill-switch worker ready.</li>
+  </ul>
+</section>
+
+<section id="qa">
+  <span class="level">Test yourself</span>
+  <h2>Questions and answers</h2>
+  <p class="plain">Try to answer each question aloud before opening it. They run from basics to the kind of question asked in a senior front-end interview.</p>
+  <div class="qa-tools">
+    <label class="cap" for="qa-search">Search the questions</label>
+    <input id="qa-search" type="search" placeholder="Try: update, iPhone, opaque, outbox">
+    <div class="row" id="qa-cats"></div>
+    <p class="cap" id="qa-count"></p>
+  </div>
+  <div class="qa-list" id="qa-list"></div>
+</section>
+
+</main>
+<footer class="foot">Browser support facts are as known in November 2026. Check MDN or caniuse before you depend on one.</footer>
+</div>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+<script>
+const QA = [{"c":"Basics","q":"What makes a website a Progressive Web App?","a":"Three things working together: it is served over HTTPS, it has a web app manifest so the operating system can install it, and it has a service worker so it can load and work without a network. \"Progressive\" means it still works as a normal website in a browser that supports none of this."},{"c":"Basics","q":"Is a PWA a different technology from a website?","a":"No. It is the same HTML, CSS and JavaScript at the same URL. The manifest and the service worker are additions. One codebase serves the browser tab and the installed app."},{"c":"Basics","q":"Why does a PWA need HTTPS?","a":"A service worker can intercept and rewrite every request for its origin. Over plain HTTP, anyone on the network path could inject a worker and keep control of the site on that device. Browsers therefore allow workers only on secure origins, with localhost as the exception for development."},{"c":"Basics","q":"What is the app shell?","a":"The minimum HTML, CSS and JavaScript needed to draw the app's frame: header, navigation, empty content area. It is cached during install so the app paints instantly and offline, and the data is filled in afterwards."},{"c":"Basics","q":"When would you choose a native app over a PWA?","a":"When you need capabilities the web lacks on your target platform: home-screen widgets, Live Activities, background location, deep Bluetooth or NFC use on iPhone, heavy graphics, or App Store discovery and in-app purchase flows. Choose a PWA when reach by link, one codebase and instant updates matter more."},{"c":"Basics","q":"Does a PWA work in a browser with no service worker support?","a":"Yes, if you build it progressively. Guard registration with a feature check. The app then behaves like an ordinary online website. The task app in this guide does exactly this."},{"c":"Basics","q":"How do users find and install a PWA?","a":"From the browser: an install icon in Chrome's or Edge's address bar, a menu entry on Android, or Share then Add to Home Screen on iPhone. You can also show your own install button in Chromium, or list the app in Google Play and the Microsoft Store through a wrapper."},{"c":"Manifest","q":"What are the minimum manifest fields for Chrome to offer installation?","a":"A name or short_name, a start_url, icons including 192 and 512 pixel PNGs, and display set to standalone, fullscreen or minimal-ui. The page must be on HTTPS. A service worker is no longer required for the prompt."},{"c":"Manifest","q":"What is the difference between name and short_name?","a":"name is the full title, used in the install dialog and on the splash screen. short_name is used where space is tight, mainly under the home-screen icon. Keep short_name to about 12 characters."},{"c":"Manifest","q":"What does the display field control?","a":"How much browser UI the installed app shows. standalone removes the address bar and looks like a native app. fullscreen also hides the status bar. minimal-ui keeps a small set of navigation controls. browser opens a normal tab and makes the app not installable in Chrome."},{"c":"Manifest","q":"What is a maskable icon and why provide one?","a":"An icon designed to be cropped to any shape. The background fills the whole square and the artwork stays inside the central 80 percent circle. Without one, Android shrinks your normal icon and puts it on a white plate."},{"c":"Manifest","q":"Why set the id field?","a":"It is the app's identity. Without it the identity is derived from start_url, so changing the start URL later makes browsers treat the site as a new, separate app. Setting id lets you change start_url safely."},{"c":"Manifest","q":"What is scope and what happens outside it?","a":"scope is the set of URLs that count as part of the app. Navigating to a URL outside it, even on your own domain, opens a browser view on top of the app with an address bar."},{"c":"Manifest","q":"How does iPhone use the manifest?","a":"Safari reads name, start_url, display and theme colour from it, but takes the Home Screen icon from the apple-touch-icon link tag. From iOS 26 a site added to the Home Screen opens as a web app by default even with no manifest."},{"c":"Manifest","q":"What is the difference between theme_color and background_color?","a":"theme_color tints the status bar, title bar and task switcher. background_color fills the splash screen shown between tapping the icon and your first paint. Match background_color to your page background to avoid a flash."},{"c":"Manifest","q":"Can you change the app name or icon after users have installed it?","a":"Yes, by changing the manifest. Chromium checks for manifest changes periodically and applies them, sometimes after asking the user to confirm a new name or icon. On iPhone the user must remove and re-add the app."},{"c":"Service worker","q":"What is a service worker in one sentence?","a":"A script the browser runs in the background, separate from any page, that can intercept the site's network requests and respond to events such as push even when no tab is open."},{"c":"Service worker","q":"Describe the service worker life cycle.","a":"The page registers the script. The browser downloads it and fires install, where you precache files. If an older worker controls open pages, the new one waits. When it can take over it fires activate, where you delete old caches. After that it handles fetch, push and sync events, and is stopped whenever it is idle."},{"c":"Service worker","q":"Why does a new service worker wait instead of activating immediately?","a":"To guarantee that one page never runs against two versions of your code. A tab loaded with version 1 HTML might later request a script that version 2 no longer has. Waiting until old tabs are gone avoids that."},{"c":"Service worker","q":"What do skipWaiting and clients.claim do?","a":"skipWaiting lets a waiting worker activate at once, without waiting for old tabs to close. clients.claim makes an active worker take control of pages that are already open and were loaded without it. They solve different problems and are often used together."},{"c":"Service worker","q":"How does the browser decide that a service worker has been updated?","a":"On navigation to a page in scope, and at most every 24 hours of use, it re-fetches the worker script and anything it imports. If the bytes differ from the installed copy, it is a new worker and install runs."},{"c":"Service worker","q":"Why can't you keep state in a service worker's global variables?","a":"The browser terminates an idle worker after roughly 30 seconds and starts a fresh instance for the next event. Globals are reset each time. Anything that must persist goes into IndexedDB or the Cache."},{"c":"Service worker","q":"What is event.waitUntil for?","a":"It extends the life of the event until the promise you pass settles. Without it the browser may kill the worker while your asynchronous work, such as writing to a cache or showing a notification, is still running."},{"c":"Service worker","q":"What determines a service worker's scope?","a":"By default, the folder the script is served from. A worker at /app/sw.js controls /app/ and below. To control the whole site, serve it from the root. A wider scope needs the Service-Worker-Allowed response header."},{"c":"Service worker","q":"Can a service worker access the DOM or localStorage?","a":"No. It has no document and no window, and localStorage is synchronous so it is not exposed. It talks to pages with postMessage and stores data with IndexedDB and the Cache API."},{"c":"Service worker","q":"Why must event.respondWith be called synchronously?","a":"The browser decides whether the worker will handle the request as soon as the fetch handler returns. If respondWith has not been called by then, the request goes to the network as normal. You can pass it a promise, but the call itself cannot come after an await."},{"c":"Service worker","q":"A user reports they still see the old version a week after you deployed. What are the likely causes?","a":"The new worker is installed but waiting because the installed app was never fully closed and there is no update prompt. Or a precached file changed but the worker file did not, so no update was detected. Or sw.js itself is served with a long cache lifetime."},{"c":"Service worker","q":"How do you unregister a broken service worker for all users?","a":"Deploy a replacement sw.js at the same URL that calls skipWaiting in install and, in activate, deletes all caches, calls registration.unregister and reloads open clients. Browsers pick it up on the next visit because the script's bytes changed."},{"c":"Caching","q":"Name the five classic caching strategies.","a":"Cache first, network first, stale while revalidate, cache only and network only."},{"c":"Caching","q":"When is cache first the right choice?","a":"For files that do not change under the same URL: the versioned app shell, fonts, icons, and scripts or styles with a content hash in the filename. It is the fastest strategy and fully offline."},{"c":"Caching","q":"When is network first the right choice, and what is its weakness?","a":"For content where fresh matters but stale is acceptable as a fallback, such as HTML pages or a feed. Its weakness is slow networks: the user waits for the request to fail before seeing the cached copy. A timeout fixes that."},{"c":"Caching","q":"Explain stale while revalidate.","a":"Answer immediately from the cache, and at the same time fetch a fresh copy and store it for next time. The user gets speed now and content that is at most one visit old. It suits images, avatars and rarely changing configuration."},{"c":"Caching","q":"What is the difference between precaching and runtime caching?","a":"Precaching stores a known list of files during install, before they are requested. Runtime caching stores responses as requests happen. Precache the shell; runtime-cache everything you cannot list in advance."},{"c":"Caching","q":"Why must you clone a response before caching it?","a":"A response body is a stream that can be consumed once. If you put the response in the cache and also return it to the page, one of them gets an empty body. response.clone creates a second readable copy."},{"c":"Caching","q":"What is an opaque response and why is it a problem?","a":"The result of a cross-origin request made without CORS. You cannot read its status, headers or body, so you cannot tell a 200 from a 500 before caching it. Chrome also pads each one to about 7 MB when counting storage use."},{"c":"Caching","q":"How does the Cache API differ from the browser's HTTP cache?","a":"The HTTP cache is automatic and controlled by response headers; the browser may evict entries at any time. The Cache API is fully under your script's control: you decide what goes in, when it is read and when it is deleted, and it ignores cache headers."},{"c":"Caching","q":"How do you invalidate cached files when you deploy?","a":"Put a version in the cache name, change it in the worker, and delete caches with other names during activate. Larger apps use hashed filenames and a build-generated precache list so each file is its own version."},{"c":"Caching","q":"Should API responses be cached by the service worker?","a":"Read-only, non-personal responses can be, with network first or stale while revalidate. For data the user edits, an IndexedDB store is better: you can query it, update single records and track unsynced changes, none of which a response cache does."},{"c":"Caching","q":"What happens if one file in cache.addAll returns a 404?","a":"The whole addAll rejects, nothing from that call is stored, the install event fails and the new worker is discarded. The previous worker keeps running. This is a safety feature: you never get a half-filled shell."},{"c":"Offline data","q":"What does local-first mean?","a":"The app reads and writes a database on the device as its primary source, and syncs with the server in the background. The UI never waits for the network, so it is instant online and fully usable offline."},{"c":"Offline data","q":"Why use IndexedDB instead of localStorage for app data?","a":"IndexedDB is asynchronous, holds structured objects and large amounts of data, supports indexes and transactions, and is available inside service workers. localStorage is synchronous, string-only, limited to a few megabytes and not available to workers."},{"c":"Offline data","q":"What is the outbox pattern?","a":"Every local change is also written to a queue of pending operations. A sync routine sends the queue to the server in order and removes each entry once the server confirms it. The queue survives restarts because it is stored in IndexedDB."},{"c":"Offline data","q":"Why write the data change and the outbox entry in one transaction?","a":"So they cannot diverge. If the app were killed between two separate writes, you could have a saved task with no queued change, and the server would never learn about it."},{"c":"Offline data","q":"What makes retrying a sync request safe?","a":"Idempotency. The client generates the record id and the server upserts by that id, or the request carries an idempotency key. Sending the same request twice then leaves the same result as sending it once."},{"c":"Offline data","q":"What is the Background Sync API and where does it work?","a":"The page registers a tag, and the browser fires a sync event in the service worker once it believes the device is online, even if the tab was closed. If the handler's promise rejects, the browser retries with backoff. It is implemented in Chromium browsers only."},{"c":"Offline data","q":"How do you sync on Safari and Firefox, which lack Background Sync?","a":"From the page: on load, on the online event, when the app returns to the foreground, and on a manual retry control. Use the same flush function, so Background Sync is an extra safety net where it exists."},{"c":"Offline data","q":"Why is navigator.onLine unreliable?","a":"It reports whether the device has a network interface that is up, not whether your server is reachable. Captive portals, a dead router or a server outage all report online. Treat a failed request as the real signal."},{"c":"Offline data","q":"How does last write wins handle conflicts, and what does it lose?","a":"Each record has a timestamp or version, and the newer write replaces the older. It is simple and fine for one user. When two people edit the same record offline, one edit is dropped without notice."},{"c":"Offline data","q":"Why should the client, not the server, create record ids?","a":"A record created offline needs an id immediately so that later edits and deletes can refer to it. A client-made UUID also makes the create request idempotent."},{"c":"Offline data","q":"Can browser storage be deleted without the user asking?","a":"Yes. Storage is best-effort unless persistence is granted, so the browser may evict it when the disk is nearly full. Safari also clears script-written storage for sites not used for 7 days, except apps on the Home Screen."},{"c":"Push","q":"What is the difference between the Push API and the Notifications API?","a":"The Push API delivers a message from a server to the service worker. The Notifications API displays a notification to the user. Push notifications use both: a push event arrives and its handler calls showNotification."},{"c":"Push","q":"Walk through subscribing a user to push.","a":"After a tap, request notification permission. Fetch your server's VAPID public key. Call pushManager.subscribe with userVisibleOnly true and that key. The browser returns a subscription with an endpoint URL and two keys. Send that object to your server and store it."},{"c":"Push","q":"What is VAPID?","a":"Voluntary Application Server Identification. Your server holds a key pair. The browser ties a subscription to the public key, and the server signs each push with the private key, so the push service accepts messages for that subscription only from you."},{"c":"Push","q":"Who runs the push service, and do you choose it?","a":"The browser vendor: Google's FCM for Chrome, Mozilla's service for Firefox, Apple's APNs for Safari. You do not choose. The endpoint URL in the subscription points to the right one, and all speak the same Web Push protocol."},{"c":"Push","q":"Why must every push show a notification?","a":"Browsers do not allow silent background wake-ups from the web, to protect battery and privacy. You declare this with userVisibleOnly true. Chrome shows a generic notification if you skip it; Safari revokes the subscription after a few silent pushes."},{"c":"Push","q":"What are the requirements for web push on iPhone?","a":"iOS or iPadOS 16.4 or later, the app added to the Home Screen and opened from there, and a permission request triggered by a user tap. In an ordinary Safari tab on iPhone the Push API is not available."},{"c":"Push","q":"The user tapped Block. What can you do?","a":"Nothing from code. requestPermission will return denied without showing a prompt. Show instructions for re-enabling notifications in browser or system settings, and avoid the situation by asking only after the user shows intent."},{"c":"Push","q":"How should the server react to a 410 Gone from the push service?","a":"Delete that subscription. 404 and 410 mean it has expired or the user unsubscribed, and it will never work again."},{"c":"Push","q":"How do you open the right screen when a notification is tapped?","a":"Put a URL in the notification's data. In notificationclick, close the notification, look for an open window of your app with clients.matchAll, focus and navigate it if found, otherwise call clients.openWindow with the URL."},{"c":"Push","q":"Is the push payload readable by the push service?","a":"No. The payload is encrypted on your server with keys from the subscription, and only the browser can decrypt it. The push service sees the endpoint and some headers such as TTL and urgency."},{"c":"Native feel","q":"How do you keep content out of the notch and home-indicator area?","a":"Add viewport-fit=cover to the viewport meta tag so the page may draw edge to edge, then pad your header and footer with env(safe-area-inset-top) and the other inset variables."},{"c":"Native feel","q":"How do you detect that the app is running installed rather than in a tab?","a":"In CSS and JavaScript, the display-mode: standalone media query. On older iOS versions, navigator.standalone is also true."},{"c":"Native feel","q":"What is beforeinstallprompt?","a":"A Chromium-only event fired when the app meets the install criteria. Call preventDefault, keep the event, and later call its prompt method from a tap to show the install dialog. Safari and Firefox do not fire it."},{"c":"Native feel","q":"Why does an iPhone zoom in when an input is focused, and how do you stop it?","a":"Safari zooms when the input's font size is under 16 pixels. Set inputs to 16 pixels or larger. Do not disable zoom globally."},{"c":"Native feel","q":"What replaces the browser's back and reload buttons in standalone mode?","a":"Nothing, so you must provide them. Give every screen in-app navigation, and build an update prompt or refresh control, since there is no reload button."},{"c":"Native feel","q":"How do you show an unread count on the app icon?","a":"navigator.setAppBadge(count), and clearAppBadge to remove it. It works in Chromium on desktop and in installed web apps on iOS 16.4 and later. Android shows a dot based on notifications instead."},{"c":"Advanced","q":"Compare the three ways to roll out a service worker update.","a":"Wait for all tabs to close: safe but slow. Call skipWaiting in install: fast, but open pages may mix old HTML with new assets. Prompt the user, then skipWaiting and reload on controllerchange: safe and timely, at the cost of a little code."},{"c":"Advanced","q":"What is navigation preload?","a":"A feature that lets the browser start the network request for a page navigation while the service worker is still booting, instead of after. The worker reads the result from event.preloadResponse. It removes worker start-up time from network-first page loads."},{"c":"Advanced","q":"What does Workbox give you over a hand-written worker?","a":"Tested implementations of the strategies, a build step that generates the precache list with revision hashes, cache expiration, a background-sync queue with a fallback, and routing helpers. You write configuration instead of plumbing."},{"c":"Advanced","q":"How much can a PWA store?","a":"It varies by browser and free disk space. Chromium allows an origin up to about 60 percent of the disk. Call navigator.storage.estimate to read the actual usage and quota at run time, and design for writes that can fail."},{"c":"Advanced","q":"How do you make stored data survive storage pressure?","a":"Call navigator.storage.persist. If granted, the browser will not evict the origin's data automatically. Chrome decides silently based on signals such as being installed; Firefox asks the user."},{"c":"Advanced","q":"How do you debug a service worker on a real phone?","a":"Android: connect by USB and use chrome://inspect on the computer. iPhone: enable Web Inspector in Safari settings, connect to a Mac and use Safari's Develop menu, which lists Home Screen apps and their workers."},{"c":"Advanced","q":"What security risks does a service worker add?","a":"A script injected through XSS could register a malicious worker that persists after the hole is fixed. Cached responses can leak between users on a shared device. Mitigate with a strict Content-Security-Policy, by clearing caches on logout and by keeping a kill-switch worker ready."},{"c":"Advanced","q":"How do you publish a PWA to Google Play?","a":"With a Trusted Web Activity: a small Android app that opens your PWA full screen in Chrome's engine. Bubblewrap or PWABuilder generates the project, and a Digital Asset Links file on your site proves ownership so no browser bar is shown."},{"c":"Advanced","q":"Why might a PWA behave differently in Chrome on iPhone than in Chrome on Android?","a":"On iPhone, browsers are built on Apple's WebKit engine, so Chrome there has Safari's capabilities and limits: no Background Sync, no beforeinstallprompt, push only when installed."},{"c":"Advanced","q":"Your offline test passes in DevTools but fails on a train. Why might that be?","a":"DevTools Offline fails requests instantly. A real weak connection makes them hang for a long time. A network-first strategy without a timeout will wait on every request. Add timeouts and test with throttling as well as full offline."},{"c":"Advanced","q":"How would you measure whether offline support is working for real users?","a":"Log, in IndexedDB, events such as launches served from cache, outbox size and age, and sync failures, and upload them when online. Watch the age of the oldest outbox entry and the share of clients on the latest worker version."}];
+(function () {
+  'use strict';
+  const $ = (id) => document.getElementById(id);
+  const el = (tag, props, ...kids) => { const n = Object.assign(document.createElement(tag), props || {}); n.append(...kids); return n; };
+  const reduceMotion = matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  // ---------- Chapters ----------
+  const sections = [...document.querySelectorAll('main > section')];
+  const links = [...document.querySelectorAll('#tabs a')];
+  function show(id, scroll) {
+    if (!sections.some((s) => s.id === id)) id = 'start';
+    sections.forEach((s) => s.classList.toggle('on', s.id === id));
+    links.forEach((a) => {
+      const on = a.getAttribute('href') === '#' + id;
+      if (on) { a.setAttribute('aria-current', 'page'); a.scrollIntoView({ block: 'nearest', inline: 'center' }); }
+      else a.removeAttribute('aria-current');
+    });
+    if (scroll) $('tabs').scrollIntoView({ block: 'start' });
+  }
+  addEventListener('hashchange', () => show(location.hash.slice(1), true));
+  show(location.hash.slice(1), false);
+
+  // ---------- Code blocks ----------
+  document.querySelectorAll('.code code').forEach((code) => { try { window.hljs && hljs.highlightElement(code); } catch (e) { /* plain text is fine */ } });
+  document.addEventListener('click', async (event) => {
+    const button = event.target.closest('.copy');
+    if (!button) return;
+    const text = button.closest('.code').querySelector('code').textContent;
+    try { await navigator.clipboard.writeText(text); }
+    catch (e) {
+      const area = el('textarea', { value: text }); document.body.append(area); area.select();
+      try { document.execCommand('copy'); } catch (e2) { /* nothing else to try */ }
+      area.remove();
+    }
+    button.textContent = 'Copied'; setTimeout(() => { button.textContent = 'Copy'; }, 1500);
+  });
+
+  // ---------- Hero phone (simulation) ----------
+  const demo = { online: true, outbox: 0, tasks: [
+    { t: 'Read chapter 1: Manifest', d: true }, { t: 'Register a service worker', d: false }, { t: 'Reload with the network off', d: false } ] };
+  const log = (line) => { const box = $('d-log'); box.textContent += (box.textContent ? '\n' : '') + line; box.scrollTop = box.scrollHeight; };
+  function drawDemo() {
+    $('d-list').replaceChildren(...demo.tasks.map((task, i) => {
+      const box = el('input', { type: 'checkbox', checked: task.d, id: 'd-t' + i });
+      box.addEventListener('change', () => { task.d = box.checked; change('toggle'); });
+      return el('li', { className: task.d ? 'done' : '' }, box, el('span', {}, task.t));
+    }));
+    const chip = $('d-chip');
+    chip.dataset.s = !demo.online ? 'off' : 'ok';
+    chip.textContent = !demo.online ? (demo.outbox ? `Offline · ${demo.outbox} to sync` : 'Offline') : 'Synced';
+    $('d-net').textContent = demo.online ? 'Online' : 'Offline';
+    $('d-net').setAttribute('aria-pressed', String(demo.online));
+  }
+  function change(kind) {
+    demo.outbox++;
+    log(`IndexedDB: ${kind === 'add' ? 'task saved' : 'task updated'} + outbox entry (1 tx)`);
+    if (demo.online) { demo.outbox = 0; log('PUT /api/tasks/:id → 200. Outbox empty.'); }
+    else log(`fetch failed. Stays in outbox (${demo.outbox}).`);
+    drawDemo();
+  }
+  $('d-form').addEventListener('submit', (event) => {
+    event.preventDefault();
+    const title = $('d-input').value.trim(); if (!title) return;
+    $('d-input').value = ''; demo.tasks.unshift({ t: title, d: false });
+    if (demo.tasks.length > 5) demo.tasks.pop();
+    change('add');
+  });
+  $('d-net').addEventListener('click', () => {
+    demo.online = !demo.online;
+    if (!demo.online) log('Network off. App shell comes from the cache.');
+    else if (demo.outbox) { log(`online → sync event: sent ${demo.outbox} queued change${demo.outbox > 1 ? 's' : ''}.`); demo.outbox = 0; }
+    else log('Network on. Nothing waiting.');
+    drawDemo();
+  });
+  log('App shell loaded from cache (cache first).');
+  drawDemo();
+
+  // ---------- Support table ----------
+  const Y = ['y', 'Yes'], N = ['n', 'No'], I = ['p', 'Installed only'];
+  const support = [
+    ['Service worker + Cache Storage', Y, Y, Y, Y, Y, Y],
+    ['Install to home screen / dock', Y, ['y', 'Yes, via Share'], Y, Y, ['y', 'Yes, Add to Dock'], ['p', 'Windows only']],
+    ['Install prompt you can trigger', Y, N, N, Y, N, N],
+    ['Web Push', Y, I, Y, Y, Y, Y],
+    ['Background Sync', Y, N, N, Y, N, N],
+    ['Periodic Background Sync', I, N, N, I, N, N],
+    ['Icon badge (Badging API)', N, I, N, Y, I, N],
+    ['Manifest shortcuts', Y, N, N, Y, N, N],
+  ];
+  support.forEach(([name, ...cells]) => {
+    $('support').append(el('tr', {}, el('td', {}, name), ...cells.map(([cls, text]) => el('td', {}, el('span', { className: 'pill ' + cls }, text)))));
+  });
+
+  // ---------- Storage estimate ----------
+  (async () => {
+    const fmt = (bytes) => bytes >= 1e9 ? (bytes / 1e9).toFixed(1) + ' GB' : bytes >= 1e6 ? (bytes / 1e6).toFixed(1) + ' MB' : Math.round(bytes / 1e3) + ' KB';
+    try {
+      const { usage, quota } = await navigator.storage.estimate();
+      if (!quota) throw new Error('no quota');
+      $('quota-text').textContent = `This page's origin is using ${fmt(usage || 0)} of the ${fmt(quota)} this browser allows it.`;
+      $('quota-bar').style.width = Math.max(0.5, ((usage || 0) / quota) * 100) + '%';
+    } catch (e) {
+      $('quota-text').textContent = 'This browser did not report a storage estimate for this page.';
+    }
+  })();
+
+  // ---------- Strategy simulator ----------
+  const STRATS = { cf: 'Cache first', nf: 'Network first', swr: 'Stale while revalidate', co: 'Cache only', no: 'Network only' };
+  const NETS = { fast: ['Fast', 120], slow: ['Slow', 3000], off: ['Offline', null] };
+  const CACHE_MS = 5, TIMEOUT = 2500;
+  const sim = { s: 'cf', n: 'fast', c: true };
+
+  // Returns the steps the worker takes, what answered, and after how many milliseconds.
+  function model(s, n, hit) {
+    const net = NETS[n][1];
+    const steps = [{ t: 'The page requests /styles.css. The service worker receives the fetch event.', e: ['e-req'] }];
+    const lookup = () => steps.push({ t: hit ? 'Looks in the cache: found (5 ms).' : 'Looks in the cache: nothing there (5 ms).', e: ['e-cache'] });
+    const done = (source, ms, text) => { steps.push({ t: text, e: ['e-res'] }); return { steps, source, ms }; };
+    const fail = (ms, text) => { steps.push({ t: text, e: [] }); return { steps, source: null, ms }; };
+    const goNet = (text) => steps.push({ t: text, e: ['e-net'] });
+    const save = () => steps.push({ t: 'Saves a copy of the response in the cache.', e: ['e-put'] });
+
+    if (s === 'co') { lookup(); return hit ? done('cache', CACHE_MS, 'Responds from the cache.') : fail(CACHE_MS, 'No copy and no network attempt: the request fails.'); }
+    if (s === 'no') {
+      if (net === null) { goNet('Goes to the network: no connection.'); return fail(0, 'The request fails. The cache is never consulted.'); }
+      goNet(`Goes to the network and waits ${net} ms.`); return done('network', net, 'Responds from the network. Nothing is stored.');
+    }
+    if (s === 'cf') {
+      lookup();
+      if (hit) return done('cache', CACHE_MS, 'Responds from the cache. The network is not used at all.');
+      if (net === null) { goNet('Cache miss, so it tries the network: no connection.'); return fail(CACHE_MS, 'The request fails.'); }
+      goNet(`Cache miss, so it goes to the network and waits ${net} ms.`); save();
+      return done('network', CACHE_MS + net, 'Responds from the network. Next time this is a cache hit.');
+    }
+    if (s === 'swr') {
+      lookup();
+      if (hit) {
+        const r = done('cache', CACHE_MS, 'Responds from the cache at once.');
+        if (net !== null) { r.steps.push({ t: `In the background, fetches a fresh copy (${net} ms) and stores it for the next visit.`, e: ['e-net', 'e-put'] }); }
+        else r.steps.push({ t: 'The background refresh fails quietly. The user never notices.', e: ['e-net'] });
+        return r;
+      }
+      if (net === null) { goNet('Cache miss, so it must wait for the network: no connection.'); return fail(CACHE_MS, 'The request fails.'); }
+      goNet(`Cache miss, so it waits ${net} ms for the network.`); save();
+      return done('network', CACHE_MS + net, 'Responds from the network.');
+    }
+    // network first
+    if (net !== null && net <= TIMEOUT) { goNet(`Goes to the network first and waits ${net} ms.`); save(); return done('network', net, 'Responds from the network: the freshest copy.'); }
+    const waited = net === null ? 0 : TIMEOUT;
+    goNet(net === null ? 'Goes to the network first: no connection, fails at once.' : `Goes to the network first. No answer after ${TIMEOUT} ms, so it gives up.`);
+    lookup();
+    return hit ? done('cache', waited + CACHE_MS, 'Falls back to the cached copy.') : fail(waited + CACHE_MS, 'Nothing cached either: the request fails (the app would show its offline page).');
+  }
+
+  let timers = [];
+  function runSim() {
+    timers.forEach(clearTimeout); timers = [];
+    const result = model(sim.s, sim.n, sim.c);
+    $('sim-name').textContent = STRATS[sim.s].toLowerCase();
+    $('sim-cstate').textContent = sim.c ? 'has a copy' : 'empty';
+    $('sim-nstate').textContent = NETS[sim.n][1] === null ? 'offline' : `${NETS[sim.n][0].toLowerCase()} · ${NETS[sim.n][1]} ms`;
+    const edges = ['e-req', 'e-res', 'e-cache', 'e-net', 'e-put'].map($);
+    edges.forEach((edge) => edge.classList.remove('act'));
+    const items = result.steps.map((step) => el('li', {}, step.t));
+    $('sim-steps').replaceChildren(...items);
+    result.steps.forEach((step, i) => {
+      const reveal = () => {
+        items.forEach((item, j) => item.classList.toggle('last', j === i));
+        items[i].classList.add('on');
+        step.e.forEach((id) => $(id).classList.add('act'));
+      };
+      if (reduceMotion) reveal(); else timers.push(setTimeout(reveal, i * 650));
+    });
+    $('sim-result').textContent = result.source
+      ? `Result: answered from the ${result.source} after ${result.ms} ms.`
+      : 'Result: no response. The page sees a failed request.';
+
+    $('chart-title').textContent = `Time until the page gets a response · network ${NETS[sim.n][0].toLowerCase()}, cache ${sim.c ? 'has a copy' : 'empty'}`;
+    const all = Object.keys(STRATS).map((key) => [key, model(key, sim.n, sim.c)]);
+    const max = Math.max(3005, ...all.map(([, r]) => r.ms));
+    $('sim-chart').replaceChildren(...all.map(([key, r]) => {
+      const track = el('div', { className: 'track' });
+      if (r.source) track.append(el('div', { className: 'bar' + (r.source === 'cache' ? ' cache' : ''), style: `width:${(r.ms / max) * 82}%` }), el('span', { className: 'bv' }, `${r.ms} ms · ${r.source}`));
+      else track.append(el('span', { className: 'bv' }, 'no response'));
+      const row = el('div', { className: 'bar-row' + (key === sim.s ? ' cur' : ''), title: `${STRATS[key]}: ${r.source ? r.ms + ' ms from the ' + r.source : 'request fails'}` }, el('span', { className: 'bl' }, STRATS[key]), track);
+      return row;
+    }));
+  }
+  function group(hostId, options, get, set) {
+    const host = $(hostId);
+    Object.entries(options).forEach(([key, label]) => {
+      const button = el('button', { className: 'btn', type: 'button' }, label);
+      button.addEventListener('click', () => { set(key); paint(); runSim(); });
+      button.dataset.k = key; host.append(button);
+    });
+    const paint = () => host.querySelectorAll('button').forEach((b) => b.setAttribute('aria-pressed', String(b.dataset.k === String(get()))));
+    paint();
+  }
+  group('sim-strat', STRATS, () => sim.s, (v) => { sim.s = v; });
+  group('sim-net', { fast: 'Fast (120 ms)', slow: 'Slow (3 s)', off: 'Offline' }, () => sim.n, (v) => { sim.n = v; });
+  group('sim-cache', { true: 'Has a copy', false: 'Empty' }, () => sim.c, (v) => { sim.c = v === 'true'; });
+  runSim();
+
+  // ---------- Q&A ----------
+  const cats = ['All', ...new Set(QA.map((item) => item.c))];
+  let cat = 'All';
+  function drawQA() {
+    const query = $('qa-search').value.trim().toLowerCase();
+    const shown = QA.filter((item) => (cat === 'All' || item.c === cat) && (!query || (item.q + ' ' + item.a).toLowerCase().includes(query)));
+    $('qa-list').replaceChildren(...shown.map((item) => el('details', {}, el('summary', {}, el('small', {}, item.c), item.q), el('p', {}, item.a))));
+    $('qa-count').textContent = shown.length ? `${shown.length} of ${QA.length} questions` : 'No question matches. Try a shorter word.';
+    $('qa-cats').querySelectorAll('button').forEach((b) => b.setAttribute('aria-pressed', String(b.textContent === cat)));
+  }
+  cats.forEach((name) => {
+    const button = el('button', { className: 'btn', type: 'button' }, name);
+    button.addEventListener('click', () => { cat = name; drawQA(); });
+    $('qa-cats').append(button);
+  });
+  $('qa-search').addEventListener('input', drawQA);
+  drawQA();
+})();
+
+</script>
+
+</body></html>

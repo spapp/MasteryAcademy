@@ -1,0 +1,1085 @@
+{
+ "modules": [
+  {
+   "id": "kmp-guide",
+   "title": "The complete guide",
+   "summary": "",
+   "tag": "",
+   "lessons": [
+    {
+     "id": "kmp-in-brief",
+     "title": "In brief",
+     "minutes": 3,
+     "level": 0,
+     "blocks": [
+      {
+       "type": "text",
+       "text": "Kotlin Multiplatform (KMP) lets you write an app's non-UI code once in Kotlin and compile it into each platform's own binary format, so Android and iOS run the same business logic without a runtime bridge. It is an open-source technology from JetBrains, officially supported by Google for sharing code between Android and iOS."
+      },
+      {
+       "type": "text",
+       "text": "The core idea is different from Flutter or React Native: KMP shares logic by default and leaves the UI decision to you. You can keep SwiftUI and Jetpack Compose, share the UI with Compose Multiplatform, or mix both screen by screen."
+      },
+      {
+       "type": "list",
+       "ordered": false,
+       "items": [
+        "**Best fit:** teams with Kotlin skills, an existing native app, or a product where native look, platform APIs and long-term maintainability matter more than raw time-to-first-release.",
+        "**Weakest fit:** a solo developer or small Dart/JS team that needs one UI on both stores as fast as possible.",
+        "**Typical sharing:** networking, persistence, models, validation, state and business rules. A common planning figure is 60 to 80% of the codebase with native UI, and more with shared UI; treat it as a rule of thumb, not a measurement."
+       ]
+      }
+     ],
+     "quiz": []
+    },
+    {
+     "id": "kmp-the-problem-kmp-solves",
+     "title": "The problem KMP solves",
+     "minutes": 3,
+     "level": 0,
+     "blocks": [
+      {
+       "type": "text",
+       "text": "Traditional mobile development means two apps: Kotlin with Jetpack Compose on Android, Swift with SwiftUI on iOS. Every rule exists twice, and the two copies drift."
+      },
+      {
+       "type": "table",
+       "headers": [
+        "Pain with two native codebases",
+        "What it costs",
+        "How KMP addresses it"
+       ],
+       "rows": [
+        [
+         "Business logic written twice",
+         "Double development and review time",
+         "One implementation in `commonMain`, compiled for both"
+        ],
+        [
+         "Bugs fixed on one platform only",
+         "Inconsistent behaviour, repeat QA",
+         "One fix ships to both platforms"
+        ],
+        [
+         "API contract changes",
+         "Two model layers, two parsers to update",
+         "Shared models and serialization"
+        ],
+        [
+         "Validation and pricing rules diverge",
+         "Support tickets, data mismatches",
+         "A single source of truth for rules"
+        ],
+        [
+         "Tests duplicated",
+         "Two suites that test the same rules",
+         "Shared tests in `commonTest` run per target"
+        ]
+       ]
+      },
+      {
+       "type": "text",
+       "text": "KMP removes that duplication while avoiding three costs that older cross-platform tools carry:"
+      },
+      {
+       "type": "list",
+       "ordered": false,
+       "items": [
+        "**No bridge or bundled engine for logic.** Shared code compiles to JVM bytecode on Android and to a native binary on iOS.",
+        "**No rewrite.** You can start with one module inside an existing app and expand later.",
+        "**No UI lock-in and no plugin wait.** Platform APIs are callable directly from Kotlin, so a new iOS or Android API does not need a third-party wrapper first."
+       ]
+      }
+     ],
+     "quiz": []
+    },
+    {
+     "id": "kmp-architecture-what-is-shared-and-what-stays-nativ",
+     "title": "Architecture: what is shared and what stays native",
+     "minutes": 3,
+     "level": 0,
+     "blocks": [
+      {
+       "type": "text",
+       "text": "A KMP app is a sandwich: a native UI on top, platform glue at the bottom, and one shared Kotlin module in the middle that holds everything the two apps would otherwise duplicate. KMP app architecture · 2 native UIs, 1 shared module, 2 platform source sets"
+      },
+      {
+       "type": "text",
+       "text": "Read it top down: each UI calls the same shared module, and the shared module reaches the operating system only through small `expect` / `actual` declarations implemented per platform."
+      },
+      {
+       "type": "table",
+       "headers": [
+        "Layer",
+        "Lives in",
+        "Written",
+        "Typical contents"
+       ],
+       "rows": [
+        [
+         "UI",
+         "`androidApp`, `iosApp` (or shared with Compose Multiplatform)",
+         "Per platform, or once",
+         "Screens, navigation host, animations, permissions prompts"
+        ],
+        [
+         "Presentation",
+         "`commonMain`",
+         "Once",
+         "ViewModels, UI state exposed as `StateFlow`, events"
+        ],
+        [
+         "Domain",
+         "`commonMain`",
+         "Once",
+         "Use cases, pricing and eligibility rules, validation"
+        ],
+        [
+         "Data",
+         "`commonMain`",
+         "Once",
+         "Repositories, DTOs, mapping, cache policy, offline sync"
+        ],
+        [
+         "Infrastructure",
+         "`commonMain` plus thin `actual` s",
+         "Mostly once",
+         "HTTP engine, database driver, key-value storage, logging"
+        ],
+        [
+         "Platform",
+         "`androidMain`, `iosMain`",
+         "Per platform",
+         "Secure storage, biometrics, sensors, push tokens, file paths"
+        ]
+       ]
+      },
+      {
+       "type": "text",
+       "text": "A practical rule: if a piece of code would produce a bug report that says \"works on Android, wrong on iOS\", it belongs in `commonMain`."
+      }
+     ],
+     "quiz": []
+    },
+    {
+     "id": "kmp-how-it-compiles",
+     "title": "How it compiles",
+     "minutes": 3,
+     "level": 0,
+     "blocks": [
+      {
+       "type": "text",
+       "text": "KMP has no runtime of its own: the Kotlin compiler has several backends, and each one turns the same shared source into the format that platform already runs."
+      },
+      {
+       "type": "text",
+       "text": "KMP build pipeline · 3 source sets, 2 compilers, 2 shipped binaries"
+      },
+      {
+       "type": "text",
+       "text": "`commonMain` is compiled twice, once with each platform's source set, so neither app carries a bridge, an interpreter or a second UI engine for its logic."
+      },
+      {
+       "type": "table",
+       "headers": [
+        "Target",
+        "Backend",
+        "Output",
+        "How the app consumes it"
+       ],
+       "rows": [
+        [
+         "Android",
+         "Kotlin/JVM",
+         "JVM bytecode, dexed",
+         "An ordinary Gradle module dependency"
+        ],
+        [
+         "iOS, macOS, watchOS, tvOS",
+         "Kotlin/Native (LLVM)",
+         "`.framework` or XCFramework",
+         "Xcode links it; Swift imports it like any framework"
+        ],
+        [
+         "Desktop",
+         "Kotlin/JVM",
+         "JAR",
+         "Runs on the JVM"
+        ],
+        [
+         "Web",
+         "Kotlin/Wasm or Kotlin/JS",
+         "`.wasm` or `.js`",
+         "Loaded by the browser"
+        ],
+        [
+         "Server",
+         "Kotlin/JVM",
+         "JAR",
+         "Share models and validation with a Ktor or Spring backend"
+        ]
+       ]
+      },
+      {
+       "type": "text",
+       "text": "Three consequences worth knowing before you start:"
+      },
+      {
+       "type": "list",
+       "ordered": false,
+       "items": [
+        "**Memory:** Kotlin/Native has its own tracing garbage collector. It coexists with Swift's ARC, so object lifetimes across the boundary are managed for you, but very allocation-heavy loops behave differently than on the JVM.",
+        "**Build time:** the iOS framework build is the slow step. Keep the exported API small and build only the simulator architecture you need during development.",
+        "**Debugging:** you can set breakpoints in shared Kotlin from Android Studio or IntelliJ IDEA with the Kotlin Multiplatform plugin while running the iOS app."
+       ]
+      }
+     ],
+     "quiz": []
+    },
+    {
+     "id": "kmp-project-structure-and-source-sets",
+     "title": "Project structure and source sets",
+     "minutes": 3,
+     "level": 0,
+     "blocks": [
+      {
+       "type": "text",
+       "text": "A KMP module is a set of folders called source sets; the compiler decides which targets each folder is compiled for, and code flows down the hierarchy from common to specific."
+      },
+      {
+       "type": "code",
+       "code": "my-app/\n├── shared/                      # the KMP module\n│   ├── build.gradle.kts\n│   └── src/\n│       ├── commonMain/kotlin/   # shared logic: compiled for every target\n│       ├── commonTest/kotlin/   # shared tests: run on every target\n│       ├── androidMain/kotlin/  # Android-only code and actuals\n│       ├── iosMain/kotlin/      # code shared by all iOS targets\n│       └── iosTest/kotlin/\n├── androidApp/                  # Android app: Jetpack Compose UI\n└── iosApp/                      # Xcode project: SwiftUI UI",
+       "language": "kotlin"
+      },
+      {
+       "type": "text",
+       "text": "A minimal `shared/build.gradle.kts`. Version numbers are left out on purpose: take the current ones from the project wizard or a version catalog."
+      },
+      {
+       "type": "code",
+       "code": "plugins {\n    kotlin(\"multiplatform\")\n    kotlin(\"plugin.serialization\")\n    id(\"com.android.library\")\n}\nkotlin {\n    androidTarget()\n    listOf(iosArm64(), iosSimulatorArm64()).forEach { target ->\n        target.binaries.framework {\n            baseName = \"Shared\"\n            isStatic = true\n        }\n    }\n    sourceSets {\n        commonMain.dependencies {\n            implementation(libs.kotlinx.coroutines.core)\n            implementation(libs.kotlinx.serialization.json)\n            implementation(libs.ktor.client.core)\n        }\n        androidMain.dependencies {\n            implementation(libs.ktor.client.okhttp)\n        }\n        iosMain.dependencies {\n            implementation(libs.ktor.client.darwin)\n        }\n        commonTest.dependencies {\n            implementation(kotlin(\"test\"))\n        }\n    }\n}",
+       "language": "kotlin"
+      },
+      {
+       "type": "list",
+       "ordered": false,
+       "items": [
+        "**Default hierarchy:** declaring `iosArm64()` and `iosSimulatorArm64()` creates the intermediate `iosMain` set automatically, so you do not wire `dependsOn` by hand.",
+        "**Rule for** `commonMain` **:** only Kotlin standard library and multiplatform libraries are visible. `java.*`, `android.*` and `platform.UIKit.*` do not compile there, which is what keeps the code portable. **Getting into Xcode:** the usual options are direct integration (an Xcode build phase runs Gradle's `embedAndSignAppleFrameworkForXcode` task), an XCFramework published as a Swift package, or CocoaPods for projects that already use it.",
+        "**Starting point:** generate the skeleton with the Kotlin Multiplatform wizard in Android Studio or IntelliJ IDEA instead of writing the Gradle files by hand."
+       ]
+      }
+     ],
+     "quiz": []
+    },
+    {
+     "id": "kmp-reaching-platform-apis-expect-actual",
+     "title": "Reaching platform APIs: expect/actual",
+     "minutes": 3,
+     "level": 0,
+     "blocks": [
+      {
+       "type": "text",
+       "text": "Shared code declares what it needs with `expect`; each platform source set supplies it with `actual`, and the compiler refuses to build until every target has one."
+      },
+      {
+       "type": "text",
+       "text": "Declare the need once, in `commonMain`:"
+      },
+      {
+       "type": "code",
+       "code": "// commonMain\nexpect class SecureStore {\n    fun save(key: String, value: String)\n    fun read(key: String): String?\n}\nexpect fun platformName(): String",
+       "language": "kotlin"
+      },
+      {
+       "type": "text",
+       "text": "Implement it on Android with Android APIs:"
+      },
+      {
+       "type": "code",
+       "code": "// androidMain\nactual fun platformName(): String = \"Android\n${android.os.Build.VERSION.SDK_INT}\"",
+       "language": "kotlin"
+      },
+      {
+       "type": "text",
+       "text": "Implement it on iOS by calling Apple frameworks directly from Kotlin:"
+      },
+      {
+       "type": "code",
+       "code": "// iosMain\nimport platform.UIKit.UIDevice\nactual fun platformName(): String =\n    UIDevice.currentDevice.systemName() + \" \" +\nUIDevice.currentDevice.systemVersion",
+       "language": "kotlin"
+      },
+      {
+       "type": "text",
+       "text": "That last snippet is the \"direct platform access\" claim made concrete: `platform.UIKit`, `platform.Foundation`, `platform.CoreBluetooth` and the rest are available in `iosMain` without a plugin. **Prefer an interface when you can.** For most cases an ordinary interface in `commonMain` plus dependency injection is easier to test and to fake than `expect class`:"
+      },
+      {
+       "type": "code",
+       "code": "// commonMain\ninterface BiometricAuth { suspend fun authenticate(reason: String): Boolean }\nclass LoginViewModel(private val auth: BiometricAuth, private val repo:\nSessionRepository)",
+       "language": "kotlin"
+      },
+      {
+       "type": "text",
+       "text": "The Android implementation lives in `androidMain`; the iOS one can be written in Kotlin in `iosMain`, or in Swift in the iOS app and passed in at startup. Writing it in Swift is the right call when the SDK you wrap is Swift-only."
+      },
+      {
+       "type": "table",
+       "headers": [
+        "Mechanism",
+        "Use it for",
+        "Trade-off"
+       ],
+       "rows": [
+        [
+         "`expect` / `actual` functions",
+         "Small factories and platform facts: database driver, HTTP engine, UUID, platform name",
+         "Compile-time checked; hard to swap in tests"
+        ],
+        [
+         "Interface + DI",
+         "Services with behaviour: auth, location, analytics, payments",
+         "One more wiring step; easy to fake"
+        ],
+        [
+         "Swift implementation injected",
+         "Swift-only SDKs and anything using SwiftUI or Swift concurrency features",
+         "Lives outside the shared module"
+        ]
+       ]
+      }
+     ],
+     "quiz": []
+    },
+    {
+     "id": "kmp-ios-interop-how-swift-sees-your-kotlin",
+     "title": "iOS interop: how Swift sees your Kotlin",
+     "minutes": 3,
+     "level": 0,
+     "blocks": [
+      {
+       "type": "text",
+       "text": "The quality of the Swift-facing API decides whether iOS developers accept KMP, and there are three ways to produce it today."
+      },
+      {
+       "type": "table",
+       "headers": [
+        "Route",
+        "Status (Nov 2026)",
+        "What Swift gets",
+        "Choose it when"
+       ],
+       "rows": [
+        [
+         "Objective-C export",
+         "Default, long-established",
+         "An Objective-C header that Swift imports",
+         "You want the lowest-risk path"
+        ],
+        [
+         "Objective-C export + SKIE",
+         "Third-party (Touchlab), widely used in production",
+         "Exhaustive Swift enums for sealed classes, `async` for `suspend`, `AsyncSequence` for `Flow`",
+         "You ship today and want idiomatic Swift"
+        ],
+        [
+         "Swift export",
+         "Alpha since Kotlin 2.4.0",
+         "Real Swift modules with no Objective-C header; `suspend` as `async`, `Flow` as `AsyncSequence`",
+         "You are evaluating, or on a new module you can afford to rework"
+        ]
+       ]
+      },
+      {
+       "type": "text",
+       "text": "What the Objective-C bridge loses, and why iOS developers on r/swift call the interop awkward:"
+      },
+      {
+       "type": "list",
+       "ordered": false,
+       "items": [
+        "**Generics** are only partly preserved, so collection and wrapper types reach Swift with less type information.",
+        "**Nullable primitives** such as `Int?` arrive boxed ( `KotlinInt?`) instead of as a Swift optional.",
+        "**Sealed classes and enums** do not become exhaustive Swift enums, so `switch` needs a `default`.",
+        "**Top-level functions** appear as members of a generated class named after the file ( `PlatformKt.platformName()`).",
+        "`suspend` **functions** surface as completion handlers; `Flow` has no built-in Swift equivalent."
+       ]
+      },
+      {
+       "type": "text",
+       "text": "Swift export limits to know before adopting it: it and Objective-C export are mutually exclusive in a module, exported classes are `final` on the Swift side (no cross-language inheritance yet), and JetBrains' Alpha label means the design can still change. The JetBrains roadmap published in August 2025 aimed for a stable release during 2026; as of this guide it is Alpha."
+      },
+      {
+       "type": "text",
+       "text": "Five habits that make any route pleasant for the iOS team:"
+      },
+      {
+       "type": "text",
+       "text": "1. Keep the exported surface small: export a facade module, mark everything else"
+      },
+      {
+       "type": "list",
+       "ordered": false,
+       "items": [
+        "`internal`."
+       ]
+      },
+      {
+       "type": "text",
+       "text": "2. Expose state as one `StateFlow<UiState>` per screen instead of many callbacks."
+      },
+      {
+       "type": "text",
+       "text": "3. Prefer concrete types over generics at the boundary. 4. Use `@ObjCName` to give types and parameters Swift-friendly names, and `@Throws` on"
+      },
+      {
+       "type": "list",
+       "ordered": false,
+       "items": [
+        "functions whose exceptions Swift should catch."
+       ]
+      },
+      {
+       "type": "text",
+       "text": "5. Add a thin Swift wrapper (an `ObservableObject` or `@Observable` class) around each"
+      },
+      {
+       "type": "list",
+       "ordered": false,
+       "items": [
+        "shared ViewModel, and let SwiftUI talk only to that."
+       ]
+      }
+     ],
+     "quiz": []
+    },
+    {
+     "id": "kmp-ui-strategy-native-shared-or-hybrid",
+     "title": "UI strategy: native, shared, or hybrid",
+     "minutes": 3,
+     "level": 0,
+     "blocks": [
+      {
+       "type": "text",
+       "text": "KMP does not pick a UI for you, so this is the first real decision, and it can be made per screen instead of per app."
+      },
+      {
+       "type": "table",
+       "headers": [
+        "Strategy",
+        "UI code",
+        "Look and feel",
+        "Best for",
+        "Cost"
+       ],
+       "rows": [
+        [
+         "Native UI",
+         "SwiftUI + Jetpack Compose",
+         "Fully native, follows each OS automatically",
+         "Existing native apps; products where platform polish is the selling point",
+         "Two UI layers and two UI skill sets"
+        ],
+        [
+         "Shared UI",
+         "Compose Multiplatform everywhere",
+         "Your design system, drawn by Skia on iOS",
+         "New apps, branded designs, Android-heavy teams",
+         "iOS UI is not UIKit; some platform conventions need deliberate work"
+        ],
+        [
+         "Hybrid",
+         "Compose Multiplatform for most screens, SwiftUI for selected ones",
+         "Mixed, chosen screen by screen",
+         "Teams that want speed on forms and settings but native hero screens",
+         "Two navigation worlds to keep in sync"
+        ]
+       ]
+      },
+      {
+       "type": "text",
+       "text": "How Compose Multiplatform relates to what you already know:"
+      },
+      {
+       "type": "list",
+       "ordered": false,
+       "items": [
+        "It is JetBrains' port of Jetpack Compose. The same `@Composable` APIs run on Android (as Jetpack Compose itself), iOS, desktop and web.",
+        "On iOS it renders through Skia, the same model Flutter uses with its own engine, so the \"KMP means native widgets\" claim holds only for the native-UI strategy.",
+        "iOS support has been Stable since Compose Multiplatform 1.8.0 (May 2025); the web target is in Beta. Interop works both ways: `UIKitView` embeds a native view (maps, camera preview, a WebView) inside Compose, and `ComposeUIViewController` embeds a Compose screen inside a SwiftUI or UIKit app."
+       ]
+      },
+      {
+       "type": "text",
+       "text": "A default that works for most teams: share everything up to and including ViewModels, start with native UI on iOS if you have iOS developers, and move individual low-risk screens to Compose Multiplatform once the shared layer is stable."
+      }
+     ],
+     "quiz": []
+    },
+    {
+     "id": "kmp-recommended-library-stack",
+     "title": "Recommended library stack",
+     "minutes": 3,
+     "level": 0,
+     "blocks": [
+      {
+       "type": "text",
+       "text": "The ecosystem now covers every layer of a typical app; these are the mainstream choices, and klibs.io is the search index for everything else."
+      },
+      {
+       "type": "table",
+       "headers": [
+        "Layer",
+        "Library",
+        "Notes"
+       ],
+       "rows": [
+        [
+         "Concurrency",
+         "kotlinx.coroutines",
+         "`suspend`, `Flow`, `StateFlow`; the backbone of shared code"
+        ],
+        [
+         "Networking",
+         "Ktor Client",
+         "OkHttp engine on Android, Darwin engine on iOS"
+        ],
+        [
+         "JSON",
+         "kotlinx.serialization",
+         "Compile-time serializers, no reflection"
+        ],
+        [
+         "Database",
+         "SQLDelight or Room",
+         "SQLDelight generates Kotlin from SQL; Room is Google's ORM with KMP support"
+        ],
+        [
+         "Key-value storage",
+         "DataStore or Multiplatform Settings",
+         "DataStore for typed preferences; Settings wraps SharedPreferences and NSUserDefaults"
+        ],
+        [
+         "Dependency injection",
+         "Koin, or Metro for compile-time injection",
+         "Koin is the common default; Metro reached 1.0 in April 2026"
+        ],
+        [
+         "Date and time",
+         "kotlinx-datetime",
+         "Use with the stable `kotlin.time` API"
+        ],
+        [
+         "ViewModel and lifecycle",
+         "AndroidX Lifecycle (multiplatform artifacts)",
+         "The same `ViewModel` class in `commonMain`"
+        ],
+        [
+         "Navigation (shared UI)",
+         "Navigation for Compose Multiplatform",
+         "Decompose and Voyager are established alternatives"
+        ],
+        [
+         "Images (shared UI)",
+         "Coil 3",
+         "Multiplatform image loading for Compose"
+        ],
+        [
+         "Logging",
+         "Kermit or Napier",
+         "Routes to Logcat and the Apple unified log"
+        ],
+        [
+         "Swift interop",
+         "SKIE",
+         "See the iOS interop section"
+        ],
+        [
+         "Testing",
+         "kotlin.test, kotlinx-coroutines-test, Turbine",
+         "Shared tests run on JVM and iOS simulator"
+        ]
+       ]
+      },
+      {
+       "type": "text",
+       "text": "Before adding any dependency to `commonMain`, check that it publishes artifacts for every target you build. A JVM-only library there is the most common cause of a broken iOS build."
+      }
+     ],
+     "quiz": []
+    },
+    {
+     "id": "kmp-kmp-vs-flutter-vs-react-native-vs-fully-native",
+     "title": "KMP vs Flutter vs React Native vs fully native",
+     "minutes": 3,
+     "level": 0,
+     "blocks": [
+      {
+       "type": "text",
+       "text": "Yes, Flutter can build the same iOS and Android app from one codebase; the difference is what gets shared and who draws the pixels."
+      },
+      {
+       "type": "table",
+       "headers": [
+        "",
+        "KMP + native UI",
+        "KMP + Compose Multiplatform",
+        "Flutter",
+        "React Native",
+        "Fully native"
+       ],
+       "rows": [
+        [
+         "Language",
+         "Kotlin + Swift",
+         "Kotlin",
+         "Dart",
+         "TypeScript / JavaScript",
+         "Kotlin and Swift"
+        ],
+        [
+         "Shared by default",
+         "Logic",
+         "Logic and UI",
+         "Logic and UI",
+         "Logic and UI",
+         "Nothing"
+        ],
+        [
+         "UI rendering",
+         "Platform toolkits",
+         "Skia canvas on iOS, Jetpack Compose on Android",
+         "Own engine (Impeller)",
+         "Platform views driven from JS",
+         "Platform toolkits"
+        ],
+        [
+         "Logic runtime JVM / native",
+         "binary",
+         "JVM / native binary",
+         "Dart AOT native code",
+         "Hermes JS engine",
+         "Native"
+        ],
+        [
+         "Platform API access",
+         "Direct from Kotlin or Swift",
+         "Direct from Kotlin",
+         "Platform channels, FFI or plugins",
+         "Native modules or plugins",
+         "Direct"
+        ],
+        [
+         "Add to an existing native app",
+         "Module by module",
+         "Screen by screen",
+         "Possible (add-to-app), heavier",
+         "Possible (brownfield), heavier",
+         "Not applicable"
+        ],
+        [
+         "Skills needed",
+         "Kotlin + Swift UI",
+         "Kotlin, some iOS knowledge",
+         "Dart",
+         "JS/TS, some native",
+         "Both platforms"
+        ],
+        [
+         "Fastest for",
+         "Sharing rules across two existing apps",
+         "New app, one design",
+         "New app, one design, small team",
+         "Web teams going mobile",
+         "Platform-specific products"
+        ]
+       ]
+      },
+      {
+       "type": "text",
+       "text": "Two corrections to common talking points, so the comparison stays fair:"
+      },
+      {
+       "type": "list",
+       "ordered": false,
+       "items": [
+        "Flutter's Dart code is compiled ahead of time to native machine code, and current React Native uses a direct JavaScript interface instead of the old asynchronous bridge. \"KMP is native, the others are bridged\" overstates the gap for everyday screens.",
+        "App-size and startup differences are real but modest for most apps: Flutter and Compose Multiplatform on iOS both bundle a rendering engine; KMP with native UI adds only the Kotlin runtime and your shared code."
+       ]
+      },
+      {
+       "type": "text",
+       "text": "Where the gap is practical instead of theoretical: KMP wins on gradual adoption, direct platform APIs and keeping OS-native UI; Flutter wins on single-team velocity, a mature single-language toolchain and pixel-identical branded UI."
+      }
+     ],
+     "quiz": []
+    },
+    {
+     "id": "kmp-when-to-choose-kmp-and-when-not-to",
+     "title": "When to choose KMP, and when not to",
+     "minutes": 3,
+     "level": 0,
+     "blocks": [
+      {
+       "type": "text",
+       "text": "Choose KMP when the cost you want to remove is duplicated logic; choose something else when the cost is building two UIs with a small team."
+      },
+      {
+       "type": "table",
+       "headers": [
+        "Your situation",
+        "Recommendation",
+        "Why"
+       ],
+       "rows": [
+        [
+         "Two existing native apps that drift apart",
+         "KMP, native UI",
+         "Share rules module by module with no rewrite"
+        ],
+        [
+         "Android team asked to deliver iOS",
+         "KMP, Compose Multiplatform or hybrid",
+         "Reuse Kotlin skills; add SwiftUI only where needed"
+        ],
+        [
+         "Existing Flutter app that works",
+         "Stay on Flutter",
+         "KMP does not repay a rewrite of a healthy app"
+        ],
+        [
+         "New app, solo developer, deadline-driven MVP",
+         "Flutter, or KMP with Compose Multiplatform if you know Kotlin",
+         "One UI codebase matters most"
+        ],
+        [
+         "Heavy Bluetooth, background location, AR, camera pipelines",
+         "KMP, native UI",
+         "Direct platform APIs, no plugin dependency"
+        ],
+        [
+         "Complex offline-first data and sync",
+         "KMP",
+         "The hardest logic is written and tested once"
+        ],
+        [
+         "Backend already in Kotlin",
+         "KMP",
+         "Share DTOs and validation with the server too"
+        ],
+        [
+         "Game or canvas-heavy custom rendering",
+         "A game engine, or Flutter",
+         "KMP adds little here"
+        ],
+        [
+         "iOS-only team with no Kotlin interest",
+         "Stay native",
+         "The shared module would have no owner"
+        ]
+       ]
+      },
+      {
+       "type": "text",
+       "text": "Three questions that settle most cases:"
+      },
+      {
+       "type": "text",
+       "text": "1. **Who will own the shared module?** KMP needs at least one engineer comfortable with"
+      },
+      {
+       "type": "list",
+       "ordered": false,
+       "items": [
+        "Kotlin and Gradle, and an iOS developer willing to shape the Swift-facing API."
+       ]
+      },
+      {
+       "type": "text",
+       "text": "2. **How much of the app is logic?** A thin client over a REST API gains less than an app"
+      },
+      {
+       "type": "list",
+       "ordered": false,
+       "items": [
+        "with sync, pricing rules or offline state."
+       ]
+      },
+      {
+       "type": "text",
+       "text": "3. **Does native UI matter to users?** If yes, KMP with native UI is the only cross-platform"
+      },
+      {
+       "type": "list",
+       "ordered": false,
+       "items": [
+        "option that keeps it by default."
+       ]
+      }
+     ],
+     "quiz": []
+    },
+    {
+     "id": "kmp-adoption-path",
+     "title": "Adoption path",
+     "minutes": 3,
+     "level": 0,
+     "blocks": [
+      {
+       "type": "text",
+       "text": "Incremental adoption is KMP's strongest practical advantage: start with one module in the apps you already ship and stop at whichever phase stops paying off."
+      },
+      {
+       "type": "text",
+       "text": "KMP adoption path · 4 phases, a gate after each Each phase is useful on its own, so a team that stops after phase 2 still has one data layer instead of two."
+      },
+      {
+       "type": "text",
+       "text": "Setup checklist for the pilot:"
+      },
+      {
+       "type": "list",
+       "ordered": false,
+       "items": [
+        "Install Android Studio or IntelliJ IDEA with the Kotlin Multiplatform plugin, plus Xcode on a Mac (required to build and run the iOS target)",
+        "Generate a project with the Kotlin Multiplatform wizard and run both apps unchanged",
+        "Pick one self-contained slice: API models and client for a single feature",
+        "Add CI jobs for `./gradlew check` and an iOS simulator build on a macOS runner",
+        "Decide the iOS integration mode: direct integration for a monorepo, a published XCFramework for separate repos",
+        "Agree the Swift-facing API with an iOS developer before writing the Kotlin",
+        "Ship the pilot behind a feature flag in both apps, then delete the two old implementations"
+       ]
+      }
+     ],
+     "quiz": []
+    },
+    {
+     "id": "kmp-pitfalls-and-how-to-avoid-them",
+     "title": "Pitfalls and how to avoid them",
+     "minutes": 3,
+     "level": 0,
+     "blocks": [
+      {
+       "type": "text",
+       "text": "Most KMP projects that struggle do so for organisational or build reasons, not because the shared code misbehaves."
+      },
+      {
+       "type": "table",
+       "headers": [
+        "Pitfall",
+        "Symptom",
+        "Fix"
+       ],
+       "rows": [
+        [
+         "Sharing too much too early",
+         "Platform quirks leak into `commonMain` behind `if` `(isIos)` flags",
+         "Share logic first; keep UI and platform behaviour native until the core is stable"
+        ],
+        [
+         "JVM-only dependency in common code",
+         "Android builds, iOS fails to resolve",
+         "Check target support on klibs.io before adding a library"
+        ],
+        [
+         "Wide, generic Swift-facing API",
+         "iOS developers fight casts and `KotlinInt`",
+         "Small facade, concrete types, SKIE or Swift export, Swift wrappers"
+        ],
+        [
+         "iOS treated as a second-class consumer",
+         "Shared module shaped only by Android habits",
+         "Design the API with an iOS developer; review it from Xcode"
+        ],
+        [
+         "Slow iOS builds",
+         "Minutes per change on the framework link step",
+         "Build one simulator architecture in debug, keep Gradle and Kotlin/Native caches on, split modules"
+        ],
+        [
+         "Version drift",
+         "Breakage after a Kotlin, AGP or Xcode update",
+         "Pin versions in a catalog and check the Kotlin compatibility guide before upgrading"
+        ],
+        [
+         "Framework distribution friction",
+         "iOS developers must install a JDK and run Gradle",
+         "Publish a prebuilt XCFramework as a Swift package for teams that only consume"
+        ],
+        [
+         "Unhandled exceptions crossing to Swift",
+         "App terminates instead of throwing",
+         "Return result types, or annotate with `@Throws`"
+        ],
+        [
+         "Main-thread assumptions",
+         "UI updated from a background coroutine on iOS",
+         "Collect state on `Dispatchers.Main`; expose `StateFlow` and let the UI layer observe"
+        ],
+        [
+         "No shared-code owner",
+         "Each platform patches around the shared module",
+         "Name an owner and require review from both platforms"
+        ]
+       ]
+      }
+     ],
+     "quiz": []
+    },
+    {
+     "id": "kmp-where-kmp-stands-in-november-2026",
+     "title": "Where KMP stands in November 2026",
+     "minutes": 3,
+     "level": 0,
+     "blocks": [
+      {
+       "type": "text",
+       "text": "KMP's logic sharing has been Stable since late 2023 and is production technology; the parts still moving are Swift export and the web target."
+      },
+      {
+       "type": "table",
+       "headers": [
+        "Piece",
+        "Status",
+        "Detail"
+       ],
+       "rows": [
+        [
+         "Kotlin Multiplatform (logic sharing)",
+         "Stable",
+         "Officially supported by Google for Android and iOS"
+        ],
+        [
+         "Kotlin language",
+         "2.4.20",
+         "Released September 7, 2026; 2.4.0 shipped in June 2026"
+        ],
+        [
+         "Compose Multiplatform",
+         "1.12.0",
+         "Released August 26, 2026; adds an experimental MCP server in Compose Hot Reload for AI coding agents"
+        ],
+        [
+         "Compose Multiplatform for iOS",
+         "Stable",
+         "Since 1.8.0, May 2025"
+        ],
+        [
+         "Compose Multiplatform for desktop",
+         "Stable",
+         "JVM-based"
+        ],
+        [
+         "Compose Multiplatform for web",
+         "Beta",
+         "Since 1.9.0, September 2025; runs on Kotlin/Wasm"
+        ],
+        [
+         "Swift export",
+         "Alpha",
+         "Promoted in Kotlin 2.4.0 with coroutine and `Flow` support"
+        ],
+        [
+         "Objective-C export",
+         "Stable default",
+         "Still the production route to Swift, often with SKIE"
+        ],
+        [
+         "Navigation 3 for Compose Multiplatform",
+         "Stabilized",
+         "Listed as completed on the August 2026 Kotlin roadmap"
+        ]
+       ]
+      },
+      {
+       "type": "text",
+       "text": "What JetBrains lists next on the August 2026 roadmap: native text input as the default in Compose Multiplatform for iOS, and Kotlin/Native compiler caches in release mode to cut iOS build times. The roadmap's next update is due February 2027."
+      },
+      {
+       "type": "text",
+       "text": "Version numbers move every few months, so confirm them on the release pages in Sources before pinning a build."
+      }
+     ],
+     "quiz": []
+    }
+   ]
+  }
+ ],
+ "questions": [],
+ "resources": [
+  {
+   "title": " ",
+   "kind": "Link",
+   "url": "https://skie.touchlab.co/"
+  },
+  {
+   "title": " ",
+   "kind": "Link",
+   "url": "https://klibs.io/"
+  },
+  {
+   "title": "Kotlin Multiplatform overview",
+   "kind": "Link",
+   "url": "https://kotlinlang.org/multiplatform/"
+  },
+  {
+   "title": "Kotlin Multiplatform on Android Developers",
+   "kind": "Link",
+   "url": "https://developer.android.com/kotlin/multiplatform"
+  },
+  {
+   "title": "Kotlin roadmap, August 2026",
+   "kind": "Link",
+   "url": "https://kotlinlang.org/docs/roadmap.html"
+  },
+  {
+   "title": "What's new in Kotlin 2.4.20",
+   "kind": "Link",
+   "url": "https://kotlinlang.org/docs/whatsnew2420.html"
+  },
+  {
+   "title": "Kotlin 2.4.0 released",
+   "kind": "Link",
+   "url": "https://blog.jetbrains.com/kotlin/2026/06/kotlin-2-4-0-released/"
+  },
+  {
+   "title": "Compose Multiplatform 1.12.0",
+   "kind": "Link",
+   "url": "https://blog.jetbrains.com/kotlin/2026/08/compose-multiplatform-1-12-0/"
+  },
+  {
+   "title": "Compose Multiplatform 1.8.0: iOS is Stable",
+   "kind": "Link",
+   "url": "https://blog.jetbrains.com/kotlin/2025/05/compose-multiplatform-1-8-0-released-compose-multiplatform-for-ios-is-stable-and-production-ready/"
+  },
+  {
+   "title": "What's next for KMP and Compose Multiplatform, August 2025",
+   "kind": "Link",
+   "url": "https://blog.jetbrains.com/kotlin/2025/08/kmp-roadmap-aug-2025/"
+  },
+  {
+   "title": "The future of KMP's iOS interop",
+   "kind": "Link",
+   "url": "https://touchlab.co/the-future-of-kmps-ios-interop"
+  },
+  {
+   "title": "Kotlin Swift export reaches Alpha",
+   "kind": "Link",
+   "url": "https://www.youngju.dev/blog/2026-07-16-kotlin-swift-export-alpha.en"
+  },
+  {
+   "title": "Compose Multiplatform 1.12.0 welcomes coding agents",
+   "kind": "Link",
+   "url": "https://www.infoworld.com/article/4216661/compose-multiplatform-1-12-0-welcomes-coding-agents-with-mcp-server.html"
+  },
+  {
+   "title": "Kotlin Multiplatform: benefits and limitations",
+   "kind": "Link",
+   "url": "https://swmansion.com/blog/kotlin-multiplatform-benefits-limitations-our-contributions-560a148d28c9/"
+  },
+  {
+   "title": "Modern architecture with KMP, 2026 guide",
+   "kind": "Link",
+   "url": "https://medium.com/@sixtinbydizora/modern-architecture-with-kotlin-multiplatform-building-one-codebase-for-every-platform-in-2026-996de0b9e4de"
+  }
+ ]
+}

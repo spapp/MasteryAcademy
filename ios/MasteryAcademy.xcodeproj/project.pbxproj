@@ -1,0 +1,365 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 77;
+	objects = {
+
+/* Begin PBXContainerItemProxy section */
+		5190E06B4BC3093F882BC094 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 57FAD7A499268FB7C5EBBB4A /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = AD2C52DC361D9952FF48F3F3;
+			remoteInfo = MasteryAcademy;
+		};
+/* End PBXContainerItemProxy section */
+
+/* Begin PBXFileReference section */
+		6407305C4771AC9842AD6030 /* MasteryAcademyTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = MasteryAcademyTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		F19488D863A23DE965DD48F0 /* MasteryAcademy.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = MasteryAcademy.app; sourceTree = BUILT_PRODUCTS_DIR; };
+/* End PBXFileReference section */
+
+/* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
+		C3A581F0DCD14E7660548A3D /* Exceptions for "MasteryAcademy" folder in "MasteryAcademy" target */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				Info.plist,
+			);
+			target = AD2C52DC361D9952FF48F3F3 /* MasteryAcademy */;
+		};
+/* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
+
+/* Begin PBXFileSystemSynchronizedRootGroup section */
+		33227A4F8085FC4C625059D1 /* MasteryAcademyTests */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			path = MasteryAcademyTests;
+			sourceTree = "<group>";
+		};
+		E988F3AEA87511D905FC3670 /* MasteryAcademy */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			exceptions = (
+				C3A581F0DCD14E7660548A3D /* Exceptions for "MasteryAcademy" folder in "MasteryAcademy" target */,
+			);
+			path = MasteryAcademy;
+			sourceTree = "<group>";
+		};
+/* End PBXFileSystemSynchronizedRootGroup section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		16176D26E34C9E3F005A520A /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		90B6564A18B83EC1CF26F566 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		026373DBD6CE329A19260FF6 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				F19488D863A23DE965DD48F0 /* MasteryAcademy.app */,
+				6407305C4771AC9842AD6030 /* MasteryAcademyTests.xctest */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		BB175443E682337BD43867EC = {
+			isa = PBXGroup;
+			children = (
+				E988F3AEA87511D905FC3670 /* MasteryAcademy */,
+				33227A4F8085FC4C625059D1 /* MasteryAcademyTests */,
+				026373DBD6CE329A19260FF6 /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		8D57BA8F858D18336017B307 /* MasteryAcademyTests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = C0198F9E61DF4A984BD08054 /* Build configuration list for PBXNativeTarget "MasteryAcademyTests" */;
+			buildPhases = (
+				4F8E94D8BF67D4786B837651 /* Sources */,
+				90B6564A18B83EC1CF26F566 /* Frameworks */,
+				2CF0962096E8F78CEE99EB38 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				D6F27F4F2111BBC61E75E264 /* PBXTargetDependency */,
+			);
+			fileSystemSynchronizedGroups = (
+				33227A4F8085FC4C625059D1 /* MasteryAcademyTests */,
+			);
+			name = MasteryAcademyTests;
+			productName = MasteryAcademyTests;
+			productReference = 6407305C4771AC9842AD6030 /* MasteryAcademyTests.xctest */;
+			productType = "com.apple.product-type.bundle.unit-test";
+		};
+		AD2C52DC361D9952FF48F3F3 /* MasteryAcademy */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 71252F021986E11ADE362D72 /* Build configuration list for PBXNativeTarget "MasteryAcademy" */;
+			buildPhases = (
+				8E479A73B64AFC74046359C3 /* Sources */,
+				16176D26E34C9E3F005A520A /* Frameworks */,
+				C4D319D90534E579B311A237 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			fileSystemSynchronizedGroups = (
+				E988F3AEA87511D905FC3670 /* MasteryAcademy */,
+			);
+			name = MasteryAcademy;
+			productName = MasteryAcademy;
+			productReference = F19488D863A23DE965DD48F0 /* MasteryAcademy.app */;
+			productType = "com.apple.product-type.application";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		57FAD7A499268FB7C5EBBB4A /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				BuildIndependentTargetsInParallel = 1;
+				LastSwiftUpdateCheck = 2600;
+				LastUpgradeCheck = 2600;
+				TargetAttributes = {
+					8D57BA8F858D18336017B307 = {
+						CreatedOnToolsVersion = 26.0;
+					};
+					AD2C52DC361D9952FF48F3F3 = {
+						CreatedOnToolsVersion = 26.0;
+					};
+				};
+			};
+			buildConfigurationList = B3C79AF540686A29C2F13DBC /* Build configuration list for PBXProject "MasteryAcademy" */;
+			developmentRegion = en;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				en,
+				Base,
+			);
+			mainGroup = BB175443E682337BD43867EC;
+			minimizedProjectReferenceProxies = 1;
+			preferredProjectObjectVersion = 77;
+			productRefGroup = 026373DBD6CE329A19260FF6 /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				AD2C52DC361D9952FF48F3F3 /* MasteryAcademy */,
+				8D57BA8F858D18336017B307 /* MasteryAcademyTests */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		2CF0962096E8F78CEE99EB38 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		C4D319D90534E579B311A237 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		4F8E94D8BF67D4786B837651 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		8E479A73B64AFC74046359C3 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin PBXTargetDependency section */
+		D6F27F4F2111BBC61E75E264 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = AD2C52DC361D9952FF48F3F3 /* MasteryAcademy */;
+			targetProxy = 5190E06B4BC3093F882BC094 /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
+
+/* Begin XCBuildConfiguration section */
+		2F2D5397E482E6E672022A11 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ENABLE_MODULES = YES;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_USER_SCRIPT_SANDBOXING = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu17;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
+				SDKROOT = iphoneos;
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
+				SWIFT_COMPILATION_MODE = wholemodule;
+				SWIFT_VERSION = 5.0;
+				VALIDATE_PRODUCT = YES;
+			};
+			name = Release;
+		};
+		9D744576706F978042718A08 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				GENERATE_INFOPLIST_FILE = YES;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.dibya.MasteryAcademyTests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/MasteryAcademy.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/MasteryAcademy";
+			};
+			name = Release;
+		};
+		A2EEF8A37747B429CD5ADE95 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ENABLE_MODULES = YES;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_TESTABILITY = YES;
+				ENABLE_USER_SCRIPT_SANDBOXING = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu17;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
+				ONLY_ACTIVE_ARCH = YES;
+				SDKROOT = iphoneos;
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "DEBUG $(inherited)";
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+				SWIFT_VERSION = 5.0;
+			};
+			name = Debug;
+		};
+		D78DF8928CC694A8F3CE31C1 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = P8APB44D6G;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = MasteryAcademy/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = "Mastery Academy";
+				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.dibya.MasteryAcademy;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Debug;
+		};
+		ED5E276A1C8916B3758393C4 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = P8APB44D6G;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = MasteryAcademy/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = "Mastery Academy";
+				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.dibya.MasteryAcademy;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Release;
+		};
+		FBB5E93213725DB213FB934B /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				GENERATE_INFOPLIST_FILE = YES;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.dibya.MasteryAcademyTests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/MasteryAcademy.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/MasteryAcademy";
+			};
+			name = Debug;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		71252F021986E11ADE362D72 /* Build configuration list for PBXNativeTarget "MasteryAcademy" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				D78DF8928CC694A8F3CE31C1 /* Debug */,
+				ED5E276A1C8916B3758393C4 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		B3C79AF540686A29C2F13DBC /* Build configuration list for PBXProject "MasteryAcademy" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				A2EEF8A37747B429CD5ADE95 /* Debug */,
+				2F2D5397E482E6E672022A11 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		C0198F9E61DF4A984BD08054 /* Build configuration list for PBXNativeTarget "MasteryAcademyTests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				FBB5E93213725DB213FB934B /* Debug */,
+				9D744576706F978042718A08 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = 57FAD7A499268FB7C5EBBB4A /* Project object */;
+}

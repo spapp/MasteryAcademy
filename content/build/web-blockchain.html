@@ -1,0 +1,1843 @@
+<!doctype html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"></head><body>
+<title>Blockchain from Zero</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: a course handbook. Sticky contents rail on wide screens, one reading column, every lesson tagged Basic / Intermediate / Advanced. Hashes are always set in mono so the reader learns to spot them. */
+:root{
+  --bg:#F2F4F7; --surface:#FFFFFF; --ink:#131A2B; --muted:#566076; --line:#D3D9E3;
+  --accent:#0B6E6E; --accent-soft:#DCEEED; --warn:#A8501A; --warn-soft:#F6E7DA;
+  --bad:#B3261E; --bad-soft:#F9E1DF; --ok:#1B7447; --ok-soft:#DDF0E5; --code-bg:#E8ECF2;
+  --display:"Bricolage Grotesque","IBM Plex Sans",system-ui,sans-serif;
+  --body:"IBM Plex Sans",system-ui,-apple-system,"Segoe UI",sans-serif;
+  --mono:"IBM Plex Mono",ui-monospace,Menlo,Consolas,monospace;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    color-scheme:dark;
+    --bg:#0F1420; --surface:#171E2D; --ink:#E6EAF2; --muted:#9BA6BA; --line:#2B3548;
+    --accent:#55C6C2; --accent-soft:#15302F; --warn:#E9A46C; --warn-soft:#33241A;
+    --bad:#F28B82; --bad-soft:#3A1D1B; --ok:#6FCF97; --ok-soft:#173022; --code-bg:#1D2535;
+  }
+}
+:root[data-theme="dark"]{
+  color-scheme:dark;
+  --bg:#0F1420; --surface:#171E2D; --ink:#E6EAF2; --muted:#9BA6BA; --line:#2B3548;
+  --accent:#55C6C2; --accent-soft:#15302F; --warn:#E9A46C; --warn-soft:#33241A;
+  --bad:#F28B82; --bad-soft:#3A1D1B; --ok:#6FCF97; --ok-soft:#173022; --code-bg:#1D2535;
+}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font-family:var(--body);font-size:16px;line-height:1.65;
+  padding-left:max(16px, env(safe-area-inset-left, 0px));padding-right:max(16px, env(safe-area-inset-right, 0px));padding-block:28px 80px}
+.shell{max-width:1120px;margin:0 auto;display:grid;grid-template-columns:minmax(0,1fr);gap:28px}
+@media (min-width:1000px){
+  .shell{grid-template-columns:220px minmax(0,1fr);gap:56px}
+  .rail{position:sticky;top:calc(env(safe-area-inset-top, 0px) + 20px);align-self:start;max-height:calc(100vh - 40px);overflow:auto}
+}
+.rail{font-size:14px}
+.rail .brand{font-family:var(--display);font-weight:700;font-size:19px;line-height:1.2;margin:0 0 14px}
+.rail ol{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:2px}
+.rail .grp{font-size:11px;letter-spacing:.09em;text-transform:uppercase;color:var(--muted);margin:14px 0 4px}
+.rail a{display:block;padding:3px 0;color:var(--ink);text-decoration:none}
+.rail a:hover{color:var(--accent);text-decoration:underline}
+@media (max-width:999px){
+  .rail{background:var(--surface);border:1px solid var(--line);border-radius:6px;padding:16px}
+  .rail ol{flex-direction:row;flex-wrap:wrap;gap:2px 16px}
+  .rail .grp{flex-basis:100%;margin-top:10px}
+}
+main{display:flex;flex-direction:column;gap:56px;min-width:0}
+a{color:var(--accent)}
+a:focus-visible,button:focus-visible,summary:focus-visible,input:focus-visible,textarea:focus-visible,select:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+h1,h2,h3{font-family:var(--display);text-wrap:balance;line-height:1.15;margin:0}
+h1{font-size:clamp(34px,6vw,54px);font-weight:700;letter-spacing:-.02em}
+h2{font-size:clamp(26px,4vw,34px);font-weight:700;letter-spacing:-.01em}
+h3{font-size:21px;font-weight:700}
+h4{font-family:var(--body);font-size:16px;font-weight:600;margin:0}
+p{margin:0;max-width:68ch}
+ul,ol{margin:0;padding-left:22px;max-width:68ch}
+li+li{margin-top:4px}
+section{display:flex;flex-direction:column;gap:36px;scroll-margin-top:20px}
+.lesson{display:flex;flex-direction:column;gap:14px;scroll-margin-top:20px}
+.part-head{display:flex;flex-direction:column;gap:10px;border-top:3px solid var(--ink);padding-top:18px}
+.eyebrow{font-size:12px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);font-weight:600}
+.lede{font-size:19px;color:var(--muted);max-width:60ch}
+.lvl{display:inline-block;font-size:11px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;padding:2px 8px;border-radius:3px;align-self:flex-start}
+.lvl.b{background:var(--ok-soft);color:var(--ok)}
+.lvl.i{background:var(--accent-soft);color:var(--accent)}
+.lvl.a{background:var(--warn-soft);color:var(--warn)}
+.analogy{border-left:3px solid var(--accent);padding:4px 0 4px 16px;display:flex;flex-direction:column;gap:6px}
+.analogy b{font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--accent)}
+.caution{background:var(--warn-soft);padding:12px 16px;border-radius:4px;max-width:68ch}
+code,.mono{font-family:var(--mono);font-size:.9em}
+p code,li code,td code{background:var(--code-bg);padding:1px 5px;border-radius:3px}
+pre{background:var(--code-bg);padding:16px;border-radius:6px;overflow-x:auto;font-family:var(--mono);font-size:13.5px;line-height:1.55;margin:0}
+pre .c{color:var(--muted)}
+.scroll{overflow-x:auto}
+table{border-collapse:collapse;width:100%;font-size:14.5px;min-width:560px}
+th,td{text-align:left;padding:9px 12px;border-bottom:1px solid var(--line);vertical-align:top}
+th{font-size:12px;letter-spacing:.07em;text-transform:uppercase;color:var(--muted);font-weight:600}
+td.n{font-variant-numeric:tabular-nums;font-family:var(--mono);font-size:13.5px}
+figure{margin:0;display:flex;flex-direction:column;gap:8px}
+figure .scroll{background:var(--surface);border:1px solid var(--line);border-radius:6px;padding:12px}
+figure svg{display:block;width:100%;height:auto;min-width:620px}
+figcaption{font-size:14px;color:var(--muted);max-width:68ch}
+svg text{font-family:var(--body);font-size:12.5px;fill:var(--ink)}
+svg .m{fill:var(--muted);font-size:11.5px}
+svg .h{font-family:var(--mono);font-size:11.5px}
+svg .acc-t{fill:var(--accent);font-weight:600}
+svg .bx{fill:var(--bg);stroke:var(--ink);stroke-width:1.2}
+svg .ac{fill:var(--accent-soft);stroke:var(--accent);stroke-width:1.4}
+svg .wn{fill:var(--warn-soft);stroke:var(--warn);stroke-width:1.4}
+svg .ln{stroke:var(--ink);stroke-width:1.3;fill:none}
+svg .dash{stroke-dasharray:4 4}
+svg .grid{stroke:var(--line);stroke-width:1}
+svg .bar{fill:var(--accent)}
+svg .hd{fill:var(--ink)}
+/* demos */
+.demo{background:var(--surface);border:1px solid var(--line);border-radius:6px;padding:18px;display:flex;flex-direction:column;gap:12px}
+.demo .tag{font-size:11px;letter-spacing:.09em;text-transform:uppercase;color:var(--accent);font-weight:600}
+.demo label{font-size:13px;color:var(--muted);display:block;margin-bottom:4px}
+input[type=text],textarea,select{width:100%;font-family:var(--mono);font-size:14px;background:var(--bg);color:var(--ink);border:1px solid var(--line);border-radius:4px;padding:8px 10px}
+select{width:auto}
+textarea{resize:vertical;min-height:44px}
+button{font-family:var(--body);font-size:14px;font-weight:600;background:var(--ink);color:var(--bg);border:0;border-radius:4px;padding:8px 14px;cursor:pointer}
+button.ghost{background:transparent;color:var(--ink);border:1px solid var(--ink)}
+button:disabled{opacity:.5;cursor:default}
+.row{display:flex;flex-wrap:wrap;gap:10px;align-items:center}
+.hash{font-family:var(--mono);font-size:13px;word-break:break-all;background:var(--code-bg);padding:8px 10px;border-radius:4px}
+.chain{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:12px}
+.blk{border:2px solid var(--ok);border-radius:6px;padding:12px;display:flex;flex-direction:column;gap:8px;background:var(--ok-soft)}
+.blk.badb{border-color:var(--bad);background:var(--bad-soft)}
+.blk .top{display:flex;justify-content:space-between;align-items:baseline;gap:8px;font-weight:600}
+.blk .st{font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--ok)}
+.blk.badb .st{color:var(--bad)}
+.blk .kv{font-size:12px;color:var(--muted)}
+.blk .kv span{display:block;font-family:var(--mono);color:var(--ink);word-break:break-all}
+.cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:16px}
+.card{border-top:2px solid var(--ink);padding-top:12px;display:flex;flex-direction:column;gap:6px}
+.card p{font-size:15px}
+details{border-bottom:1px solid var(--line);padding:10px 0}
+details summary{cursor:pointer;font-weight:600;max-width:68ch}
+details p{margin-top:8px;color:var(--ink)}
+.qa{display:flex;flex-direction:column}
+.quiz{display:flex;flex-direction:column;gap:22px}
+.q{display:flex;flex-direction:column;gap:8px}
+.q .opts{display:flex;flex-direction:column;gap:6px;max-width:68ch}
+.q button{background:var(--surface);color:var(--ink);border:1px solid var(--line);text-align:left;font-weight:400;font-size:15px;padding:9px 12px}
+.q button.right{border-color:var(--ok);background:var(--ok-soft)}
+.q button.wrong{border-color:var(--bad);background:var(--bad-soft)}
+.q .why{font-size:14.5px;color:var(--muted)}
+.score{font-family:var(--mono);font-variant-numeric:tabular-nums}
+dl{margin:0;display:grid;grid-template-columns:minmax(120px,190px) minmax(0,1fr);gap:8px 20px;max-width:820px}
+dt{font-weight:600}
+dd{margin:0}
+@media (max-width:560px){dl{grid-template-columns:1fr;gap:2px}dd{margin-bottom:10px}}
+.two{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:16px}
+.two>div{display:flex;flex-direction:column;gap:8px;min-width:0}
+.lbl-bad{color:var(--bad);font-weight:600;font-size:13px;letter-spacing:.06em;text-transform:uppercase}
+.lbl-ok{color:var(--ok);font-weight:600;font-size:13px;letter-spacing:.06em;text-transform:uppercase}
+.trace{font-family:var(--mono);font-size:13px;line-height:1.6;white-space:pre;overflow-x:auto;background:var(--code-bg);padding:12px;border-radius:4px;margin:0}
+.log{font-family:var(--mono);font-size:13px;line-height:1.6;background:var(--code-bg);padding:12px;border-radius:4px;display:flex;flex-direction:column;gap:4px;word-break:break-word}
+.log .rv{color:var(--bad)}
+.state{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:16px}
+.state table{min-width:0}
+.field{display:flex;flex-direction:column}
+.field input[type=text]{width:110px}
+.log .ok{color:var(--ok)}
+.log b{font-weight:600}
+footer{font-size:14px;color:var(--muted);border-top:1px solid var(--line);padding-top:16px}
+@media (prefers-reduced-motion:no-preference){html{scroll-behavior:smooth}}
+</style>
+
+<div class="shell">
+<nav class="rail" aria-label="Contents">
+  <p class="brand">Blockchain from Zero</p>
+  <ol>
+    <li><a href="#start">The one idea</a></li>
+    <li class="grp">Part 1 · Core mechanics</li>
+    <li><a href="#ledger">Shared ledger</a></li>
+    <li><a href="#hash">Hashing</a></li>
+    <li><a href="#blocks">Blocks and the chain</a></li>
+    <li><a href="#merkle">Merkle trees</a></li>
+    <li><a href="#keys">Keys and signatures</a></li>
+    <li><a href="#network">Life of a transaction</a></li>
+    <li><a href="#consensus">Consensus</a></li>
+    <li><a href="#attacks">Forks and attacks</a></li>
+    <li class="grp">Part 2 · Coins vs contracts</li>
+    <li><a href="#bitcoin">Bitcoin as money</a></li>
+    <li><a href="#contracts">Smart contracts</a></li>
+    <li><a href="#gas">Gas and the EVM</a></li>
+    <li><a href="#tokens">Tokens</a></li>
+    <li><a href="#oracles">Oracles</a></li>
+    <li><a href="#bugs">When contracts fail</a></li>
+    <li class="grp">Deep dive · Smart contracts</li>
+    <li><a href="#sc-life">From code to chain</a></li>
+    <li><a href="#sc-anatomy">Anatomy of a contract</a></li>
+    <li><a href="#sc-lang">Solidity essentials</a></li>
+    <li><a href="#sc-cost">What costs gas</a></li>
+    <li><a href="#sc-token">Build a token</a></li>
+    <li><a href="#sc-patterns">Design patterns</a></li>
+    <li><a href="#sc-proxy">Upgradeable contracts</a></li>
+    <li><a href="#sc-attacks">Attack catalogue</a></li>
+    <li><a href="#sc-testing">Testing and shipping</a></li>
+    <li class="grp">Part 3 · Web3 and enterprise</li>
+    <li><a href="#web3">What Web3 means</a></li>
+    <li><a href="#dapp">How a dApp works</a></li>
+    <li><a href="#scaling">Scaling and Layer 2</a></li>
+    <li><a href="#enterprise">Enterprise chains</a></li>
+    <li><a href="#usecases">Real use cases</a></li>
+    <li><a href="#need">Do you need one?</a></li>
+    <li class="grp">Deep dive · Building a dApp</li>
+    <li><a href="#dd-stack">The stack</a></li>
+    <li><a href="#dd-connect">Connect a wallet</a></li>
+    <li><a href="#dd-read">Read from a contract</a></li>
+    <li><a href="#dd-write">Send a transaction</a></li>
+    <li><a href="#dd-events">Events and indexing</a></li>
+    <li><a href="#dd-signin">Sign in with a wallet</a></li>
+    <li><a href="#dd-mobile">Mobile dApps</a></li>
+    <li><a href="#dd-errors">Errors and UX rules</a></li>
+    <li><a href="#dd-security">Front-end security</a></li>
+    <li><a href="#dd-ship">Shipping checklist</a></li>
+    <li class="grp">Practice</li>
+    <li><a href="#qa">Questions and answers</a></li>
+    <li><a href="#quiz">Quiz</a></li>
+    <li><a href="#glossary">Glossary</a></li>
+    <li><a href="#next">What to do next</a></li>
+  </ol>
+</nav>
+
+<main>
+<header id="start" style="display:flex;flex-direction:column;gap:18px">
+  <span class="eyebrow">A course in three parts · basic to advanced</span>
+  <h1>Blockchain from Zero</h1>
+  <p class="lede">A blockchain is a record book that many strangers keep together, where every page is glued to the one before it. This course builds that idea up piece by piece until you can read how a decentralized app works.</p>
+  <div class="analogy">
+    <b>The picture to keep in your head</b>
+    <p>Think of a housing society's maintenance register. Normally the secretary keeps it, and everyone trusts the secretary. Now imagine every flat owner holds an identical copy. A new entry counts only when most owners agree it is correct, and each page carries a stamp calculated from the previous page. Nobody can quietly change an old entry, because their copy would stop matching everyone else's.</p>
+  </div>
+  <div class="cards">
+    <div class="card"><span class="lvl b">Basic to intermediate</span><h4>Part 1 · Core mechanics</h4><p>Hashing, blocks, signatures, and how thousands of computers agree without a boss. Two live demos you can break.</p></div>
+    <div class="card"><span class="lvl i">Intermediate</span><h4>Part 2 · Coins vs contracts</h4><p>Bitcoin as digital cash. Ethereum as a shared computer. Gas, tokens, oracles, and a contract you can read line by line.</p></div>
+    <div class="card"><span class="lvl a">Intermediate to advanced</span><h4>Part 3 · Web3 and enterprise</h4><p>dApp architecture, Layer 2 scaling, private chains, and where companies actually use this. Also where they tried and stopped.</p></div>
+  </div>
+  <p style="font-size:14.5px;color:var(--muted)">Each lesson is tagged <span class="lvl b">Basic</span> <span class="lvl i">Intermediate</span> or <span class="lvl a">Advanced</span>. On a first pass you can read only the Basic ones and still follow the story. This page teaches the technology. It is not investment advice.</p>
+</header>
+
+<!-- ================= PART 1 ================= -->
+<section id="part1">
+  <div class="part-head">
+    <span class="eyebrow">Part 1</span>
+    <h2>Core mechanics</h2>
+    <p class="lede">Four ingredients make a blockchain: a shared ledger, hashing, digital signatures, and a rule for agreeing. Learn them in that order.</p>
+  </div>
+
+  <div class="lesson" id="ledger">
+    <span class="lvl b">Basic</span>
+    <h3>A ledger everybody holds</h3>
+    <p>A ledger is a list of who paid whom. Your bank keeps one. When you send money by UPI, no coins move. The bank lowers one number and raises another. You trust the bank to do that honestly and to never let you spend the same rupee twice.</p>
+    <p>Spending the same digital money twice is called the <b>double-spend problem</b>. A file can be copied, so digital money needs someone to keep score. Before 2008 that someone was always a central party. Bitcoin's whitepaper, published on 31 October 2008, showed how a group of strangers could keep the score together instead.</p>
+    <div class="scroll"><table>
+      <thead><tr><th></th><th>Bank ledger</th><th>Blockchain ledger</th></tr></thead>
+      <tbody>
+        <tr><td>Who holds the record</td><td>One company</td><td>Thousands of computers, called nodes</td></tr>
+        <tr><td>Who approves an entry</td><td>The bank</td><td>The network, by a fixed rule</td></tr>
+        <tr><td>Can old entries change</td><td>Yes, by the bank</td><td>Practically no. Corrections are new entries</td></tr>
+        <tr><td>Who can read it</td><td>The bank and you</td><td>Anyone, on a public chain</td></tr>
+        <tr><td>What you give up</td><td>Control</td><td>Speed, cost, and the option to undo mistakes</td></tr>
+      </tbody>
+    </table></div>
+    <p>That last row matters. A blockchain is slower and more expensive than a database on purpose. You pay that price only to remove the need for a trusted scorekeeper.</p>
+  </div>
+
+  <div class="lesson" id="hash">
+    <span class="lvl b">Basic</span>
+    <h3>Hashing: a fingerprint for data</h3>
+    <p>A hash function takes any input, a word or a whole film, and returns a short fixed-length code. Bitcoin uses one called SHA-256, which always returns 64 hexadecimal characters.</p>
+    <div class="analogy"><b>Analogy</b><p>A fingerprint. It identifies a person, it is always the same size, and you cannot rebuild the person from it.</p></div>
+    <ul>
+      <li><b>Same input, same hash.</b> Every time, on every computer.</li>
+      <li><b>One way.</b> You cannot work backwards from the hash to the input.</li>
+      <li><b>Tiny change, completely different hash.</b> This is called the avalanche effect.</li>
+      <li><b>No two inputs you can find share a hash.</b> In theory collisions exist. In practice nobody can find one.</li>
+    </ul>
+    <div class="demo">
+      <span class="tag">Try it · real SHA-256 running in this page</span>
+      <div><label for="hashIn">Type anything. Then change one letter and watch the whole hash change.</label>
+      <input type="text" id="hashIn" value="Pay Ravi 200 rupees"></div>
+      <div class="hash" id="hashOut" aria-live="polite"></div>
+    </div>
+    <p>Blockchains use hashes for three jobs: to label a block, to link each block to the previous one, and to make mining a measurable amount of work.</p>
+  </div>
+
+  <div class="lesson" id="blocks">
+    <span class="lvl b">Basic</span>
+    <h3>Blocks, and why they form a chain</h3>
+    <p>A block is one page of the ledger. It holds a batch of transactions and a small header. The header includes the hash of the previous block. That single field is what turns separate pages into a chain.</p>
+    <figure>
+      <div class="scroll">
+      <svg viewBox="0 0 780 190" role="img" aria-label="Three blocks in a row. Each block's hash is copied into the next block's previous-hash field.">
+        <defs><marker id="a1" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0L10 5L0 10z" class="hd"/></marker></defs>
+        <g>
+          <rect x="20" y="16" width="200" height="150" class="bx"/><text x="32" y="38" font-weight="600">Block 41</text>
+          <text x="32" y="66" class="m">prev hash</text><text x="110" y="66" class="h">00c4…e1</text>
+          <text x="32" y="92" class="m">data</text><text x="110" y="92">3 payments</text>
+          <text x="32" y="118" class="m">nonce</text><text x="110" y="118" class="h">8841</text>
+          <text x="32" y="146" class="m">hash</text><text x="110" y="146" class="h acc-t">009f…2c</text>
+        </g>
+        <g>
+          <rect x="290" y="16" width="200" height="150" class="bx"/><text x="302" y="38" font-weight="600">Block 42</text>
+          <text x="302" y="66" class="m">prev hash</text><text x="380" y="66" class="h acc-t">009f…2c</text>
+          <text x="302" y="92" class="m">data</text><text x="380" y="92">5 payments</text>
+          <text x="302" y="118" class="m">nonce</text><text x="380" y="118" class="h">120</text>
+          <text x="302" y="146" class="m">hash</text><text x="380" y="146" class="h acc-t">00a7…b0</text>
+        </g>
+        <g>
+          <rect x="560" y="16" width="200" height="150" class="bx"/><text x="572" y="38" font-weight="600">Block 43</text>
+          <text x="572" y="66" class="m">prev hash</text><text x="650" y="66" class="h acc-t">00a7…b0</text>
+          <text x="572" y="92" class="m">data</text><text x="650" y="92">2 payments</text>
+          <text x="572" y="118" class="m">nonce</text><text x="650" y="118" class="h">5073</text>
+          <text x="572" y="146" class="m">hash</text><text x="650" y="146" class="h">0031…d4</text>
+        </g>
+        <path d="M220 142 C255 142 255 62 286 62" class="ln" marker-end="url(#a1)"/>
+        <path d="M490 142 C525 142 525 62 556 62" class="ln" marker-end="url(#a1)"/>
+        <text x="255" y="182" text-anchor="middle" class="m">copied into</text>
+        <text x="525" y="182" text-anchor="middle" class="m">copied into</text>
+      </svg></div>
+      <figcaption>Each block stores the hash of the block before it. Change anything in block 41 and its hash changes, so block 42 no longer points at it, and so on down the line.</figcaption>
+    </figure>
+    <div class="demo">
+      <span class="tag">Try it · break the chain</span>
+      <p style="font-size:15px">This is a four-block chain. A block is valid when its hash starts with <code>00</code>. Edit the data in block 1 and see what happens to the blocks after it. Then repair it one block at a time.</p>
+      <div class="chain" id="chain"></div>
+      <div class="row"><button id="remineAll" type="button">Re-mine every block</button><button id="resetChain" type="button" class="ghost">Reset</button><span id="chainMsg" style="font-size:14px;color:var(--muted)" aria-live="polite"></span></div>
+    </div>
+    <p>You just did what an attacker has to do. To rewrite one old entry, they must redo the work for that block and for every block after it, and they must do it faster than the rest of the world is adding new blocks. On a real network that is the whole defence.</p>
+  </div>
+
+  <div class="lesson" id="merkle">
+    <span class="lvl i">Intermediate</span>
+    <h3>Merkle trees: one hash for a thousand transactions</h3>
+    <p>A block can hold thousands of transactions. Instead of hashing them as one big lump, the block hashes them in pairs, then hashes those results in pairs, until one hash is left. That final hash is the <b>Merkle root</b>, and it sits in the block header.</p>
+    <figure>
+      <div class="scroll">
+      <svg viewBox="0 0 720 250" role="img" aria-label="A Merkle tree. Four transactions are hashed in pairs into two hashes, which are hashed into one Merkle root.">
+        <rect x="270" y="14" width="180" height="38" class="ac"/><text x="360" y="38" text-anchor="middle" font-weight="600">Merkle root</text>
+        <rect x="100" y="104" width="160" height="36" class="bx"/><text x="180" y="127" text-anchor="middle">hash(A + B)</text>
+        <rect x="460" y="104" width="160" height="36" class="bx"/><text x="540" y="127" text-anchor="middle">hash(C + D)</text>
+        <rect x="20" y="194" width="140" height="36" class="bx"/><text x="90" y="217" text-anchor="middle">Tx A</text>
+        <rect x="200" y="194" width="140" height="36" class="bx"/><text x="270" y="217" text-anchor="middle">Tx B</text>
+        <rect x="380" y="194" width="140" height="36" class="bx"/><text x="450" y="217" text-anchor="middle">Tx C</text>
+        <rect x="560" y="194" width="140" height="36" class="bx"/><text x="630" y="217" text-anchor="middle">Tx D</text>
+        <path d="M90 194L180 140M270 194L180 140M450 194L540 140M630 194L540 140M180 104L360 52M540 104L360 52" class="ln"/>
+        <text x="360" y="82" text-anchor="middle" class="m">hashed together</text>
+        <text x="360" y="172" text-anchor="middle" class="m">hashed in pairs</text>
+      </svg></div>
+      <figcaption>To prove Tx C is in the block, you need only Tx D's hash and hash(A + B). A phone wallet can check that without downloading the full block.</figcaption>
+    </figure>
+    <div class="analogy"><b>Analogy</b><p>A knockout tournament bracket. To confirm one player reached the final you only need the matches on their path, not every match played.</p></div>
+  </div>
+
+  <div class="lesson" id="keys">
+    <span class="lvl b">Basic</span>
+    <h3>Keys and signatures: proving it is you</h3>
+    <p>There are no usernames or passwords on a blockchain. You have a <b>key pair</b>. The private key is a very large secret number. The public key is calculated from it, and your address is a short form of the public key.</p>
+    <div class="analogy"><b>Analogy</b><p>Your address is a letterbox with a slot. Anyone can drop money in. Only the person with the key to the box can take money out. A signature is proof that you hold the key, shown without revealing the key.</p></div>
+    <figure>
+      <div class="scroll">
+      <svg viewBox="0 0 760 200" role="img" aria-label="A message and a private key go into signing. The signature travels to the network, where anyone verifies it with the public key.">
+        <defs><marker id="a2" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0L10 5L0 10z" class="hd"/></marker></defs>
+        <rect x="20" y="24" width="190" height="50" class="bx"/><text x="115" y="54" text-anchor="middle">"Pay Ravi 2 coins"</text>
+        <rect x="20" y="118" width="190" height="50" class="wn"/><text x="115" y="140" text-anchor="middle" font-weight="600">Private key</text><text x="115" y="157" text-anchor="middle" class="m">never leaves your wallet</text>
+        <rect x="270" y="71" width="100" height="50" class="bx"/><text x="320" y="101" text-anchor="middle" font-weight="600">Sign</text>
+        <rect x="430" y="71" width="120" height="50" class="ac"/><text x="490" y="101" text-anchor="middle">Signature</text>
+        <rect x="610" y="71" width="130" height="50" class="bx"/><text x="675" y="93" text-anchor="middle" font-weight="600">Verify</text><text x="675" y="110" text-anchor="middle" class="m">with public key</text>
+        <path d="M210 49L266 84" class="ln" marker-end="url(#a2)"/><path d="M210 143L266 108" class="ln" marker-end="url(#a2)"/>
+        <path d="M370 96L426 96" class="ln" marker-end="url(#a2)"/><path d="M550 96L606 96" class="ln" marker-end="url(#a2)"/>
+        <text x="580" y="60" text-anchor="middle" class="m">sent to network</text>
+        <text x="675" y="146" text-anchor="middle" class="m">any node can do this</text>
+        <text x="675" y="162" text-anchor="middle" class="m">result: valid or invalid</text>
+      </svg></div>
+      <figcaption>The private key signs. The public key checks. The signature also covers the message, so changing "2 coins" to "20 coins" makes it invalid.</figcaption>
+    </figure>
+    <p class="caution"><b>The hard truth about keys.</b> Whoever holds the private key controls the funds. There is no "forgot password" link and no helpline. A wallet's 12 or 24 word seed phrase is the private key in readable form. Lose it and the money is gone. Share it and the money is someone else's.</p>
+  </div>
+
+  <div class="lesson" id="network">
+    <span class="lvl b">Basic</span>
+    <h3>The life of one transaction</h3>
+    <p>The network is a set of computers called <b>nodes</b>. Each node holds a copy of the chain and passes messages to its neighbours, the way news spreads in a WhatsApp group. There is no central server.</p>
+    <figure>
+      <div class="scroll">
+      <svg viewBox="0 0 800 110" role="img" aria-label="Five steps: sign in wallet, broadcast to nodes, wait in mempool, included in a block, confirmed by later blocks.">
+        <defs><marker id="a3" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0L10 5L0 10z" class="hd"/></marker></defs>
+        <rect x="8" y="20" width="124" height="64" class="bx"/><text x="70" y="47" text-anchor="middle" font-weight="600">1 · Sign</text><text x="70" y="66" text-anchor="middle" class="m">in your wallet</text>
+        <rect x="172" y="20" width="124" height="64" class="bx"/><text x="234" y="47" text-anchor="middle" font-weight="600">2 · Broadcast</text><text x="234" y="66" text-anchor="middle" class="m">node to node</text>
+        <rect x="336" y="20" width="124" height="64" class="bx"/><text x="398" y="47" text-anchor="middle" font-weight="600">3 · Wait</text><text x="398" y="66" text-anchor="middle" class="m">in the mempool</text>
+        <rect x="500" y="20" width="124" height="64" class="ac"/><text x="562" y="47" text-anchor="middle" font-weight="600">4 · Included</text><text x="562" y="66" text-anchor="middle" class="m">in a new block</text>
+        <rect x="664" y="20" width="124" height="64" class="bx"/><text x="726" y="47" text-anchor="middle" font-weight="600">5 · Confirmed</text><text x="726" y="66" text-anchor="middle" class="m">blocks pile on top</text>
+        <path d="M132 52L168 52M296 52L332 52M460 52L496 52M624 52L660 52" class="ln" marker-end="url(#a3)"/>
+      </svg></div>
+      <figcaption>The mempool is a waiting room. Block producers usually pick the transactions that pay the highest fee first, which is why fees rise when the network is busy.</figcaption>
+    </figure>
+    <p>Every node checks each transaction itself: is the signature valid, and does the sender have the money. A node does not take anyone's word for it. "Don't trust, verify" is the working rule.</p>
+  </div>
+
+  <div class="lesson" id="consensus">
+    <span class="lvl i">Intermediate</span>
+    <h3>Consensus: agreeing without a boss</h3>
+    <p>Thousands of nodes each see transactions in a slightly different order. They need a rule for deciding who writes the next page. The rule must also make cheating expensive, because anyone can join and create a million fake identities for free.</p>
+    <h4>Proof of Work</h4>
+    <p>Used by Bitcoin. Computers called miners race to find a number, the <b>nonce</b>, that makes the block's hash start with a required number of zeros. The only method is guessing. The first to find one publishes the block and earns the reward.</p>
+    <div class="analogy"><b>Analogy</b><p>A Sudoku. Solving it takes real effort. Checking a finished one takes seconds. The effort is the miner's cost, and that cost is what makes rewriting history expensive.</p></div>
+    <div class="demo">
+      <span class="tag">Try it · mine a block</span>
+      <div class="row">
+        <div><label for="diff">Zeros required</label>
+        <select id="diff"><option value="1">1 zero</option><option value="2">2 zeros</option><option value="3" selected>3 zeros</option><option value="4">4 zeros</option></select></div>
+        <button id="mineBtn" type="button">Mine</button>
+      </div>
+      <div class="hash" id="mineOut" aria-live="polite">Press Mine. The page will try nonce 0, 1, 2… until the hash starts with enough zeros.</div>
+    </div>
+    <div class="scroll"><table>
+      <thead><tr><th>Leading zeros (hex)</th><th>Average guesses needed</th><th>What that tells you</th></tr></thead>
+      <tbody>
+        <tr><td class="n">1</td><td class="n">16</td><td>Each extra zero makes the puzzle 16 times harder</td></tr>
+        <tr><td class="n">2</td><td class="n">256</td><td></td></tr>
+        <tr><td class="n">3</td><td class="n">4,096</td><td></td></tr>
+        <tr><td class="n">4</td><td class="n">65,536</td><td>Your browser does this in under a second</td></tr>
+        <tr><td class="n">19 or more</td><td class="n">over 10²²</td><td>The range real Bitcoin blocks sit in. It takes the whole network about 10 minutes</td></tr>
+      </tbody>
+    </table></div>
+    <p>Bitcoin adjusts the difficulty every 2,016 blocks, about two weeks, so that a block arrives roughly every 10 minutes no matter how many miners join.</p>
+    <h4>Proof of Stake</h4>
+    <p>Used by Ethereum since 15 September 2022. There is no puzzle. Participants called validators lock up coins as a deposit. The protocol picks one at random to propose each block, and the others vote on it. A validator who cheats loses part of the deposit. That penalty is called <b>slashing</b>.</p>
+    <div class="analogy"><b>Analogy</b><p>A security deposit on a rented flat. You behave because you have money on the table, not because you burned electricity.</p></div>
+    <h4>Voting among known members</h4>
+    <p>Private company networks know exactly who the members are, so they can simply vote. These methods go by names like PBFT, Raft and Proof of Authority. They are fast and final, and they work only because membership is controlled.</p>
+    <div class="scroll"><table>
+      <thead><tr><th></th><th>Proof of Work</th><th>Proof of Stake</th><th>Member voting (BFT, PoA)</th></tr></thead>
+      <tbody>
+        <tr><td>What you put at risk</td><td>Electricity and hardware</td><td>Locked-up coins</td><td>Your organisation's reputation and contract</td></tr>
+        <tr><td>Who can take part</td><td>Anyone</td><td>Anyone with the stake</td><td>Approved members only</td></tr>
+        <tr><td>Energy use</td><td>Very high</td><td>Low. Ethereum's dropped by about 99.95% after the switch</td><td>Low</td></tr>
+        <tr><td>When is it final</td><td>Probable. Bitcoin users often wait 6 blocks, about an hour</td><td>Ethereum finalises in roughly 13 minutes</td><td>Immediately</td></tr>
+        <tr><td>Used by</td><td>Bitcoin, Litecoin</td><td>Ethereum, Solana, Cardano</td><td>Hyperledger Fabric, many consortium chains</td></tr>
+      </tbody>
+    </table></div>
+  </div>
+
+  <div class="lesson" id="attacks">
+    <span class="lvl a">Advanced</span>
+    <h3>Forks, finality and the 51% attack</h3>
+    <p>Sometimes two valid blocks appear at nearly the same moment. For a short while the network has two versions of the last page. This is a <b>fork</b>. Nodes follow the branch with the most accumulated work, and the next block usually settles it. Transactions in the losing block go back to the mempool.</p>
+    <p>This is why a payment gets safer with every block added on top of it. Each new block is one more block an attacker would have to redo.</p>
+    <p>A <b>51% attack</b> is when one party controls most of the mining power or stake. They could then build a private branch faster than everyone else and replace recent history, which lets them reverse their own payments. They still cannot forge your signature, spend your coins, or create coins outside the rules. On large networks the cost of gathering that majority is the deterrent. Small Proof of Work chains have been attacked this way.</p>
+    <p>Two more terms worth knowing. A <b>soft fork</b> tightens the rules in a way old software still accepts. A <b>hard fork</b> changes the rules so that old software rejects the new blocks, and if some people refuse to upgrade the chain splits into two. Ethereum and Ethereum Classic split this way in 2016.</p>
+  </div>
+</section>
+
+<!-- ================= PART 2 ================= -->
+<section id="part2">
+  <div class="part-head">
+    <span class="eyebrow">Part 2</span>
+    <h2>Cryptocurrencies vs smart contracts</h2>
+    <p class="lede">Bitcoin put a ledger of money on a blockchain. Ethereum put programs on one. That is the whole difference, and everything else follows from it.</p>
+  </div>
+
+  <div class="lesson" id="bitcoin">
+    <span class="lvl b">Basic</span>
+    <h3>Bitcoin: a blockchain that does one job</h3>
+    <p>Bitcoin's first block was mined on 3 January 2009. It does one thing: record who owns how many bitcoin. New coins enter only as the reward to whoever produces a block, and that reward halves every 210,000 blocks, about every four years. The total can never pass 21 million.</p>
+    <figure>
+      <div class="scroll">
+      <svg viewBox="0 0 640 300" role="img" aria-label="Bar chart of the Bitcoin block reward: 50 BTC in 2009, 25 in 2012, 12.5 in 2016, 6.25 in 2020, 3.125 in 2024.">
+        <line x1="70" x2="620" y1="240" y2="240" class="ln"/>
+        <line x1="70" x2="620" y1="187.5" y2="187.5" class="grid"/><line x1="70" x2="620" y1="135" y2="135" class="grid"/><line x1="70" x2="620" y1="82.5" y2="82.5" class="grid"/><line x1="70" x2="620" y1="30" y2="30" class="grid"/>
+        <text x="60" y="244" text-anchor="end" class="m">0</text><text x="60" y="191.5" text-anchor="end" class="m">12.5</text><text x="60" y="139" text-anchor="end" class="m">25</text><text x="60" y="86.5" text-anchor="end" class="m">37.5</text><text x="60" y="34" text-anchor="end" class="m">50</text>
+        <rect x="90" y="30" width="70" height="210" class="bar"/><rect x="200" y="135" width="70" height="105" class="bar"/><rect x="310" y="187.5" width="70" height="52.5" class="bar"/><rect x="420" y="213.75" width="70" height="26.25" class="bar"/><rect x="530" y="226.9" width="70" height="13.1" class="bar"/>
+        <text x="125" y="22" text-anchor="middle" class="h">50</text><text x="235" y="127" text-anchor="middle" class="h">25</text><text x="345" y="180" text-anchor="middle" class="h">12.5</text><text x="455" y="206" text-anchor="middle" class="h">6.25</text><text x="565" y="219" text-anchor="middle" class="h">3.125</text>
+        <text x="125" y="260" text-anchor="middle">2009</text><text x="235" y="260" text-anchor="middle">2012</text><text x="345" y="260" text-anchor="middle">2016</text><text x="455" y="260" text-anchor="middle">2020</text><text x="565" y="260" text-anchor="middle">2024</text>
+        <text x="345" y="286" text-anchor="middle" class="m">Year each reward level began · BTC paid per block</text>
+      </svg></div>
+      <figcaption>New bitcoin per block, halving on schedule. Because each step is half the last, the sum approaches 21 million and never exceeds it.</figcaption>
+    </figure>
+    <h4>How Bitcoin tracks money: unspent notes</h4>
+    <p>Bitcoin has no account balances. It tracks individual chunks of coin called <b>UTXOs</b>, unspent transaction outputs. Your "balance" is the total of the chunks your key can unlock.</p>
+    <div class="analogy"><b>Analogy</b><p>Cash in a wallet. To pay ₹600 you hand over a ₹500 and a ₹200 note and get ₹100 back as change. You cannot tear a note. Bitcoin works the same way: whole chunks go in, new chunks come out.</p></div>
+    <figure>
+      <div class="scroll">
+      <svg viewBox="0 0 720 200" role="img" aria-label="Two unspent outputs of 5 and 3 BTC go into a transaction, which creates three outputs: 6 BTC to the receiver, 1.999 BTC back as change, 0.001 BTC fee.">
+        <defs><marker id="a4" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0L10 5L0 10z" class="hd"/></marker></defs>
+        <text x="20" y="16" class="m">Inputs (your old chunks)</text><text x="540" y="16" class="m">Outputs (new chunks)</text>
+        <rect x="20" y="40" width="150" height="44" class="bx"/><text x="95" y="67" text-anchor="middle">5 BTC</text>
+        <rect x="20" y="116" width="150" height="44" class="bx"/><text x="95" y="143" text-anchor="middle">3 BTC</text>
+        <rect x="280" y="72" width="150" height="56" class="ac"/><text x="355" y="96" text-anchor="middle" font-weight="600">Transaction</text><text x="355" y="114" text-anchor="middle" class="m">signed by you</text>
+        <rect x="540" y="26" width="160" height="44" class="bx"/><text x="620" y="53" text-anchor="middle">6 BTC to Meera</text>
+        <rect x="540" y="80" width="160" height="44" class="bx"/><text x="620" y="107" text-anchor="middle">1.999 BTC back to you</text>
+        <rect x="540" y="134" width="160" height="44" class="bx"/><text x="620" y="161" text-anchor="middle">0.001 BTC fee</text>
+        <path d="M170 62L276 90M170 138L276 110M430 90L536 48M430 100L536 102M430 110L536 156" class="ln" marker-end="url(#a4)"/>
+      </svg></div>
+      <figcaption>8 BTC in, 8 BTC out. The old chunks are marked spent forever, which is how the network stops a double spend.</figcaption>
+    </figure>
+  </div>
+
+  <div class="lesson" id="contracts">
+    <span class="lvl b">Basic</span>
+    <h3>Smart contracts: programs that live on the chain</h3>
+    <p>Ethereum went live on 30 July 2015 with a different idea. If a network can agree on a list of payments, it can also agree on the result of running a program. A <b>smart contract</b> is a small program stored on the chain. It has its own address, it can hold money, and it runs exactly as written when someone calls it.</p>
+    <div class="analogy"><b>Analogy</b><p>A vending machine. Put in the right money, press a button, get the item. No shopkeeper decides whether to serve you. The rules are built into the machine and are the same for everyone.</p></div>
+    <p>Here is a real one, written in Solidity. It holds a buyer's payment and releases it to the seller only when the buyer confirms delivery.</p>
+<pre><span class="c">// SPDX-License-Identifier: MIT</span>
+pragma solidity ^0.8.20;
+
+contract Escrow {
+    address public buyer;
+    address public seller;
+    bool public paidOut;
+
+    <span class="c">// Runs once, when the buyer deploys it and sends the money in.</span>
+    constructor(address _seller) payable {
+        buyer = msg.sender;
+        seller = _seller;
+    }
+
+    function confirmDelivery() external {
+        require(msg.sender == buyer, "Only the buyer can confirm");
+        require(!paidOut, "Already paid out");
+        paidOut = true;                              <span class="c">// record first</span>
+        (bool ok, ) = seller.call{value: address(this).balance}("");
+        require(ok, "Payment failed");               <span class="c">// then pay</span>
+    }
+}</pre>
+    <ul>
+      <li><code>msg.sender</code> is whoever signed the transaction. That is the only login there is.</li>
+      <li><code>payable</code> means the function can receive coins.</li>
+      <li><code>require</code> stops everything and undoes all changes if the condition is false.</li>
+      <li>Once deployed, the code cannot be edited. Anyone can read it and anyone can call it.</li>
+    </ul>
+    <div class="scroll"><table>
+      <thead><tr><th></th><th>Bitcoin</th><th>Ethereum</th></tr></thead>
+      <tbody>
+        <tr><td>Built to be</td><td>Digital money</td><td>A shared computer that runs programs</td></tr>
+        <tr><td>Keeps track of</td><td>Unspent chunks (UTXO)</td><td>Account balances and contract storage</td></tr>
+        <tr><td>Consensus</td><td>Proof of Work</td><td>Proof of Stake since September 2022</td></tr>
+        <tr><td>New block about every</td><td>10 minutes</td><td>12 seconds</td></tr>
+        <tr><td>Supply</td><td>Capped at 21 million BTC</td><td>No fixed cap. Part of every fee is destroyed</td></tr>
+        <tr><td>Programming</td><td>A small, deliberately limited script language</td><td>General-purpose languages such as Solidity and Vyper</td></tr>
+        <tr><td>Rough base-layer capacity</td><td>About 7 transactions a second</td><td>About 15 to 30 a second, more on Layer 2</td></tr>
+      </tbody>
+    </table></div>
+  </div>
+
+  <div class="lesson" id="gas">
+    <span class="lvl i">Intermediate</span>
+    <h3>Gas and the EVM</h3>
+    <p>Every Ethereum node runs every contract call to check the result. The software that runs them is the <b>Ethereum Virtual Machine</b>, or EVM. Because everyone's computer does the work, a program that looped forever would freeze the whole network. Gas prevents that.</p>
+    <div class="analogy"><b>Analogy</b><p>A taxi meter. Every step of computation adds to the meter. You state the most you are willing to pay before the ride starts. If the meter hits that limit, the ride stops, the work is undone, and you still pay for the distance covered.</p></div>
+    <ul>
+      <li>Each operation has a fixed gas cost. A plain transfer of ETH costs 21,000 gas. Writing to storage costs far more than arithmetic.</li>
+      <li>Fee = gas used × price per unit of gas. The price is quoted in gwei, and one gwei is a billionth of one ETH.</li>
+      <li>Since 2021 the price has two parts. A <b>base fee</b> set by the protocol is destroyed. A <b>tip</b> goes to the validator.</li>
+    </ul>
+    <p>A worked example. A transfer uses 21,000 gas. At a price of 10 gwei the fee is 210,000 gwei, which is 0.00021 ETH. The same transfer at 100 gwei on a busy day costs ten times as much, and nothing about the transfer has changed.</p>
+    <p>For a developer this changes how you write code. Storage is the expensive resource, so you store as little as possible on chain and emit <b>events</b>, which are cheap log entries, for anything the app only needs to read later.</p>
+  </div>
+
+  <div class="lesson" id="tokens">
+    <span class="lvl i">Intermediate</span>
+    <h3>Tokens: assets made by contracts</h3>
+    <p>A coin such as ETH or BTC is built into its chain. A <b>token</b> is just a smart contract that keeps a table of who owns how much. Standards make every token contract expose the same functions, so any wallet or exchange can handle a token it has never seen.</p>
+    <div class="scroll"><table>
+      <thead><tr><th>Standard</th><th>What it represents</th><th>Everyday comparison</th><th>Examples</th></tr></thead>
+      <tbody>
+        <tr><td class="n">ERC-20</td><td>Interchangeable units. Any one is as good as another</td><td>Currency notes, loyalty points</td><td>USDC, DAI, LINK</td></tr>
+        <tr><td class="n">ERC-721</td><td>One-of-a-kind items, each with its own ID. These are NFTs</td><td>A property deed, a numbered ticket</td><td>Digital art, event tickets, name registrations</td></tr>
+        <tr><td class="n">ERC-1155</td><td>Both kinds in one contract</td><td>A game inventory: 500 gold coins and one unique sword</td><td>Game items</td></tr>
+      </tbody>
+    </table></div>
+    <p>A <b>stablecoin</b> is a token designed to stay at the value of a currency, usually one US dollar. Some are backed by cash and bonds held by a company. Others are backed by crypto locked in contracts. They are the most used tokens because they let people move dollars at blockchain speed.</p>
+    <p>An NFT proves who holds a token ID. The picture or file usually lives somewhere else, and the token only points to it. Owning the token is not automatically owning the copyright.</p>
+  </div>
+
+  <div class="lesson" id="oracles">
+    <span class="lvl i">Intermediate</span>
+    <h3>Oracles: how a contract learns about the outside world</h3>
+    <p>A contract can read only what is already on its chain. It cannot call a weather API or check a share price. If it could, different nodes would get different answers at different moments and could never agree on the result.</p>
+    <p>An <b>oracle</b> is a service that writes outside data onto the chain so contracts can read it. Chainlink is the best known. Good oracles collect the same data from many independent sources and publish the combined answer, so that no single reporter can lie.</p>
+    <div class="analogy"><b>Analogy</b><p>A referee's scoresheet. The betting slip, which is the contract, pays out based on the official score. It does not watch the match. The slip is only as honest as the scorer, so the oracle is often the weakest point of an otherwise solid design.</p></div>
+  </div>
+
+  <div class="lesson" id="bugs">
+    <span class="lvl a">Advanced</span>
+    <h3>When contracts fail</h3>
+    <p>Three properties that make contracts useful also make them dangerous. The code is public, it holds real money, and it cannot be patched. A bug is an open vault that anyone can study at leisure.</p>
+    <p>The best known failure is The DAO in June 2016. An attacker drained about 3.6 million ETH through a <b>reentrancy</b> bug. The contract sent money before it updated its own records. The attacker's contract received the money and, inside that same call, asked for a withdrawal again. The records still showed the old balance, so the contract paid again, and again.</p>
+    <p>Look back at the escrow code. It sets <code>paidOut = true</code> before it sends the money. That ordering, check first, update your records second, talk to outsiders last, is the standard defence. It is known as checks-effects-interactions.</p>
+    <ul>
+      <li><b>Access control mistakes.</b> A function that should be owner-only is left open.</li>
+      <li><b>Oracle manipulation.</b> The contract trusts a price that an attacker can move for one transaction.</li>
+      <li><b>Front-running.</b> Pending transactions are public in the mempool, so others can see yours and pay to get ahead of it.</li>
+      <li><b>Upgrade keys.</b> Many contracts sit behind a proxy that lets the team swap the code. That fixes bugs, and it also means you are trusting whoever holds the upgrade key.</li>
+    </ul>
+    <p>Serious projects respond with independent audits, automated testing, bug bounties, and limits on how much money a new contract may hold.</p>
+  </div>
+</section>
+
+<!-- ================= DEEP DIVE: SMART CONTRACTS ================= -->
+<section id="deep">
+  <div class="part-head">
+    <span class="eyebrow">Deep dive</span>
+    <h2>Smart contracts, properly</h2>
+    <p class="lede">Part 2 showed what a contract is. This section shows how one is written, deployed, attacked and tested. It assumes you have written code in some language before.</p>
+  </div>
+
+  <div class="lesson" id="sc-life">
+    <span class="lvl i">Intermediate</span>
+    <h3>From source code to a live contract</h3>
+    <p>Ethereum has two kinds of account. A normal account is controlled by a private key. A <b>contract account</b> is controlled by code and has no key at all. It can only react when someone calls it.</p>
+    <figure>
+      <div class="scroll">
+      <svg viewBox="0 0 806 124" role="img" aria-label="Solidity source goes through the compiler, which produces bytecode and an ABI. A deploy transaction puts the bytecode on chain, where it gets a contract address.">
+        <defs><marker id="b1" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0L10 5L0 10z" class="hd"/></marker></defs>
+        <rect x="8" y="24" width="130" height="64" class="bx"/><text x="73" y="51" text-anchor="middle" font-weight="600">Source</text><text x="73" y="70" text-anchor="middle" class="m">a .sol file</text>
+        <rect x="173" y="24" width="130" height="64" class="bx"/><text x="238" y="51" text-anchor="middle" font-weight="600">Compiler</text><text x="238" y="70" text-anchor="middle" class="m">solc</text>
+        <rect x="338" y="24" width="130" height="64" class="ac"/><text x="403" y="51" text-anchor="middle" font-weight="600">Bytecode + ABI</text><text x="403" y="70" text-anchor="middle" class="m">two outputs</text>
+        <rect x="503" y="24" width="130" height="64" class="bx"/><text x="568" y="51" text-anchor="middle" font-weight="600">Deploy tx</text><text x="568" y="70" text-anchor="middle" class="m">no "to" address</text>
+        <rect x="668" y="24" width="130" height="64" class="bx"/><text x="733" y="51" text-anchor="middle" font-weight="600">Contract</text><text x="733" y="70" text-anchor="middle" class="m">gets an address</text>
+        <path d="M138 56L169 56M303 56L334 56M468 56L499 56M633 56L664 56" class="ln" marker-end="url(#b1)"/>
+        <text x="403" y="110" text-anchor="middle" class="m">bytecode goes on chain · the ABI goes into your app</text>
+      </svg></div>
+      <figcaption>The compiler produces machine code for the EVM and a JSON description of the functions. Deploying is a transaction like any other, and you pay gas for every byte of code stored.</figcaption>
+    </figure>
+    <div class="analogy"><b>Analogy for app developers</b><p>Bytecode is the compiled binary. The ABI is the header file or API spec. Deploying is a release that can never be replaced, to a server everyone in the world shares.</p></div>
+    <p>After that there are two ways to use the contract, and the difference matters every day:</p>
+    <div class="scroll"><table>
+      <thead><tr><th></th><th>Call (read)</th><th>Transaction (write)</th></tr></thead>
+      <tbody>
+        <tr><td>Changes state</td><td>No</td><td>Yes</td></tr>
+        <tr><td>Costs gas</td><td>No, when made from outside the chain</td><td>Yes, always</td></tr>
+        <tr><td>Needs a signature</td><td>No</td><td>Yes</td></tr>
+        <tr><td>Speed</td><td>Immediate. One node answers</td><td>Waits for a block</td></tr>
+        <tr><td>Returns</td><td>The function's return value</td><td>A receipt with status, gas used and events. Not the return value</td></tr>
+      </tbody>
+    </table></div>
+    <p>That last cell surprises most newcomers. An app cannot read the return value of a write. It reads the <b>events</b> the transaction emitted, or makes a follow-up read call.</p>
+  </div>
+
+  <div class="lesson" id="sc-anatomy">
+    <span class="lvl i">Intermediate</span>
+    <h3>Anatomy of a contract</h3>
+    <p>This crowdfunding contract uses every building block you will meet. People pledge ETH before a deadline. If the goal is reached the owner collects. If not, each backer takes their own money back.</p>
+<pre><span class="c">// SPDX-License-Identifier: MIT</span>
+pragma solidity ^0.8.20;
+
+contract Crowdfund {
+    <span class="c">// 1. STATE. Lives on chain forever. The costly part.</span>
+    address public immutable owner;
+    uint256 public immutable goal;
+    uint256 public immutable deadline;
+    uint256 public raised;
+    mapping(address => uint256) public pledged;
+
+    <span class="c">// 2. EVENTS. Cheap log entries that apps listen for.</span>
+    event Pledged(address indexed backer, uint256 amount);
+    event Refunded(address indexed backer, uint256 amount);
+
+    <span class="c">// 3. ERRORS. Named reasons for a revert.</span>
+    error NotOwner();
+    error TooLate();
+    error TooEarly();
+    error GoalNotMet();
+    error GoalMet();
+
+    <span class="c">// 4. MODIFIER. A reusable guard placed in front of a function.</span>
+    modifier onlyOwner() {
+        if (msg.sender != owner) revert NotOwner();
+        _;
+    }
+
+    <span class="c">// 5. CONSTRUCTOR. Runs once, at deployment.</span>
+    constructor(uint256 _goal, uint256 _days) {
+        owner = msg.sender;
+        goal = _goal;
+        deadline = block.timestamp + _days * 1 days;
+    }
+
+    <span class="c">// 6. FUNCTIONS.</span>
+    function pledge() external payable {
+        if (block.timestamp >= deadline) revert TooLate();
+        pledged[msg.sender] += msg.value;
+        raised += msg.value;
+        emit Pledged(msg.sender, msg.value);
+    }
+
+    function withdraw() external onlyOwner {
+        if (raised &lt; goal) revert GoalNotMet();
+        (bool ok, ) = owner.call{value: address(this).balance}("");
+        require(ok, "Transfer failed");
+    }
+
+    function refund() external {
+        if (block.timestamp &lt; deadline) revert TooEarly();
+        if (raised >= goal) revert GoalMet();
+        uint256 amount = pledged[msg.sender];
+        pledged[msg.sender] = 0;                         <span class="c">// record first</span>
+        (bool ok, ) = msg.sender.call{value: amount}("");
+        require(ok, "Refund failed");                    <span class="c">// then pay</span>
+        emit Refunded(msg.sender, amount);
+    }
+
+    function daysLeft() external view returns (uint256) {
+        if (block.timestamp >= deadline) return 0;
+        return (deadline - block.timestamp) / 1 days;
+    }
+}</pre>
+    <dl>
+      <dt>State variables</dt><dd>The contract's database. <code>public</code> makes the compiler generate a free getter. <code>immutable</code> values are fixed at deployment and cost almost nothing to read.</dd>
+      <dt>mapping</dt><dd>A key-value table. Every possible key exists and starts at zero, so you cannot list its keys or ask how many there are.</dd>
+      <dt>Events</dt><dd>Written to the transaction log, not to state. Contracts cannot read them back. Apps and indexers can, and <code>indexed</code> fields are searchable.</dd>
+      <dt>Custom errors</dt><dd>Cheaper than text messages, and an app can decode them by name to show a proper message.</dd>
+      <dt>Modifier</dt><dd>The <code>_;</code> marks where the function body runs. Think of it as a route guard or middleware.</dd>
+      <dt>msg.sender</dt><dd>The account that made this call. It can be a person or another contract.</dd>
+      <dt>msg.value</dt><dd>The ETH sent with the call, in wei. Only <code>payable</code> functions accept it.</dd>
+      <dt>block.timestamp</dt><dd>The block's time in seconds. Fine for deadlines measured in days. The block producer can nudge it by a few seconds.</dd>
+    </dl>
+    <p>Notice what a revert does. If any check fails, every change made during that transaction is undone, as if it never ran. Only the gas is spent. This all-or-nothing behaviour is called <b>atomicity</b>, and it is the property that makes contracts safe to compose.</p>
+  </div>
+
+  <div class="lesson" id="sc-lang">
+    <span class="lvl i">Intermediate</span>
+    <h3>Solidity essentials that differ from normal languages</h3>
+    <div class="scroll"><table>
+      <thead><tr><th>Topic</th><th>What Solidity does</th><th>Why it catches people out</th></tr></thead>
+      <tbody>
+        <tr><td>Numbers</td><td>Integers only. <code>uint256</code> is the default</td><td>There are no decimals. Amounts are stored in the smallest unit, like paise instead of rupees</td></tr>
+        <tr><td>Money units</td><td>1 ether = 10⁹ gwei = 10¹⁸ wei</td><td>Everything in code is wei. Most tokens copy this and use 18 decimal places</td></tr>
+        <tr><td>Overflow</td><td>Since version 0.8, arithmetic that overflows reverts</td><td>Older contracts wrapped around silently, which caused real thefts</td></tr>
+        <tr><td>Division</td><td>Rounds down</td><td>Divide last, or small amounts vanish: <code>5 / 2 * 2</code> is 4</td></tr>
+        <tr><td>Default values</td><td>Everything starts at zero. There is no null</td><td>You cannot tell "never set" from "set to zero" without an extra flag</td></tr>
+        <tr><td>Randomness</td><td>None that is safe</td><td>Every input is public and the block producer can influence it. Use an oracle service for random numbers</td></tr>
+        <tr><td>Time and scheduling</td><td>A contract cannot wake itself up</td><td>Someone must send a transaction to trigger anything. Bots called keepers do this</td></tr>
+        <tr><td>Privacy</td><td><code>private</code> only hides a variable from other contracts</td><td>Anyone can read the raw storage of any contract. Never store a secret on chain</td></tr>
+      </tbody>
+    </table></div>
+    <h4>Who can call a function</h4>
+    <div class="scroll"><table>
+      <thead><tr><th>Keyword</th><th>Callable from</th><th>Use it for</th></tr></thead>
+      <tbody>
+        <tr><td class="n">external</td><td>Outside the contract only</td><td>Your public API</td></tr>
+        <tr><td class="n">public</td><td>Outside and inside</td><td>API functions you also call internally</td></tr>
+        <tr><td class="n">internal</td><td>This contract and contracts that inherit from it</td><td>Shared helpers</td></tr>
+        <tr><td class="n">private</td><td>This contract only</td><td>Helpers nobody else should use</td></tr>
+      </tbody>
+    </table></div>
+    <p>Two more labels describe what a function may touch. A <code>view</code> function reads state and changes nothing. A <code>pure</code> function does not even read state. Both are free to call from an app.</p>
+    <h4>Where data lives</h4>
+    <ul>
+      <li><b>storage</b> is the contract's permanent data on chain. Reading is moderately costly and writing is very costly.</li>
+      <li><b>memory</b> is scratch space that exists only during the call. Cheap.</li>
+      <li><b>calldata</b> is the read-only input that came with the transaction. Cheapest. Use it for array and string parameters of external functions.</li>
+    </ul>
+    <p>Solidity is not the only option. Vyper is a stricter, Python-like language for the EVM. Solana programs are written in Rust. Aptos and Sui use Move. Hyperledger Fabric chaincode is written in Go, Java or JavaScript. The ideas in this section carry across all of them.</p>
+  </div>
+
+  <div class="lesson" id="sc-cost">
+    <span class="lvl a">Advanced</span>
+    <h3>What actually costs gas</h3>
+    <p>Gas prices reflect the burden an operation puts on every node. Arithmetic is forgotten the moment it finishes. A storage write must be kept by every node forever. The price list follows from that.</p>
+    <div class="scroll"><table>
+      <thead><tr><th>Operation</th><th>Gas</th><th>In plain terms</th></tr></thead>
+      <tbody>
+        <tr><td>Add two numbers</td><td class="n">3</td><td>Practically free</td></tr>
+        <tr><td>Read a storage slot, first time in a transaction</td><td class="n">2,100</td><td>Later reads of the same slot cost 100</td></tr>
+        <tr><td>Change an existing storage value</td><td class="n">about 5,000</td><td></td></tr>
+        <tr><td>Write to a storage slot that was zero</td><td class="n">about 22,100</td><td>The single most expensive common operation</td></tr>
+        <tr><td>Emit an event with one indexed field and 32 bytes of data</td><td class="n">about 1,400</td><td>Roughly fifteen times cheaper than a new storage slot</td></tr>
+        <tr><td>Base cost of any transaction</td><td class="n">21,000</td><td>Paid before your code runs</td></tr>
+        <tr><td>Deploy a contract</td><td class="n">32,000 + 200 per byte</td><td>A mid-sized contract costs over a million gas</td></tr>
+      </tbody>
+    </table></div>
+    <p>These numbers come from the protocol's fee schedule and have been changed by upgrades before, so treat them as a guide to proportions.</p>
+    <p>The habits that follow:</p>
+    <ul>
+      <li>Store only what the contract needs to make decisions. Put history in events.</li>
+      <li>Never loop over a list that users can grow without limit. One day the loop will not fit in a block and the function will be stuck forever.</li>
+      <li>Read a storage value into a local variable once instead of reading it inside a loop.</li>
+      <li>Store a hash of a large document on chain and keep the document elsewhere.</li>
+      <li>Pack small values together. Several variables that fit inside 32 bytes share one slot.</li>
+    </ul>
+  </div>
+
+  <div class="lesson" id="sc-token">
+    <span class="lvl i">Intermediate</span>
+    <h3>Build a token from scratch</h3>
+    <p>An ERC-20 token is two tables and three functions. This is a complete, working one.</p>
+<pre>contract SimpleToken {
+    string public name = "Society Points";
+    string public symbol = "SOC";
+    uint8 public decimals = 18;
+    uint256 public totalSupply;
+
+    mapping(address => uint256) public balanceOf;                       <span class="c">// table 1</span>
+    mapping(address => mapping(address => uint256)) public allowance;   <span class="c">// table 2</span>
+
+    event Transfer(address indexed from, address indexed to, uint256 value);
+    event Approval(address indexed owner, address indexed spender, uint256 value);
+
+    constructor(uint256 initialSupply) {
+        totalSupply = initialSupply;
+        balanceOf[msg.sender] = initialSupply;
+        emit Transfer(address(0), msg.sender, initialSupply);
+    }
+
+    function transfer(address to, uint256 value) external returns (bool) {
+        balanceOf[msg.sender] -= value;      <span class="c">// reverts if the balance is too low</span>
+        balanceOf[to] += value;
+        emit Transfer(msg.sender, to, value);
+        return true;
+    }
+
+    function approve(address spender, uint256 value) external returns (bool) {
+        allowance[msg.sender][spender] = value;
+        emit Approval(msg.sender, spender, value);
+        return true;
+    }
+
+    function transferFrom(address from, address to, uint256 value) external returns (bool) {
+        allowance[from][msg.sender] -= value;   <span class="c">// reverts if not allowed that much</span>
+        balanceOf[from] -= value;
+        balanceOf[to] += value;
+        emit Transfer(from, to, value);
+        return true;
+    }
+}</pre>
+    <p>"Sending" a token moves nothing. It lowers one number in <code>balanceOf</code> and raises another. Your tokens are a row in that contract's table, which is why a wallet must know the contract's address before it can show them.</p>
+    <h4>Why approve exists</h4>
+    <p>A contract cannot pull tokens out of your account by itself, and it cannot tell that you sent it tokens with a plain <code>transfer</code>. So paying a contract takes two steps. You first allow it to take a set amount. Then you call it, and it collects.</p>
+    <div class="analogy"><b>Analogy</b><p>A UPI AutoPay mandate. You approve a merchant to debit up to a limit. The merchant then pulls the payment when it is due. You never hand over your PIN.</p></div>
+    <figure>
+      <div class="scroll">
+      <svg viewBox="0 0 720 262" role="img" aria-label="Sequence: Asha's wallet calls approve on the token contract, then calls buy on the shop contract, and the shop contract calls transferFrom on the token contract.">
+        <defs><marker id="b2" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0L10 5L0 10z" class="hd"/></marker></defs>
+        <rect x="30" y="12" width="160" height="38" class="bx"/><text x="110" y="36" text-anchor="middle" font-weight="600">Asha's wallet</text>
+        <rect x="280" y="12" width="160" height="38" class="ac"/><text x="360" y="36" text-anchor="middle" font-weight="600">Token contract</text>
+        <rect x="530" y="12" width="160" height="38" class="bx"/><text x="610" y="36" text-anchor="middle" font-weight="600">Shop contract</text>
+        <path d="M110 50L110 246M360 50L360 246M610 50L610 246" class="ln dash"/>
+        <path d="M110 96L356 96" class="ln" marker-end="url(#b2)"/><text x="235" y="88" text-anchor="middle">1 · approve(shop, 50)</text>
+        <path d="M110 150L606 150" class="ln" marker-end="url(#b2)"/><text x="485" y="142" text-anchor="middle">2 · buy()</text>
+        <path d="M610 204L364 204" class="ln" marker-end="url(#b2)"/><text x="485" y="196" text-anchor="middle">3 · transferFrom(asha, shop, 50)</text>
+        <text x="235" y="226" text-anchor="middle" class="m">allowance drops from 50 to 0</text>
+        <text x="235" y="242" text-anchor="middle" class="m">50 tokens move to the shop</text>
+      </svg></div>
+      <figcaption>Steps 1 and 2 are two separate transactions signed by Asha. Step 3 happens inside step 2. If it fails, the whole purchase reverts.</figcaption>
+    </figure>
+    <div class="demo">
+      <span class="tag">Try it · the token contract, simulated</span>
+      <p style="font-size:15px">Asha deployed the token and holds 1,000. Try this: as Ravi, call <code>transferFrom(Asha, Ravi, 50)</code> and watch it revert. Then, as Asha, <code>approve(Ravi, 50)</code> and try again.</p>
+      <div class="row">
+        <div class="field"><label for="tkActor">Acting as</label><select id="tkActor"><option>Asha</option><option>Ravi</option><option>Meera</option></select></div>
+        <div class="field"><label for="tkFn">Function</label><select id="tkFn"><option>transfer</option><option>approve</option><option>transferFrom</option></select></div>
+        <div class="field" id="tkFromWrap" hidden><label for="tkFrom">From</label><select id="tkFrom"><option>Asha</option><option>Ravi</option><option>Meera</option></select></div>
+        <div class="field"><label for="tkTo" id="tkToLbl">To</label><select id="tkTo"><option>Ravi</option><option>Asha</option><option>Meera</option></select></div>
+        <div class="field"><label for="tkAmt">Amount</label><input type="text" id="tkAmt" value="50" inputmode="numeric"></div>
+      </div>
+      <div class="row"><button type="button" id="tkSend">Send transaction</button><button type="button" id="tkReset" class="ghost">Redeploy</button></div>
+      <div class="state">
+        <div><table><thead><tr><th>balanceOf</th><th>Tokens</th></tr></thead><tbody id="tkBal"></tbody></table></div>
+        <div><table><thead><tr><th>allowance</th><th>Tokens</th></tr></thead><tbody id="tkAllow"></tbody></table></div>
+      </div>
+      <div class="log" id="tkLog" aria-live="polite"></div>
+    </div>
+    <p>In real projects you do not write this yourself. You inherit from the OpenZeppelin library, which is audited and widely used, and add only your own rules on top.</p>
+    <p class="caution"><b>A safety habit for users.</b> Many apps ask for an unlimited allowance so you only approve once. If that contract is later found to have a bug, everything you approved is exposed. Approve the amount you need, and revoke old approvals.</p>
+  </div>
+
+  <div class="lesson" id="sc-patterns">
+    <span class="lvl a">Advanced</span>
+    <h3>Design patterns you will see everywhere</h3>
+    <dl>
+      <dt>Checks, effects, interactions</dt><dd>Inside every function: validate first, update your own state second, call other contracts or send money last. This ordering alone prevents most reentrancy bugs.</dd>
+      <dt>Pull over push</dt><dd>Do not loop through users sending them money. Record what each is owed and let each one withdraw. One user whose address rejects payments then cannot block everyone else. The crowdfund's <code>refund</code> works this way.</dd>
+      <dt>Ownable and roles</dt><dd>A stored owner address plus an <code>onlyOwner</code> guard. Larger systems use named roles such as minter and pauser. In production the owner should be a multi-signature wallet, never one person's key.</dd>
+      <dt>Reentrancy guard</dt><dd>A lock flag set at the start of a function and cleared at the end. A second entry while the lock is set reverts. Used in addition to correct ordering.</dd>
+      <dt>Pausable</dt><dd>An emergency stop that the owner can trigger to freeze sensitive functions while a problem is investigated.</dd>
+      <dt>Timelock</dt><dd>Admin actions are announced on chain and can run only after a delay, such as 48 hours. Users get time to leave if they disagree.</dd>
+      <dt>Factory</dt><dd>A contract that deploys other contracts, so each user or market gets its own instance from one audited template.</dd>
+    </dl>
+    <p>There is a tension in that list. Pause switches, owners and upgrades make a system safer against bugs, and they also put trust back into a small group. When you assess any project, find out who holds those keys.</p>
+  </div>
+
+  <div class="lesson" id="sc-proxy">
+    <span class="lvl a">Advanced</span>
+    <h3>How "immutable" contracts get upgraded</h3>
+    <p>Code at an address cannot change. So teams split a contract in two. A small <b>proxy</b> holds the data and never changes. It forwards every call to a separate <b>logic</b> contract. To upgrade, an admin points the proxy at a new logic contract.</p>
+    <figure>
+      <div class="scroll">
+      <svg viewBox="0 0 760 200" role="img" aria-label="A user calls a proxy at a fixed address. The proxy holds the data and runs the code of logic version 1 through delegatecall. After an upgrade it runs logic version 2.">
+        <defs><marker id="b3" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0L10 5L0 10z" class="hd"/></marker></defs>
+        <rect x="20" y="75" width="120" height="50" class="bx"/><text x="80" y="105" text-anchor="middle">User or app</text>
+        <rect x="230" y="65" width="190" height="70" class="ac"/><text x="325" y="92" text-anchor="middle" font-weight="600">Proxy</text><text x="325" y="110" text-anchor="middle" class="m">fixed address</text><text x="325" y="125" text-anchor="middle" class="m">holds all the data</text>
+        <rect x="540" y="22" width="200" height="50" class="bx"/><text x="640" y="52" text-anchor="middle">Logic v1 (code only)</text>
+        <rect x="540" y="128" width="200" height="50" class="bx"/><text x="640" y="158" text-anchor="middle">Logic v2 (code only)</text>
+        <path d="M140 100L226 100" class="ln" marker-end="url(#b3)"/><text x="183" y="90" text-anchor="middle" class="m">calls</text>
+        <path d="M420 88L536 52" class="ln" marker-end="url(#b3)"/><text x="470" y="46" text-anchor="middle" class="m">delegatecall</text>
+        <path d="M420 112L536 148" class="ln dash" marker-end="url(#b3)"/><text x="470" y="166" text-anchor="middle" class="m">after upgrade</text>
+      </svg></div>
+      <figcaption>Users always talk to the proxy's address. The data stays in the proxy. Only the code it borrows is swapped.</figcaption>
+    </figure>
+    <p>The mechanism is an instruction called <code>delegatecall</code>. It runs another contract's code against the caller's own storage.</p>
+    <div class="analogy"><b>Analogy</b><p>A shop that keeps its own stock room and cash register but hires a manager from an agency. Replace the manager and the stock is still there. Hire a bad manager and they have full access to the register.</p></div>
+    <ul>
+      <li>The new logic must keep the old storage layout. Reordering variables makes the new code read the wrong slots and corrupts the data.</li>
+      <li>Logic contracts cannot use a constructor for setup. They use an <code>initialize</code> function that must be callable only once. Forgetting that guard has led to real takeovers.</li>
+      <li>Whoever controls the upgrade can replace the code with anything. Good setups put that power behind a multi-signature wallet and a timelock.</li>
+    </ul>
+  </div>
+
+  <div class="lesson" id="sc-attacks">
+    <span class="lvl a">Advanced</span>
+    <h3>Attack catalogue</h3>
+    <p>Start with the famous one, shown side by side. A bank contract lets users withdraw their deposit.</p>
+    <div class="two">
+      <div><span class="lbl-bad">Vulnerable</span>
+<pre>function withdraw() external {
+    uint256 amount = balances[msg.sender];
+    (bool ok, ) = msg.sender.call{value: amount}("");
+    require(ok);
+    balances[msg.sender] = 0;   <span class="c">// too late</span>
+}</pre></div>
+      <div><span class="lbl-ok">Fixed</span>
+<pre>function withdraw() external nonReentrant {
+    uint256 amount = balances[msg.sender];
+    balances[msg.sender] = 0;   <span class="c">// first</span>
+    (bool ok, ) = msg.sender.call{value: amount}("");
+    require(ok);
+}</pre></div>
+    </div>
+    <p>Sending ETH to a contract runs that contract's <code>receive</code> function. The attacker writes one that calls <code>withdraw</code> again before the first call has finished:</p>
+<pre>receive() external payable {
+    if (address(bank).balance >= 1 ether) bank.withdraw();
+}</pre>
+    <div class="demo">
+      <span class="tag">Try it · replay the attack</span>
+      <div class="row">
+        <div class="field"><label for="reMode">Bank contract version</label><select id="reMode"><option value="vuln">Vulnerable: pays, then records</option><option value="fixed">Fixed: records, then pays</option></select></div>
+        <button type="button" id="reRun">Run the attack</button>
+      </div>
+      <pre class="trace" id="reOut" aria-live="polite">Press Run. Each indent is one call nested inside the previous one.</pre>
+    </div>
+    <div class="scroll"><table>
+      <thead><tr><th>Attack</th><th>How it works</th><th>Defence</th></tr></thead>
+      <tbody>
+        <tr><td>Missing access control</td><td>A function that mints, upgrades or withdraws has no owner check, so anyone calls it</td><td>A guard on every privileged function, and tests that call each one as a stranger</td></tr>
+        <tr><td>tx.origin login</td><td>The contract checks who started the transaction instead of who called it. A malicious contract you interact with can then act as you</td><td>Always use <code>msg.sender</code></td></tr>
+        <tr><td>Price manipulation</td><td>The contract reads a price from one trading pool. An attacker borrows a huge sum for one transaction with a flash loan, moves that price, exploits it and repays</td><td>Oracle prices built from many sources or averaged over time</td></tr>
+        <tr><td>Front-running</td><td>Your pending transaction is visible. A bot copies it or trades ahead of it with a higher fee</td><td>A minimum acceptable result, commit-then-reveal designs, private transaction relays</td></tr>
+        <tr><td>Stuck by a loop</td><td>A function loops over a list that grows. Eventually it needs more gas than a block allows</td><td>Pull payments, pagination, hard limits on list size</td></tr>
+        <tr><td>Blocked by a refusing receiver</td><td>Paying a list of addresses in one go fails if one of them rejects payments</td><td>Pull over push</td></tr>
+        <tr><td>Ignored return value</td><td>A low-level call or an old token returns false instead of reverting, and the code carries on as if it worked</td><td>Check every result. Use a safe-transfer helper for tokens</td></tr>
+        <tr><td>Weak randomness</td><td>A lottery uses the block time or block hash, which the attacker can predict or the producer can influence</td><td>A verifiable random function from an oracle</td></tr>
+        <tr><td>Signature replay</td><td>A signed off-chain message is accepted twice, or on another chain</td><td>Include a nonce, the chain ID and the contract address in what is signed</td></tr>
+        <tr><td>Unprotected initializer</td><td>An upgradeable contract's setup function is left open, and an attacker makes themselves owner</td><td>An initializer that runs once, called in the same transaction as deployment</td></tr>
+      </tbody>
+    </table></div>
+    <p>A <b>flash loan</b> deserves one more sentence. It is a loan with no collateral that must be repaid within the same transaction, or the whole transaction reverts. It is only possible because of atomicity. It means an attacker never needs to be rich, so "nobody has that much money" is never a valid security assumption.</p>
+  </div>
+
+  <div class="lesson" id="sc-testing">
+    <span class="lvl a">Advanced</span>
+    <h3>Testing and shipping</h3>
+    <p>You cannot hotfix a contract, so testing carries far more weight than in app development. The standard tools are Remix for experiments in the browser, and Foundry or Hardhat for real projects. Both run a private chain on your machine where you control the clock and every account.</p>
+    <p>A Foundry test file for the crowdfund contract. Tests are themselves written in Solidity.</p>
+<pre>import {Test} from "forge-std/Test.sol";
+import {Crowdfund} from "../src/Crowdfund.sol";
+
+contract CrowdfundTest is Test {
+    Crowdfund fund;
+    address asha = makeAddr("asha");
+
+    function setUp() public {
+        fund = new Crowdfund(10 ether, 30);   <span class="c">// goal 10 ETH, 30 days</span>
+        vm.deal(asha, 5 ether);               <span class="c">// give Asha test money</span>
+    }
+
+    function test_PledgeIsRecorded() public {
+        vm.prank(asha);                       <span class="c">// next call comes from Asha</span>
+        fund.pledge{value: 2 ether}();
+        assertEq(fund.pledged(asha), 2 ether);
+        assertEq(fund.raised(), 2 ether);
+    }
+
+    function test_RefundBlockedBeforeDeadline() public {
+        vm.prank(asha);
+        fund.pledge{value: 2 ether}();
+        vm.prank(asha);
+        vm.expectRevert(Crowdfund.TooEarly.selector);
+        fund.refund();
+    }
+
+    function test_RefundAfterFailedCampaign() public {
+        vm.prank(asha);
+        fund.pledge{value: 2 ether}();
+        vm.warp(block.timestamp + 31 days);   <span class="c">// jump the clock forward</span>
+        vm.prank(asha);
+        fund.refund();
+        assertEq(asha.balance, 5 ether);
+    }
+}</pre>
+    <p>Every contract in this course, and this test file, was compiled with Solidity 0.8.28 and run on a local chain. The reentrancy attack was run too: against the vulnerable bank the attacker left with 11 ETH, and against the fixed one the attack reverted. They are teaching samples and have not been audited, so do not put real money in them.</p>
+    <h4>The layers of checking, cheapest first</h4>
+    <ol>
+      <li><b>Unit tests.</b> Every function, every revert path, called by the right and the wrong account.</li>
+      <li><b>Fuzz tests.</b> The tool calls your function with thousands of random inputs and looks for one that breaks an assertion.</li>
+      <li><b>Invariant tests.</b> You state a rule that must always hold, such as "the sum of all balances equals total supply", and the tool tries random sequences of calls to break it.</li>
+      <li><b>Fork tests.</b> Run against a local copy of the real chain, so your contract meets the real tokens and protocols it will depend on.</li>
+      <li><b>Static analysis.</b> Tools such as Slither scan the code for known bad patterns.</li>
+      <li><b>Testnet deployment.</b> A public rehearsal with valueless coins.</li>
+      <li><b>Independent audit and bug bounty.</b> Outside specialists read the code, and a public reward stays open afterwards.</li>
+    </ol>
+    <h4>Launch checklist</h4>
+    <ul>
+      <li>Publish and verify the source on a block explorer so anyone can match it to the deployed bytecode.</li>
+      <li>Move ownership to a multi-signature wallet before any real money arrives.</li>
+      <li>Start with limits on deposits and raise them over time.</li>
+      <li>Have monitoring and a rehearsed pause procedure.</li>
+      <li>Write down who can upgrade, who can pause, and how long the timelock is. Users will ask.</li>
+    </ul>
+  </div>
+</section>
+
+<!-- ================= PART 3 ================= -->
+<section id="part3">
+  <div class="part-head">
+    <span class="eyebrow">Part 3</span>
+    <h2>Web3 and real-world enterprise use</h2>
+    <p class="lede">Now put the pieces together into applications, and look at where organisations use them outside of trading coins.</p>
+  </div>
+
+  <div class="lesson" id="web3">
+    <span class="lvl b">Basic</span>
+    <h3>What people mean by Web3</h3>
+    <div class="scroll"><table>
+      <thead><tr><th></th><th>Web1, 1990s</th><th>Web2, 2005 onwards</th><th>Web3</th></tr></thead>
+      <tbody>
+        <tr><td>You can</td><td>Read</td><td>Read and write</td><td>Read, write and own</td></tr>
+        <tr><td>Typical product</td><td>Static pages</td><td>Social networks, apps</td><td>Wallets, dApps, tokens</td></tr>
+        <tr><td>Your identity</td><td>None needed</td><td>An account on each company's server</td><td>One key pair you carry between apps</td></tr>
+        <tr><td>Your data lives</td><td>On the site</td><td>In the company's database</td><td>On a public chain or under your key</td></tr>
+        <tr><td>Who can change the rules</td><td>Site owner</td><td>The platform</td><td>Token holders or nobody, depending on the design</td></tr>
+      </tbody>
+    </table></div>
+    <p>Treat that last column as the aim. In practice most Web3 apps still depend on ordinary companies for their website, their data feeds and their node access.</p>
+    <div class="cards">
+      <div class="card"><h4>DeFi</h4><p>Lending, trading and saving run by contracts instead of banks. A pool of funds and a formula replace the order desk.</p></div>
+      <div class="card"><h4>DAOs</h4><p>Groups that hold a shared treasury in a contract and decide by token vote. Think of a cooperative society whose bylaws are code.</p></div>
+      <div class="card"><h4>NFTs</h4><p>Unique tokens used for art, tickets, memberships and game items. The useful part is proof of holding that any app can check.</p></div>
+    </div>
+  </div>
+
+  <div class="lesson" id="dapp">
+    <span class="lvl i">Intermediate</span>
+    <h3>How a decentralized app works</h3>
+    <p>A dApp is a normal web or mobile front end whose back end is a smart contract. If you build apps today, most of the picture is familiar. Three things move.</p>
+    <figure>
+      <div class="scroll">
+      <svg viewBox="0 0 780 320" role="img" aria-label="Top row: a usual app sends API calls to a company server, which reads and writes a company database. Bottom row: a dApp asks the wallet to sign, the wallet sends a signed transaction to a node, and the smart contract executes on chain. File storage, an indexer and an oracle support it.">
+        <defs><marker id="a5" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0L10 5L0 10z" class="hd"/></marker></defs>
+        <text x="20" y="18" font-weight="600">Usual app</text>
+        <rect x="20" y="40" width="150" height="50" class="bx"/><text x="95" y="70" text-anchor="middle">App screen</text>
+        <rect x="290" y="40" width="170" height="50" class="bx"/><text x="375" y="70" text-anchor="middle">Company server</text>
+        <rect x="590" y="40" width="170" height="50" class="bx"/><text x="675" y="70" text-anchor="middle">Company database</text>
+        <path d="M170 65L286 65M460 65L586 65" class="ln" marker-end="url(#a5)"/>
+        <text x="230" y="56" text-anchor="middle" class="m">API call + token</text><text x="525" y="56" text-anchor="middle" class="m">reads and writes</text>
+        <line x1="20" x2="760" y1="116" y2="116" class="grid"/>
+        <text x="20" y="142" font-weight="600">dApp</text>
+        <rect x="20" y="162" width="150" height="50" class="bx"/><text x="95" y="192" text-anchor="middle">App screen</text>
+        <rect x="235" y="162" width="120" height="50" class="wn"/><text x="295" y="184" text-anchor="middle" font-weight="600">Wallet</text><text x="295" y="201" text-anchor="middle" class="m">holds your key</text>
+        <rect x="420" y="162" width="110" height="50" class="bx"/><text x="475" y="184" text-anchor="middle">Node</text><text x="475" y="201" text-anchor="middle" class="m">RPC endpoint</text>
+        <rect x="595" y="162" width="165" height="50" class="ac"/><text x="677" y="184" text-anchor="middle" font-weight="600">Smart contract</text><text x="677" y="201" text-anchor="middle" class="m">on the chain</text>
+        <path d="M170 187L231 187M355 187L416 187M530 187L591 187" class="ln" marker-end="url(#a5)"/>
+        <text x="200" y="156" text-anchor="middle" class="m">asks to sign</text><text x="386" y="156" text-anchor="middle" class="m">signed tx</text><text x="562" y="156" text-anchor="middle" class="m">executes</text>
+        <rect x="20" y="262" width="150" height="44" class="bx"/><text x="95" y="289" text-anchor="middle">File storage (IPFS)</text>
+        <rect x="405" y="262" width="140" height="44" class="bx"/><text x="475" y="289" text-anchor="middle">Indexer</text>
+        <rect x="595" y="262" width="165" height="44" class="bx"/><text x="677" y="289" text-anchor="middle">Oracle</text>
+        <path d="M95 212L95 258" class="ln" marker-end="url(#a5)"/><path d="M475 212L475 258" class="ln dash" marker-end="url(#a5)"/><path d="M677 262L677 216" class="ln" marker-end="url(#a5)"/>
+        <text x="103" y="240" class="m">images, big files</text><text x="483" y="240" class="m">history for fast reads</text><text x="685" y="240" class="m">outside data</text>
+      </svg></div>
+      <figcaption>The server becomes a contract, the database becomes the chain, and login becomes a wallet signature. Storage, indexing and outside data are added around the edges because the chain itself is poor at all three.</figcaption>
+    </figure>
+    <ul>
+      <li><b>Login is a signature.</b> The app asks the wallet for your address. No password is stored anywhere.</li>
+      <li><b>Reads are free, writes cost gas.</b> Reading a balance is a plain query to a node. Changing anything is a transaction you sign and pay for.</li>
+      <li><b>Writes are slow and can fail.</b> The UI must show pending, confirmed and failed states. It is closer to tracking an order than to a normal API response.</li>
+      <li><b>The app talks to the contract through its ABI.</b> The ABI is a JSON description of the contract's functions, the same role an API spec plays for a REST service. Libraries such as ethers.js, viem and web3.dart turn it into callable methods.</li>
+      <li><b>Big data stays off chain.</b> Images and documents go to IPFS or ordinary storage. The chain keeps only a hash of the file, which proves it has not been swapped.</li>
+      <li><b>Lists and search need an indexer.</b> A chain cannot answer "show my last 20 orders" efficiently. A service such as The Graph listens to contract events and builds a queryable database from them.</li>
+    </ul>
+    <h4>Custodial and self-custody wallets</h4>
+    <p>A <b>custodial</b> wallet is an exchange account. The company holds the keys, and you get password reset and support, much like a bank. A <b>self-custody</b> wallet such as MetaMask keeps the key on your device. You get full control and full responsibility. Newer smart-contract wallets try to give both, using passkeys, spending limits and recovery through trusted contacts.</p>
+  </div>
+
+  <div class="lesson" id="scaling">
+    <span class="lvl a">Advanced</span>
+    <h3>Scaling and Layer 2</h3>
+    <p>A public chain is slow because every node repeats every computation. Designers talk about a <b>trilemma</b>: decentralization, security and speed, where pushing one tends to cost another. Bitcoin and Ethereum chose the first two. A card network handles thousands of payments a second. Ethereum's base layer handles a few dozen.</p>
+    <p>The main answer is to do the work elsewhere and use the main chain as the court of record. Such a system is called a <b>Layer 2</b>, and the most common kind is a <b>rollup</b>.</p>
+    <figure>
+      <div class="scroll">
+      <svg viewBox="0 0 760 170" role="img" aria-label="Thousands of user transactions go to a Layer 2 rollup, which executes them and posts one compressed batch with a proof to Layer 1.">
+        <defs><marker id="a6" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0L10 5L0 10z" class="hd"/></marker></defs>
+        <rect x="20" y="50" width="170" height="64" class="bx"/><text x="105" y="78" text-anchor="middle" font-weight="600">Thousands of</text><text x="105" y="96" text-anchor="middle">user transactions</text>
+        <rect x="285" y="50" width="190" height="64" class="ac"/><text x="380" y="78" text-anchor="middle" font-weight="600">Layer 2 rollup</text><text x="380" y="96" text-anchor="middle" class="m">runs them, bundles them</text>
+        <rect x="570" y="50" width="170" height="64" class="bx"/><text x="655" y="78" text-anchor="middle" font-weight="600">Layer 1</text><text x="655" y="96" text-anchor="middle" class="m">stores batch + proof</text>
+        <path d="M190 82L281 82M475 82L566 82" class="ln" marker-end="url(#a6)"/>
+        <text x="237" y="72" text-anchor="middle" class="m">cheap, fast</text><text x="522" y="72" text-anchor="middle" class="m">one batch</text>
+        <text x="655" y="138" text-anchor="middle" class="m">security comes from here</text>
+        <text x="380" y="138" text-anchor="middle" class="m">cost is shared by everyone in the batch</text>
+      </svg></div>
+      <figcaption>A rollup runs transactions off the main chain and posts a compressed summary to it. Users split the cost of one Layer 1 entry.</figcaption>
+    </figure>
+    <div class="analogy"><b>Analogy</b><p>A tab at a restaurant. You order many times during the evening and the waiter keeps a running note. Only the final bill goes through the card machine.</p></div>
+    <div class="scroll"><table>
+      <thead><tr><th></th><th>Optimistic rollup</th><th>ZK rollup</th></tr></thead>
+      <tbody>
+        <tr><td>How Layer 1 knows the batch is honest</td><td>It assumes so. Anyone can challenge within a window, usually about 7 days</td><td>Each batch carries a mathematical proof that Layer 1 checks</td></tr>
+        <tr><td>Withdrawal to Layer 1</td><td>Slow, because of the challenge window</td><td>Fast, once the proof is accepted</td></tr>
+        <tr><td>Hard part</td><td>Someone must be watching for fraud</td><td>Producing proofs takes heavy computation</td></tr>
+        <tr><td>Examples</td><td>Arbitrum, Optimism, Base</td><td>zkSync, Starknet, Linea</td></tr>
+      </tbody>
+    </table></div>
+    <p>A <b>zero-knowledge proof</b> lets you prove a statement is true without revealing the details behind it. The classic picture is proving you are over 18 without showing your date of birth. Rollups use the same maths to prove "these 5,000 transactions were executed correctly" in one small proof.</p>
+    <p>Ethereum's March 2024 upgrade added a cheaper kind of data space for rollups, called blobs, which cut Layer 2 fees sharply. Other approaches include <b>sidechains</b>, which are separate chains with their own security, and <b>bridges</b>, which move assets between chains. Bridges have been the target of some of the largest thefts in the field, so treat them as the risky part of any design.</p>
+  </div>
+
+  <div class="lesson" id="enterprise">
+    <span class="lvl i">Intermediate</span>
+    <h3>Enterprise chains: public, private and consortium</h3>
+    <p>A bank or a retailer usually cannot put customer data on a chain that anyone can read. So companies run <b>permissioned</b> networks, where every participant is a known, approved organisation.</p>
+    <div class="scroll"><table>
+      <thead><tr><th></th><th>Public</th><th>Consortium</th><th>Private</th></tr></thead>
+      <tbody>
+        <tr><td>Who can join</td><td>Anyone</td><td>A group of approved organisations</td><td>One organisation</td></tr>
+        <tr><td>Who can read</td><td>Anyone</td><td>Members, often per deal or channel</td><td>Whoever the owner allows</td></tr>
+        <tr><td>Agreement method</td><td>Proof of Work or Stake</td><td>Member voting</td><td>Member voting</td></tr>
+        <tr><td>Speed</td><td>Low on the base layer</td><td>High</td><td>High</td></tr>
+        <tr><td>Trust removed</td><td>Most</td><td>Between the member companies</td><td>Very little. Close to a database with an audit trail</td></tr>
+        <tr><td>Examples</td><td>Bitcoin, Ethereum</td><td>Hyperledger Fabric networks, R3 Corda, Besu</td><td>Internal pilots</td></tr>
+      </tbody>
+    </table></div>
+    <div class="analogy"><b>Analogy</b><p>A public chain is a public road. A consortium chain is the shared lane inside a gated business park, built and maintained by the companies that use it. A private chain is your own driveway.</p></div>
+    <p>The three platforms you will meet most often:</p>
+    <ul>
+      <li><b>Hyperledger Fabric.</b> Open source under the Linux Foundation. Members share data in private "channels". Contracts are called chaincode and are written in Go, Java or JavaScript.</li>
+      <li><b>R3 Corda.</b> Built for finance. A deal is shared only between the parties involved, not with the whole network.</li>
+      <li><b>Besu and other Ethereum-based stacks.</b> The Ethereum tools and Solidity, run among known members.</li>
+    </ul>
+  </div>
+
+  <div class="lesson" id="usecases">
+    <span class="lvl i">Intermediate</span>
+    <h3>Real use cases, with their results</h3>
+    <div class="scroll"><table>
+      <thead><tr><th>Area</th><th>Problem it addresses</th><th>Real example</th></tr></thead>
+      <tbody>
+        <tr><td>Food traceability</td><td>Farm, packer, shipper and retailer each keep separate records, so tracing a contaminated batch takes days</td><td>Walmart with IBM Food Trust on Hyperledger Fabric. Tracing a pack of mangoes went from about 7 days to 2.2 seconds in its pilot</td></tr>
+        <tr><td>Bank payments and settlement</td><td>Money between banks moves through several intermediaries and only in business hours</td><td>JPMorgan's Kinexys network, formerly Onyx, moves tokenised deposits between institutional clients around the clock</td></tr>
+        <tr><td>Central bank digital currency</td><td>Giving digital cash the finality of a banknote</td><td>The Reserve Bank of India began its retail e-rupee pilot on 1 December 2022</td></tr>
+        <tr><td>Tokenised investments</td><td>Fund units and bonds settle slowly and trade only in market hours</td><td>BlackRock launched a tokenised US Treasury fund, BUIDL, on Ethereum in March 2024</td></tr>
+        <tr><td>Stablecoin payments</td><td>Cross-border transfers are slow and costly</td><td>Dollar stablecoins such as USDC are used for remittances and business payouts, settling in minutes</td></tr>
+        <tr><td>Credentials and identity</td><td>Checking a degree or licence means calling the issuer</td><td>Universities and governments issue verifiable certificates whose hash is anchored on a chain, so anyone can check them instantly</td></tr>
+        <tr><td>Trade documents</td><td>A shipment generates dozens of paper documents across parties who do not trust each other</td><td>TradeLens, by Maersk and IBM. It worked technically and was shut down in early 2023 because too few competitors would join</td></tr>
+      </tbody>
+    </table></div>
+    <p>TradeLens is the most useful row in that table. The technology was fine. The project failed because rival shipping lines did not want to join a network a competitor had built. An enterprise blockchain is mostly a governance project: who runs it, who pays, who may join, and who decides upgrades.</p>
+    <h4>Limits you should state honestly in any proposal</h4>
+    <ul>
+      <li><b>The chain cannot check the real world.</b> If someone enters "organic" for a non-organic crate, the false record is preserved perfectly. The link between a physical item and its record is the weak spot.</li>
+      <li><b>Privacy is hard.</b> Data that many parties replicate is hard to keep confidential and harder to delete, which conflicts with privacy laws that grant a right to erasure. The usual design keeps personal data off chain and stores only a hash.</li>
+      <li><b>Keys must be managed.</b> Companies need hardware security modules, approval flows and recovery plans.</li>
+      <li><b>Rules differ by country</b> and keep changing, especially for tokens and customer funds.</li>
+    </ul>
+  </div>
+
+  <div class="lesson" id="need">
+    <span class="lvl i">Intermediate</span>
+    <h3>Do you actually need a blockchain?</h3>
+    <p>Most of the time the answer is no. Four questions sort it out.</p>
+    <figure>
+      <div class="scroll">
+      <svg viewBox="0 0 760 364" role="img" aria-label="Decision flow of four questions. A no at any question leads to using a normal database. Four yes answers lead to evaluating a blockchain.">
+        <defs><marker id="a7" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0L10 5L0 10z" class="hd"/></marker></defs>
+        <rect x="20" y="16" width="400" height="44" class="bx"/><text x="220" y="43" text-anchor="middle">Do several organisations write to the same data?</text>
+        <rect x="20" y="88" width="400" height="44" class="bx"/><text x="220" y="115" text-anchor="middle">Is there no single party they would all trust to run it?</text>
+        <rect x="20" y="160" width="400" height="44" class="bx"/><text x="220" y="187" text-anchor="middle">Must everyone be able to prove history was not altered?</text>
+        <rect x="20" y="232" width="400" height="44" class="bx"/><text x="220" y="259" text-anchor="middle">Can the shared rules be written as code?</text>
+        <rect x="20" y="304" width="400" height="44" class="ac"/><text x="220" y="331" text-anchor="middle" font-weight="600">A blockchain is worth evaluating</text>
+        <rect x="540" y="16" width="200" height="260" class="wn"/>
+        <text x="640" y="132" text-anchor="middle" font-weight="600">Use a normal database</text><text x="640" y="152" text-anchor="middle" class="m">with access control</text><text x="640" y="168" text-anchor="middle" class="m">and an audit log</text>
+        <path d="M220 60L220 84M220 132L220 156M220 204L220 228M220 276L220 300" class="ln" marker-end="url(#a7)"/>
+        <path d="M420 38L536 38M420 110L536 110M420 182L536 182M420 254L536 254" class="ln" marker-end="url(#a7)"/>
+        <text x="232" y="77" class="m">yes</text><text x="232" y="149" class="m">yes</text><text x="232" y="221" class="m">yes</text><text x="232" y="293" class="m">yes</text>
+        <text x="478" y="32" text-anchor="middle" class="m">no</text><text x="478" y="104" text-anchor="middle" class="m">no</text><text x="478" y="176" text-anchor="middle" class="m">no</text><text x="478" y="248" text-anchor="middle" class="m">no</text>
+      </svg></div>
+      <figcaption>One "no" is enough to choose a database. A blockchain earns its cost only when several parties share data and none of them can be the trusted owner.</figcaption>
+    </figure>
+  </div>
+</section>
+
+<!-- ================= DEEP DIVE: BUILDING A DAPP ================= -->
+<section id="deep-dapp">
+  <div class="part-head">
+    <span class="eyebrow">Deep dive</span>
+    <h2>Building a dApp, end to end</h2>
+    <p class="lede">This section builds the screen for the crowdfunding contract from the smart contracts deep dive: connect a wallet, show the amount raised, pledge, and list recent pledges. It assumes you have built a web or mobile app before.</p>
+  </div>
+
+  <div class="lesson" id="dd-stack">
+    <span class="lvl i">Intermediate</span>
+    <h3>The stack, mapped to what you already know</h3>
+    <div class="scroll"><table>
+      <thead><tr><th>Job</th><th>In a normal app</th><th>In a dApp</th><th>Common tools</th></tr></thead>
+      <tbody>
+        <tr><td>Business logic</td><td>Backend service</td><td>Smart contract</td><td>Solidity with Foundry or Hardhat</td></tr>
+        <tr><td>API description</td><td>OpenAPI spec</td><td>ABI, a JSON file from the compiler</td><td></td></tr>
+        <tr><td>Network client</td><td>Dio, URLSession, fetch</td><td>A chain library that encodes calls using the ABI</td><td>viem, ethers.js, wagmi for React, web3dart for Flutter</td></tr>
+        <tr><td>Server address</td><td>Base URL</td><td>RPC endpoint of a node, plus the contract address</td><td>Alchemy, Infura, QuickNode, or your own node</td></tr>
+        <tr><td>Login</td><td>Password or OTP, then a token</td><td>Wallet connection, then a signature</td><td>MetaMask, WalletConnect, embedded wallets</td></tr>
+        <tr><td>Lists and search</td><td>Database query</td><td>Indexer built from contract events</td><td>The Graph, Ponder, a small service of your own</td></tr>
+        <tr><td>Files</td><td>Object storage</td><td>Content-addressed storage, with the hash on chain</td><td>IPFS, Arweave, or ordinary storage</td></tr>
+        <tr><td>Environments</td><td>Dev, staging, production</td><td>Local chain, testnet, mainnet</td><td>Anvil, Sepolia, Ethereum or a Layer 2</td></tr>
+      </tbody>
+    </table></div>
+    <div class="analogy"><b>Analogy</b><p>The ABI is a restaurant's menu card. It lists what you can order and what each order needs. The contract address tells you which restaurant. Without both, the app cannot place an order.</p></div>
+    <p>A <b>node provider</b> is a company that runs nodes and gives you a URL to reach them. Almost every dApp uses one, because running your own node takes real effort. It is a central dependency, so serious apps configure a second provider as a fallback.</p>
+    <p>The examples below use viem, a TypeScript library, version 2. The read, simulate, write, receipt, event and error-decoding calls were run against a local chain with the crowdfunding contract deployed. The wallet connection lines need a browser wallet and were not run.</p>
+  </div>
+
+  <div class="lesson" id="dd-connect">
+    <span class="lvl i">Intermediate</span>
+    <h3>Step 1 · Connect a wallet</h3>
+    <p>A browser wallet adds an object to the page, <code>window.ethereum</code>. The app sends requests to it. The wallet shows a prompt and the user decides. The app never sees the private key.</p>
+    <div class="analogy"><b>Analogy</b><p>Paying on a shopping site with UPI. The site sends a request, your UPI app opens, and you approve with your PIN there. The site never learns the PIN.</p></div>
+<pre>import { createPublicClient, createWalletClient, custom, http } from 'viem'
+import { sepolia } from 'viem/chains'
+
+<span class="c">// Reads go through your node provider. No wallet needed.</span>
+const publicClient = createPublicClient({ chain: sepolia, transport: http(RPC_URL) })
+
+<span class="c">// Writes go through the user's wallet.</span>
+const walletClient = createWalletClient({ chain: sepolia, transport: custom(window.ethereum) })
+
+<span class="c">// Opens the wallet's "Connect" prompt. Call it from a button tap, never on page load.</span>
+const [account] = await walletClient.requestAddresses()
+
+<span class="c">// The user can switch account or network at any time, from inside the wallet.</span>
+window.ethereum.on('accountsChanged', (accounts) => { <span class="c">/* reset the session */</span> })
+window.ethereum.on('chainChanged', (chainId) => { <span class="c">/* re-check the network */</span> })</pre>
+    <ul>
+      <li><b>Connecting only shares the address.</b> It gives the app no power to move funds. Each transaction needs its own approval.</li>
+      <li><b>Check the network.</b> The wallet may be on a different chain from the one your contract is on. Compare chain IDs before every write. Sepolia is 11155111 and Ethereum mainnet is 1.</li>
+      <li><b>Show the page without a wallet.</b> Reads need only the public client, so a visitor can see the campaign before connecting anything.</li>
+    </ul>
+  </div>
+
+  <div class="lesson" id="dd-read">
+    <span class="lvl i">Intermediate</span>
+    <h3>Step 2 · Read from the contract</h3>
+    <p>The app needs the part of the ABI it uses. This is the fragment for our screen:</p>
+<pre>export const abi = [
+  { type: 'function', name: 'raised',  stateMutability: 'view',    inputs: [], outputs: [{ type: 'uint256' }] },
+  { type: 'function', name: 'goal',    stateMutability: 'view',    inputs: [], outputs: [{ type: 'uint256' }] },
+  { type: 'function', name: 'pledge',  stateMutability: 'payable', inputs: [], outputs: [] },
+  { type: 'event',    name: 'Pledged', inputs: [
+      { name: 'backer', type: 'address', indexed: true },
+      { name: 'amount', type: 'uint256', indexed: false } ] },
+  { type: 'error',    name: 'TooLate', inputs: [] },
+] as const</pre>
+<pre>import { formatEther } from 'viem'
+
+const raised = await publicClient.readContract({
+  address: CROWDFUND_ADDRESS, abi, functionName: 'raised',
+})                                   <span class="c">// 2500000000000000000n, a BigInt in wei</span>
+
+label.textContent = formatEther(raised) + ' ETH'   <span class="c">// "2.5 ETH"</span></pre>
+    <p>Amounts arrive in wei as big integers. Keep them as <code>BigInt</code> for all arithmetic and convert to a decimal string only when you display them. A normal JavaScript number loses precision above about 9 × 10¹⁵, and one ETH is 10¹⁸ wei.</p>
+    <div class="demo">
+      <span class="tag">Try it · ETH to wei</span>
+      <div><label for="ethIn">Amount in ETH, up to 18 decimal places</label>
+      <input type="text" id="ethIn" value="0.1" inputmode="decimal"></div>
+      <div class="hash" id="ethOut" aria-live="polite"></div>
+    </div>
+    <p>Every read is a network request to your provider, and providers bill by request. Batch reads together with a multicall, cache them, and refresh when a new block arrives instead of on a fast timer.</p>
+  </div>
+
+  <div class="lesson" id="dd-write">
+    <span class="lvl i">Intermediate</span>
+    <h3>Step 3 · Send a transaction</h3>
+    <p>A write passes through several states, and it can stop at three different points. Your screen needs a design for each one.</p>
+    <figure>
+      <div class="scroll">
+      <svg viewBox="0 0 806 216" role="img" aria-label="A write goes through simulate, wallet prompt, pending, mined and confirmed. It can stop at simulate if the call would revert, at the wallet prompt if the user rejects, and at mined if the transaction reverted on chain.">
+        <defs><marker id="c1" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0L10 5L0 10z" class="hd"/></marker></defs>
+        <rect x="8" y="20" width="130" height="64" class="bx"/><text x="73" y="47" text-anchor="middle" font-weight="600">Simulate</text><text x="73" y="66" text-anchor="middle" class="m">dry run on a node</text>
+        <rect x="173" y="20" width="130" height="64" class="bx"/><text x="238" y="47" text-anchor="middle" font-weight="600">Wallet prompt</text><text x="238" y="66" text-anchor="middle" class="m">user signs</text>
+        <rect x="338" y="20" width="130" height="64" class="bx"/><text x="403" y="47" text-anchor="middle" font-weight="600">Pending</text><text x="403" y="66" text-anchor="middle" class="m">you hold a tx hash</text>
+        <rect x="503" y="20" width="130" height="64" class="bx"/><text x="568" y="47" text-anchor="middle" font-weight="600">Mined</text><text x="568" y="66" text-anchor="middle" class="m">receipt arrives</text>
+        <rect x="668" y="20" width="130" height="64" class="ac"/><text x="733" y="47" text-anchor="middle" font-weight="600">Confirmed</text><text x="733" y="66" text-anchor="middle" class="m">blocks on top</text>
+        <path d="M138 52L169 52M303 52L334 52M468 52L499 52M633 52L664 52" class="ln" marker-end="url(#c1)"/>
+        <rect x="8" y="150" width="130" height="50" class="wn"/><text x="73" y="172" text-anchor="middle" font-weight="600">Not sent</text><text x="73" y="189" text-anchor="middle" class="m">show the reason</text>
+        <rect x="173" y="150" width="130" height="50" class="wn"/><text x="238" y="172" text-anchor="middle" font-weight="600">Cancelled</text><text x="238" y="189" text-anchor="middle" class="m">back to the form</text>
+        <rect x="503" y="150" width="130" height="50" class="wn"/><text x="568" y="172" text-anchor="middle" font-weight="600">Failed</text><text x="568" y="189" text-anchor="middle" class="m">gas is still spent</text>
+        <path d="M73 84L73 146M238 84L238 146M568 84L568 146" class="ln" marker-end="url(#c1)"/>
+        <text x="81" y="120" class="m">would revert</text><text x="246" y="120" class="m">user rejects</text><text x="576" y="120" class="m">status: reverted</text>
+      </svg></div>
+      <figcaption>The first two exits cost nothing. Only a transaction that reaches a block costs gas, whether it succeeds or reverts.</figcaption>
+    </figure>
+    <div class="analogy"><b>Analogy</b><p>Tracking a food order: placed, accepted, on the way, delivered. You would not show "delivered" the moment the customer taps Order, and the app must cope with a restaurant that cancels.</p></div>
+<pre>import { parseEther, BaseError, ContractFunctionRevertedError } from 'viem'
+
+async function pledge(amountEth) {
+  try {
+    <span class="c">// 1. Dry run. Catches reverts and missing funds before the wallet opens.</span>
+    const { request } = await publicClient.simulateContract({
+      account, address: CROWDFUND_ADDRESS, abi,
+      functionName: 'pledge', value: parseEther(amountEth),
+    })
+
+    <span class="c">// 2. Wallet prompt. Resolves with the hash as soon as the user signs.</span>
+    const hash = await walletClient.writeContract(request)
+    setState({ status: 'pending', hash })          <span class="c">// save the hash, show an explorer link</span>
+
+    <span class="c">// 3. Wait for the block.</span>
+    const receipt = await publicClient.waitForTransactionReceipt({ hash })
+    setState({ status: receipt.status === 'success' ? 'done' : 'failed', hash })
+  } catch (err) {
+    <span class="c">// A custom error from the contract, decoded by name through the ABI.</span>
+    const revert = err instanceof BaseError &amp;&amp; err.walk(e => e instanceof ContractFunctionRevertedError)
+    if (revert?.data?.errorName === 'TooLate') return showMessage('This campaign has ended.')
+    if (err.code === 4001 || /rejected/i.test(err.shortMessage ?? '')) return   <span class="c">// user cancelled. Not an error.</span>
+    showMessage('Could not send the pledge. Nothing was charged.')
+  }
+}</pre>
+    <div class="demo">
+      <span class="tag">Try it · follow one pledge through its states</span>
+      <div class="row">
+        <div class="field"><label for="txScn">What happens</label><select id="txScn">
+          <option value="ok">Everything goes well</option>
+          <option value="wrongnet">Wallet is on the wrong network</option>
+          <option value="nofunds">Not enough ETH for the pledge and gas</option>
+          <option value="ended">Campaign already ended</option>
+          <option value="reject">User rejects in the wallet</option>
+          <option value="late">Campaign ends while the transaction is pending</option>
+        </select></div>
+        <button type="button" id="txRun">Pledge 0.1 ETH</button>
+      </div>
+      <div class="log" id="txOut" aria-live="polite"><div>Pick a case and press the button. Each line shows the state and what the screen should do.</div></div>
+    </div>
+    <p>Save the transaction hash as soon as you get it. If the user closes the app while it is pending, you can look up the receipt on the next launch and show the right result.</p>
+  </div>
+
+  <div class="lesson" id="dd-events">
+    <span class="lvl i">Intermediate</span>
+    <h3>Step 4 · Events and indexing</h3>
+    <p>The screen needs a list of recent pledges. The contract stores only a total per backer. It has no list, and it could not return one cheaply if it did. The history lives in the <code>Pledged</code> events.</p>
+<pre><span class="c">// Live updates while the screen is open.</span>
+const unwatch = publicClient.watchContractEvent({
+  address: CROWDFUND_ADDRESS, abi, eventName: 'Pledged',
+  onLogs: (logs) => logs.forEach(l => addRow(l.args.backer, l.args.amount)),
+})
+
+<span class="c">// Past events, by block range. Fine for small ranges.</span>
+const logs = await publicClient.getContractEvents({
+  address: CROWDFUND_ADDRESS, abi, eventName: 'Pledged', fromBlock: DEPLOY_BLOCK,
+})</pre>
+    <p>Asking a node for old events works for a small contract. It gets slow over long block ranges, and providers limit how far back one request may go. A real app adds an <b>indexer</b>: a service that follows the chain, stores each event in a normal database, and serves queries.</p>
+    <figure>
+      <div class="scroll">
+      <svg viewBox="0 0 800 156" role="img" aria-label="The contract emits events. An indexer stores them in a database. A query API serves lists to the app. Writes from the app go straight to the contract through the wallet.">
+        <defs><marker id="c2" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0L10 5L0 10z" class="hd"/></marker></defs>
+        <rect x="20" y="24" width="150" height="60" class="ac"/><text x="95" y="50" text-anchor="middle" font-weight="600">Contract</text><text x="95" y="68" text-anchor="middle" class="m">on the chain</text>
+        <rect x="223" y="24" width="150" height="60" class="bx"/><text x="298" y="50" text-anchor="middle" font-weight="600">Indexer</text><text x="298" y="68" text-anchor="middle" class="m">follows every block</text>
+        <rect x="426" y="24" width="150" height="60" class="bx"/><text x="501" y="50" text-anchor="middle" font-weight="600">Query API</text><text x="501" y="68" text-anchor="middle" class="m">database behind it</text>
+        <rect x="629" y="24" width="150" height="60" class="bx"/><text x="704" y="50" text-anchor="middle" font-weight="600">App screen</text><text x="704" y="68" text-anchor="middle" class="m">lists, search, totals</text>
+        <path d="M170 54L219 54M373 54L422 54M576 54L625 54" class="ln" marker-end="url(#c2)"/>
+        <text x="196" y="16" text-anchor="middle" class="m">events</text><text x="399" y="16" text-anchor="middle" class="m">rows</text><text x="602" y="16" text-anchor="middle" class="m">results</text>
+        <path d="M704 84L704 122L95 122L95 88" class="ln dash" marker-end="url(#c2)"/>
+        <text x="400" y="144" text-anchor="middle" class="m">writes skip the indexer and go to the contract through the wallet</text>
+      </svg></div>
+      <figcaption>Reads of history come from the indexer. Writes and current values come from the chain. The indexer is a convenience copy that anyone can rebuild from the events.</figcaption>
+    </figure>
+    <div class="analogy"><b>Analogy</b><p>A library catalogue. The books are the truth. The catalogue is built from them so you can search by author in a second, and it can be rebuilt if it is lost.</p></div>
+    <p>The indexer runs a little behind the chain. After a successful pledge, add the new row to the list yourself from the receipt, or the user will see their pledge missing for a few seconds.</p>
+  </div>
+
+  <div class="lesson" id="dd-signin">
+    <span class="lvl a">Advanced</span>
+    <h3>Sign in with a wallet</h3>
+    <p>Many dApps still have a backend, for profiles, notifications or anything too costly to keep on chain. That backend needs to know which address it is talking to. An address typed into a form proves nothing. A signature does.</p>
+    <figure>
+      <div class="scroll">
+      <svg viewBox="0 0 720 270" role="img" aria-label="Sequence: the app asks the server for a nonce, asks the wallet to sign a message containing it, receives the signature, and sends message and signature to the server, which starts a session.">
+        <defs><marker id="c3" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0L10 5L0 10z" class="hd"/></marker></defs>
+        <rect x="30" y="12" width="160" height="38" class="bx"/><text x="110" y="36" text-anchor="middle" font-weight="600">App</text>
+        <rect x="280" y="12" width="160" height="38" class="wn"/><text x="360" y="36" text-anchor="middle" font-weight="600">Wallet</text>
+        <rect x="530" y="12" width="160" height="38" class="bx"/><text x="610" y="36" text-anchor="middle" font-weight="600">Your server</text>
+        <path d="M110 50L110 256M360 50L360 256M610 50L610 256" class="ln dash"/>
+        <path d="M110 92L606 92" class="ln" marker-end="url(#c3)"/><text x="485" y="84" text-anchor="middle">1 · ask for a nonce</text>
+        <path d="M110 138L356 138" class="ln" marker-end="url(#c3)"/><text x="235" y="130" text-anchor="middle">2 · sign this message</text>
+        <path d="M360 184L114 184" class="ln" marker-end="url(#c3)"/><text x="235" y="176" text-anchor="middle">3 · signature</text>
+        <path d="M110 230L606 230" class="ln" marker-end="url(#c3)"/><text x="485" y="222" text-anchor="middle">4 · message + signature</text>
+        <text x="485" y="250" text-anchor="middle" class="m">server checks it, starts a session</text>
+      </svg></div>
+      <figcaption>Signing a message is free and touches no chain. The server recovers the address from the signature and compares it with the one claimed.</figcaption>
+    </figure>
+    <div class="analogy"><b>Analogy</b><p>Signing the visitor register at a society gate. The guard writes today's date and a serial number on the line first, so yesterday's signature cannot be reused.</p></div>
+    <ul>
+      <li>The <b>nonce</b> is a random value the server issues once. It stops someone replaying an old signature.</li>
+      <li>The message should state the site's domain, the chain ID and an expiry time, in words the user can read in the wallet. The standard format is called Sign-In with Ethereum, EIP-4361.</li>
+      <li>After that the server issues a normal session token, as in any app.</li>
+      <li>For structured data, such as an order the user signs off chain, use <b>typed data</b> signing, EIP-712. The wallet then shows named fields instead of an unreadable blob.</li>
+    </ul>
+  </div>
+
+  <div class="lesson" id="dd-mobile">
+    <span class="lvl i">Intermediate</span>
+    <h3>Mobile dApps</h3>
+    <p>A mobile app has no browser extension to talk to. There are three ways to reach a wallet.</p>
+    <div class="scroll"><table>
+      <thead><tr><th>Approach</th><th>How it works</th><th>Good for</th><th>Cost</th></tr></thead>
+      <tbody>
+        <tr><td>Wallet app on the same phone</td><td>Your app opens the wallet app by deep link through a relay protocol such as WalletConnect. The user approves there and is sent back</td><td>Users who already hold crypto</td><td>App switching on every signature. Sessions can drop in the background</td></tr>
+        <tr><td>Embedded wallet</td><td>An SDK creates a key for the user inside your app, protected by the device's secure hardware and a login such as email or passkey</td><td>Mainstream users who have never heard of a seed phrase</td><td>You depend on the SDK vendor, and you must explain recovery clearly</td></tr>
+        <tr><td>Wallet's built-in browser</td><td>The user opens your web dApp inside the wallet app, which injects a provider like a browser extension does</td><td>Reusing a web dApp with no native work</td><td>Web experience only, and you rely on users finding you there</td></tr>
+      </tbody>
+    </table></div>
+    <p>The rest carries over directly. In Flutter, the web3dart package plays the role viem plays on the web: it encodes calls from the ABI, talks to an RPC URL, and handles big integers with <code>BigInt</code>. On iOS and Android there are native libraries that do the same.</p>
+    <ul>
+      <li>Treat the pending state as long-lived. The app may be killed while a transaction is in flight, so persist the hash and resume on launch.</li>
+      <li>Never store a private key or seed phrase in plain preferences. Use the Keychain or Keystore, or leave key handling to the wallet.</li>
+      <li>App stores have their own rules on crypto payments and digital goods. Read the current guidelines before you design a purchase flow.</li>
+    </ul>
+  </div>
+
+  <div class="lesson" id="dd-errors">
+    <span class="lvl a">Advanced</span>
+    <h3>Errors and UX rules</h3>
+    <div class="scroll"><table>
+      <thead><tr><th>What happened</th><th>How it shows up</th><th>What the screen should do</th></tr></thead>
+      <tbody>
+        <tr><td>User rejected the prompt</td><td>Provider error code 4001</td><td>Return to the form quietly. It was a choice</td></tr>
+        <tr><td>Wrong network</td><td>Wallet chain ID differs from yours</td><td>Offer a "Switch network" button that asks the wallet to switch</td></tr>
+        <tr><td>Network not in the wallet</td><td>Error code 4902 on switching, in MetaMask</td><td>Ask the wallet to add the network, then switch</td></tr>
+        <tr><td>Not enough ETH</td><td>Simulation fails with insufficient funds</td><td>Say how much is needed, including gas</td></tr>
+        <tr><td>Contract would revert</td><td>Simulation fails with a named custom error</td><td>Map each error name to a plain sentence</td></tr>
+        <tr><td>Stuck pending</td><td>No receipt for minutes</td><td>Keep showing pending with an explorer link. The user can speed it up in the wallet</td></tr>
+        <tr><td>Replaced transaction</td><td>The user sped up or cancelled, so a different hash is mined</td><td>Track by sender and nonce, not only by the first hash</td></tr>
+        <tr><td>Reverted on chain</td><td>Receipt status is reverted</td><td>Say it failed and that only the network fee was spent</td></tr>
+        <tr><td>Provider down or rate limited</td><td>HTTP 429 or timeouts</td><td>Retry with backoff and fall back to a second provider</td></tr>
+      </tbody>
+    </table></div>
+    <h4>Rules that make a dApp feel trustworthy</h4>
+    <ul>
+      <li>Say what the wallet is about to ask before it asks. "You will confirm a pledge of 0.1 ETH" removes the surprise.</li>
+      <li>Disable the button while a transaction is pending, so a double tap does not send two.</li>
+      <li>Show amounts in familiar units with a sensible number of decimals, and the fee estimate beside them.</li>
+      <li>Link every transaction to a block explorer. It is the user's independent receipt.</li>
+      <li>Do not mark important actions final on the first block. Recent blocks can occasionally be replaced, so wait for a few confirmations or for finality when real value depends on it.</li>
+      <li>Do not ask for an unlimited token approval by default.</li>
+    </ul>
+  </div>
+
+  <div class="lesson" id="dd-security">
+    <span class="lvl a">Advanced</span>
+    <h3>Front-end security</h3>
+    <p>The contract may be flawless and users can still lose money through the screen in front of it. The front end decides what the wallet is asked to sign, so whoever controls the front end controls that request.</p>
+    <dl>
+      <dt>Hijacked website</dt><dd>An attacker who takes over your domain, your hosting or one of your script dependencies can swap the contract address for their own. Pin dependency versions, protect DNS and deploy accounts with strong two-factor login, and keep the contract address in reviewed code.</dd>
+      <dt>Phishing copies</dt><dd>A cloned site on a lookalike domain asks users to "verify" their wallet. Tell users plainly that you will never ask for a seed phrase, because no real app needs one.</dd>
+      <dt>Blind signing</dt><dd>If the wallet shows only a hex string, the user cannot tell what they are approving. Use typed data and verified contracts so the wallet can show readable details.</dd>
+      <dt>Leftover approvals</dt><dd>An old unlimited allowance stays active for years. Request exact amounts and give users a way to see and revoke what they granted.</dd>
+      <dt>Exposed keys</dt><dd>An RPC key in front-end code is public. Restrict it by domain in the provider's dashboard. Never ship a private key that holds funds inside an app.</dd>
+      <dt>Trusting your own indexer</dt><dd>Use the indexer to display data. Before any action that moves value, read the current state from the chain.</dd>
+    </dl>
+  </div>
+
+  <div class="lesson" id="dd-ship">
+    <span class="lvl i">Intermediate</span>
+    <h3>Shipping checklist</h3>
+    <ol>
+      <li><b>Develop on a local chain.</b> Anvil or Hardhat gives you instant blocks and accounts with test ETH.</li>
+      <li><b>Keep one config per chain:</b> chain ID, RPC URLs, contract addresses, deployment block, explorer URL. Nothing else in the app should hard-code these.</li>
+      <li><b>Generate the ABI from the build.</b> Copying it by hand leads to an app that calls functions the deployed contract does not have.</li>
+      <li><b>Deploy to a testnet and verify the source</b> on the explorer. Run the whole flow with a fresh wallet, on a real phone.</li>
+      <li><b>Walk every exit from the transaction diagram:</b> reject, wrong network, no funds, revert, app killed while pending.</li>
+      <li><b>Set up a fallback provider</b> and watch your request counts.</li>
+      <li><b>Monitor the contract's events</b> and alert on anything unexpected, such as an ownership change.</li>
+      <li><b>Go to mainnet or a Layer 2 with small limits first,</b> and raise them as confidence grows.</li>
+    </ol>
+  </div>
+</section>
+
+<!-- ================= PRACTICE ================= -->
+<section id="qa">
+  <div class="part-head">
+    <span class="eyebrow">Practice</span>
+    <h2>Questions and answers</h2>
+    <p class="lede">The questions people ask most, grouped by level. Try to answer each one aloud before opening it.</p>
+  </div>
+  <div class="lesson">
+    <span class="lvl b">Basic</span>
+    <div class="qa">
+      <details><summary>Is blockchain the same thing as Bitcoin?</summary><p>No. Blockchain is the record-keeping method. Bitcoin is one application built on it, the first one. Email and the internet have the same relationship.</p></details>
+      <details><summary>Where is the blockchain stored?</summary><p>On every full node. For Bitcoin that is tens of thousands of computers around the world, each holding the complete history. There is no master copy.</p></details>
+      <details><summary>If everything is public, how is it private?</summary><p>It is pseudonymous. The chain shows addresses, not names. Once an address is linked to you, for example through an exchange that checked your identity, your whole history at that address is readable.</p></details>
+      <details><summary>Can a transaction be reversed?</summary><p>Not by anyone on the network. Once confirmed it stays. The receiver can send the money back with a new transaction if they choose to. Send to a wrong address and it is usually lost.</p></details>
+      <details><summary>What does a miner or validator actually do?</summary><p>They collect pending transactions, check them, pack them into a block and propose it. Miners earn the right by solving a hash puzzle. Validators earn it by locking up a deposit. Both are paid in new coins and fees.</p></details>
+      <details><summary>Why can't I just copy a coin like I copy a file?</summary><p>A coin is not a file. It is an entry in the shared ledger. Copying data on your own computer changes nothing, because every other node still holds the real record and will reject a spend that the ledger does not support.</p></details>
+      <details><summary>What is a wallet, really?</summary><p>A key manager. It stores your private keys and signs transactions with them. The coins never sit "in" the wallet. They are entries on the chain that your key can move.</p></details>
+    </div>
+  </div>
+  <div class="lesson">
+    <span class="lvl i">Intermediate</span>
+    <div class="qa">
+      <details><summary>What stops someone creating thousands of fake nodes to outvote everyone?</summary><p>Votes are not counted per node. They are weighted by something costly: computing power in Proof of Work, locked coins in Proof of Stake. A thousand fake identities with no hardware or stake behind them have no weight. This defence is called Sybil resistance.</p></details>
+      <details><summary>Why did Ethereum move from Proof of Work to Proof of Stake?</summary><p>Mainly energy. The change cut Ethereum's electricity use by about 99.95%. It also removed the need for specialised mining hardware and made later scaling upgrades easier. The trade-off is that influence follows wealth held in ETH, and the protocol is more complex.</p></details>
+      <details><summary>What is the difference between a coin and a token?</summary><p>A coin is native to its chain and pays that chain's fees: BTC on Bitcoin, ETH on Ethereum. A token is created by a smart contract on top of a chain. USDC on Ethereum is a token, and you still need ETH to pay the gas to move it.</p></details>
+      <details><summary>Why are fees sometimes high?</summary><p>Block space is limited and sold to the highest bidders. When many people want in at once, the price rises. Nothing is wrong with the network. It is an auction for a scarce resource, and Layer 2 networks exist to make it cheaper.</p></details>
+      <details><summary>Is a smart contract a legal contract?</summary><p>Not by default. It is a program. It enforces what the code says, not what the parties meant. Some jurisdictions recognise agreements carried out by code, but a bug or a dispute still ends up with lawyers and courts.</p></details>
+      <details><summary>If contracts cannot be changed, how do teams fix bugs?</summary><p>Either they deploy a new contract and ask users to move, or they build in an upgrade path from the start. The common pattern is a proxy: users call a fixed address that forwards to a replaceable logic contract. Upgradeable contracts are only as trustworthy as whoever controls the upgrade.</p></details>
+      <details><summary>What is a nonce?</summary><p>A number used once. In mining it is the value a miner keeps changing to get a hash that meets the target. In an Ethereum account it is a transaction counter that prevents the same signed transaction from being replayed.</p></details>
+      <details><summary>How does a private chain differ from a shared database?</summary><p>In a shared database one administrator can change anything. In a permissioned chain, each member runs a node, every change is signed, and no single member can rewrite history without the others noticing. If one company runs all the nodes, the difference largely disappears.</p></details>
+    </div>
+  </div>
+  <div class="lesson">
+    <span class="lvl a">Advanced</span>
+    <div class="qa">
+      <details><summary>What is finality, and why do Bitcoin and Ethereum describe it differently?</summary><p>Finality is the point after which a block will not be reversed. Bitcoin's is probabilistic: the chance of reversal shrinks with every block on top, and it never reaches exactly zero. Ethereum's Proof of Stake adds explicit finality. Once two thirds of the stake has voted for a checkpoint, reversing it would require destroying at least a third of all staked ETH.</p></details>
+      <details><summary>What is MEV?</summary><p>Maximal extractable value. Whoever orders transactions in a block can profit from that position, for example by placing their own trade just before and after a large one. It is a hidden cost to users. Private transaction relays and fair-ordering designs try to reduce it.</p></details>
+      <details><summary>Where does a rollup's data live, and why does it matter?</summary><p>A rollup must publish enough data for anyone to rebuild its state. If that data goes to Ethereum, users can always exit even if the rollup operator disappears. If it goes somewhere cheaper, fees drop and you add a new party to trust. This is the data availability question.</p></details>
+      <details><summary>What is account abstraction?</summary><p>Making a user's account a smart contract instead of a bare key pair. The account can then define its own rules: sign in with a passkey, set daily limits, let an app pay the gas, or recover through trusted contacts. It removes much of the seed-phrase burden. ERC-4337 is the main standard.</p></details>
+      <details><summary>Why are cross-chain bridges attacked so often?</summary><p>A bridge locks assets on one chain and issues matching tokens on another. The locked pool is a large target, and its safety depends on a small set of signers or on complex verification code. A flaw in either lets an attacker mint or release assets they never paid for.</p></details>
+      <details><summary>How does sharding relate to rollups?</summary><p>Sharding splits a chain's work across groups of nodes. Ethereum dropped its plan to shard execution and now treats rollups as the place where execution scales. The base layer concentrates on being a secure, cheap place for rollups to publish data.</p></details>
+      <details><summary>What would quantum computers do to all this?</summary><p>A large enough quantum computer could derive a private key from an exposed public key, breaking today's signatures. Hash functions are much less affected. No such machine exists yet, and quantum-resistant signature schemes are standardised and being planned into upgrades. The practical risk is a slow migration, not a sudden collapse.</p></details>
+    </div>
+  </div>
+  <div class="lesson">
+    <span class="lvl a">Smart contracts deep dive</span>
+    <div class="qa">
+      <details><summary>Why can't my app read the return value of a transaction?</summary><p>A transaction is processed later, inside a block, so there is nothing to return at the moment you send it. You get a receipt with a success flag, the gas used and the events emitted. Design write functions to emit an event carrying whatever the app needs.</p></details>
+      <details><summary>What is the difference between require, revert and assert?</summary><p>All three undo the transaction. <code>require</code> checks a condition and carries a message. <code>revert</code> with a custom error does the same job more cheaply and is the current habit. <code>assert</code> is for things that should be impossible. If one fires, the contract has a bug.</p></details>
+      <details><summary>Why is storing data on chain so expensive?</summary><p>Every full node must keep it forever and include it in every future state calculation. The fee pays for that permanent shared burden. An event is far cheaper because nodes do not need it to run contracts.</p></details>
+      <details><summary>If private variables are readable, how do contracts keep anything secret?</summary><p>They do not. Designs that need secrecy use commit-then-reveal, where you publish a hash first and the value later, or zero-knowledge proofs, or they keep the secret off chain entirely.</p></details>
+      <details><summary>What is the difference between call and delegatecall?</summary><p>A <code>call</code> runs the other contract's code on the other contract's storage. A <code>delegatecall</code> runs the other contract's code on your own storage, with the original sender preserved. Proxies depend on it, and it is dangerous for the same reason.</p></details>
+      <details><summary>Why does approve plus transferFrom exist when transfer already works?</summary><p>A contract is not notified when tokens are transferred to it, so it cannot react. With an allowance, the contract itself pulls the tokens inside its own function and can do the rest of its work in the same transaction. Newer standards let a signed message replace the separate approve step.</p></details>
+      <details><summary>Can a contract call itself on a schedule?</summary><p>No. Nothing runs unless a transaction triggers it. Recurring jobs are done by outside bots, often paid a small reward by the contract for calling the function at the right time.</p></details>
+      <details><summary>Is an audited contract safe?</summary><p>Safer. An audit is a time-boxed review by people who can miss things, and it covers only the version they were shown. Several of the largest losses came from audited code or from changes made after the audit. Look for multiple audits, a live bug bounty, time in production, and sensible admin controls.</p></details>
+    </div>
+  </div>
+  <div class="lesson">
+    <span class="lvl a">Building a dApp deep dive</span>
+    <div class="qa">
+      <details><summary>Does a dApp need a backend at all?</summary><p>A simple one does not. The front end, a node provider and the contract are enough. Most real products add one for indexing, notifications, profiles and anything private. The rule is that the backend may make the app nicer, and the contract alone decides who owns what.</p></details>
+      <details><summary>Why do I need an RPC provider? Can the app not talk to the chain directly?</summary><p>Talking to the chain means talking to a node. Running a node needs storage, bandwidth and upkeep, and a phone cannot do it. A provider runs nodes for you behind a URL. It can see your requests and can go down, which is why apps keep a fallback.</p></details>
+      <details><summary>My transaction has been pending for ten minutes. What happened?</summary><p>Usually the fee offered is below what block producers currently accept, so it waits in the mempool. The user can speed it up from the wallet, which sends the same transaction again with the same nonce and a higher fee. Only one of the two will be mined.</p></details>
+      <details><summary>What is a reorg, and should my UI care?</summary><p>A reorg is when the last block or two are replaced by a competing branch. A transaction you saw as mined can briefly return to pending. For a like button it does not matter. For releasing goods or crediting a balance, wait for several confirmations or for finality.</p></details>
+      <details><summary>How can people use my app if they hold no ETH for gas?</summary><p>Someone else pays. With smart-contract wallets a service called a paymaster can sponsor the fee, or accept it in a stablecoin. Many consumer apps on Layer 2 networks do this so that new users never meet the word gas.</p></details>
+      <details><summary>Can I build a dApp in Flutter or native mobile code?</summary><p>Yes. The concepts are identical. You need a library that encodes calls from the ABI and a way to reach a wallet, which on mobile means a deep link to a wallet app or an embedded wallet SDK. The contract side does not change at all.</p></details>
+      <details><summary>Is the front end itself decentralized?</summary><p>Usually not. Most dApp sites sit on ordinary hosting behind an ordinary domain. Some teams also publish the site to IPFS so it stays reachable if the main host goes away. The contract keeps working either way, and anyone can build another front end for it.</p></details>
+      <details><summary>How do I support several chains?</summary><p>Deploy the contract to each one. It will get a different address on each unless you plan for matching addresses. Keep a config entry per chain, read the wallet's chain ID, and pick the matching entry. Balances and history are separate per chain, so say clearly which network the user is looking at.</p></details>
+    </div>
+  </div>
+</section>
+
+<section id="quiz">
+  <div class="part-head">
+    <span class="eyebrow">Practice</span>
+    <h2>Check yourself</h2>
+    <p class="lede">Twenty questions. The first ten run from basic to advanced. The next five cover the smart contracts deep dive and the last five cover building a dApp. Pick an answer to see the explanation. Score: <span class="score" id="score">0 / 20</span></p>
+  </div>
+  <div class="quiz" id="quizBox"></div>
+</section>
+
+<section id="glossary">
+  <div class="part-head">
+    <span class="eyebrow">Reference</span>
+    <h2>Glossary</h2>
+  </div>
+  <dl>
+    <dt>ABI</dt><dd>The description of a contract's functions that an app uses to call it.</dd>
+    <dt>Address</dt><dd>A short identifier derived from a public key. Where funds are sent.</dd>
+    <dt>Block</dt><dd>A batch of transactions plus a header that links it to the previous block.</dd>
+    <dt>Consensus</dt><dd>The rule by which nodes agree on the next block.</dd>
+    <dt>dApp</dt><dd>An application whose back-end logic runs in smart contracts.</dd>
+    <dt>EVM</dt><dd>Ethereum Virtual Machine. The runtime that executes contract code on every node.</dd>
+    <dt>Fork</dt><dd>Two competing versions of the chain, temporary or permanent.</dd>
+    <dt>Gas</dt><dd>The unit that measures computation on Ethereum. You pay for it in ETH.</dd>
+    <dt>Hash</dt><dd>A fixed-length fingerprint of data. One way, and sensitive to any change.</dd>
+    <dt>Layer 2</dt><dd>A network that processes transactions off the main chain and settles on it.</dd>
+    <dt>Mempool</dt><dd>The waiting area for transactions not yet in a block.</dd>
+    <dt>Merkle root</dt><dd>A single hash that summarises every transaction in a block.</dd>
+    <dt>Node</dt><dd>A computer that stores the chain and checks new blocks.</dd>
+    <dt>Nonce</dt><dd>A number used once. The value miners vary, or an account's transaction counter.</dd>
+    <dt>Oracle</dt><dd>A service that brings outside data onto the chain.</dd>
+    <dt>Private key</dt><dd>The secret number that controls an account. Never share it.</dd>
+    <dt>Rollup</dt><dd>A Layer 2 that posts compressed batches of transactions to Layer 1.</dd>
+    <dt>Seed phrase</dt><dd>12 or 24 words that can regenerate all the keys in a wallet.</dd>
+    <dt>Slashing</dt><dd>Destroying part of a validator's deposit as a penalty for cheating.</dd>
+    <dt>Smart contract</dt><dd>A program stored on a blockchain that runs when called.</dd>
+    <dt>Stablecoin</dt><dd>A token designed to hold the value of a currency.</dd>
+    <dt>UTXO</dt><dd>Unspent transaction output. Bitcoin's unit of ownership.</dd>
+    <dt>Validator</dt><dd>A participant who stakes coins to propose and vote on blocks.</dd>
+    <dt>Zero-knowledge proof</dt><dd>A proof that a statement is true which reveals nothing else.</dd>
+  </dl>
+</section>
+
+<section id="next">
+  <div class="part-head">
+    <span class="eyebrow">After this page</span>
+    <h2>What to do next</h2>
+    <p class="lede">Reading gets you the vocabulary. These steps, in this order, get you the skill. All of them use test networks where the coins are free and worth nothing.</p>
+  </div>
+  <ol>
+    <li><b>Read a real block.</b> Open a block explorer such as Etherscan or mempool.space and find the previous hash, the Merkle root and the fee of one transaction.</li>
+    <li><b>Set up a test wallet.</b> Install a self-custody wallet, switch it to the Sepolia test network, and get test ETH from a faucet. Use a fresh wallet with no real funds.</li>
+    <li><b>Deploy the escrow contract.</b> Paste the code from Part 2 into Remix, the browser IDE for Solidity, and deploy it to Sepolia. Call <code>confirmDelivery</code> from the buyer and from another account and compare the results.</li>
+    <li><b>Write your own token.</b> Build an ERC-20 using the OpenZeppelin library. Read the library code. It is short.</li>
+    <li><b>Move to a local toolchain.</b> Use Foundry or Hardhat to write tests. Reproduce the reentrancy bug on purpose, then fix it.</li>
+    <li><b>Build a small dApp.</b> One screen that connects a wallet, reads a value from your contract, and sends one transaction with pending and confirmed states.</li>
+    <li><b>Try a Layer 2.</b> Deploy the same contract to a rollup testnet and compare the fee.</li>
+    <li><b>Run this course's own code.</b> The contracts, tests and dApp calls shown on this page are in a ready project at <code>~/Documents/Blockchain-Academy-Starters</code>. Its README lists the three commands.</li>
+    <li><b>Explore the enterprise side.</b> Run the Hyperledger Fabric test network locally and deploy the sample chaincode.</li>
+  </ol>
+  <footer>Dates and figures are as of 2026 and were written from general knowledge, not looked up live. Fees, throughput and network sizes change often, so check a current source before quoting a number. Nothing here is investment advice.</footer>
+</section>
+</main>
+</div>
+
+<script>
+/*SHA-START*/
+const K=new Uint32Array([0x428a2f98,0x71374491,0xb5c0fbcf,0xe9b5dba5,0x3956c25b,0x59f111f1,0x923f82a4,0xab1c5ed5,0xd807aa98,0x12835b01,0x243185be,0x550c7dc3,0x72be5d74,0x80deb1fe,0x9bdc06a7,0xc19bf174,0xe49b69c1,0xefbe4786,0x0fc19dc6,0x240ca1cc,0x2de92c6f,0x4a7484aa,0x5cb0a9dc,0x76f988da,0x983e5152,0xa831c66d,0xb00327c8,0xbf597fc7,0xc6e00bf3,0xd5a79147,0x06ca6351,0x14292967,0x27b70a85,0x2e1b2138,0x4d2c6dfc,0x53380d13,0x650a7354,0x766a0abb,0x81c2c92e,0x92722c85,0xa2bfe8a1,0xa81a664b,0xc24b8b70,0xc76c51a3,0xd192e819,0xd6990624,0xf40e3585,0x106aa070,0x19a4c116,0x1e376c08,0x2748774c,0x34b0bcb5,0x391c0cb3,0x4ed8aa4a,0x5b9cca4f,0x682e6ff3,0x748f82ee,0x78a5636f,0x84c87814,0x8cc70208,0x90befffa,0xa4506ceb,0xbef9a3f7,0xc67178f2]);
+const ENC=new TextEncoder();
+function sha256(msg){
+  const bytes=ENC.encode(msg),l=bytes.length,padLen=((l+9+63)>>6)<<6;
+  const buf=new Uint8Array(padLen);buf.set(bytes);buf[l]=0x80;
+  const dv=new DataView(buf.buffer);
+  dv.setUint32(padLen-8,Math.floor(l/0x20000000));dv.setUint32(padLen-4,(l*8)>>>0);
+  let h0=0x6a09e667,h1=0xbb67ae85,h2=0x3c6ef372,h3=0xa54ff53a,h4=0x510e527f,h5=0x9b05688c,h6=0x1f83d9ab,h7=0x5be0cd19;
+  const w=new Uint32Array(64);
+  for(let o=0;o<padLen;o+=64){
+    for(let i=0;i<16;i++)w[i]=dv.getUint32(o+i*4);
+    for(let i=16;i<64;i++){const x=w[i-15],y=w[i-2];
+      const s0=(x>>>7|x<<25)^(x>>>18|x<<14)^(x>>>3),s1=(y>>>17|y<<15)^(y>>>19|y<<13)^(y>>>10);
+      w[i]=(w[i-16]+s0+w[i-7]+s1)|0;}
+    let a=h0,b=h1,c=h2,d=h3,e=h4,f=h5,g=h6,h=h7;
+    for(let i=0;i<64;i++){
+      const S1=(e>>>6|e<<26)^(e>>>11|e<<21)^(e>>>25|e<<7),ch=(e&f)^(~e&g),t1=(h+S1+ch+K[i]+w[i])|0;
+      const S0=(a>>>2|a<<30)^(a>>>13|a<<19)^(a>>>22|a<<10),mj=(a&b)^(a&c)^(b&c),t2=(S0+mj)|0;
+      h=g;g=f;f=e;e=(d+t1)|0;d=c;c=b;b=a;a=(t1+t2)|0;}
+    h0=(h0+a)|0;h1=(h1+b)|0;h2=(h2+c)|0;h3=(h3+d)|0;h4=(h4+e)|0;h5=(h5+f)|0;h6=(h6+g)|0;h7=(h7+h)|0;
+  }
+  return [h0,h1,h2,h3,h4,h5,h6,h7].map(x=>(x>>>0).toString(16).padStart(8,'0')).join('');
+}
+/*SHA-END*/
+const $=id=>document.getElementById(id);
+
+// 1. hash demo
+const hashIn=$('hashIn'),hashOut=$('hashOut');
+const showHash=()=>{hashOut.textContent=sha256(hashIn.value)};
+hashIn.addEventListener('input',showHash);showHash();
+
+// 2. mini chain
+const GENESIS='0'.repeat(64),PREFIX='00';
+const START=['Asha pays Ravi 200','Ravi pays Meera 50','Meera pays Kabir 120','Kabir pays Asha 30'];
+let blocks=[];
+const blockHash=(i,prev,b)=>sha256(i+prev+b.data+b.nonce);
+function mineBlock(i,prev){const b=blocks[i];b.nonce=0;while(!blockHash(i,prev,b).startsWith(PREFIX))b.nonce++;}
+function mineAll(){let prev=GENESIS;blocks.forEach((b,i)=>{mineBlock(i,prev);prev=blockHash(i,prev,b)});}
+function resetChain(){blocks=START.map(d=>({data:d,nonce:0}));mineAll();buildChain();$('chainMsg').textContent='';}
+function buildChain(){
+  const box=$('chain');box.textContent='';
+  blocks.forEach((b,i)=>{
+    const el=document.createElement('div');el.className='blk';el.id='blk'+i;
+    el.innerHTML='<div class="top"><span>Block '+(i+1)+'</span><span class="st"></span></div>'+
+      '<div><label for="bd'+i+'">Data</label><textarea id="bd'+i+'" rows="2"></textarea></div>'+
+      '<div class="kv">Nonce<span class="nn"></span></div><div class="kv">Previous hash<span class="pv"></span></div><div class="kv">Hash<span class="hs"></span></div>'+
+      '<button type="button" class="ghost">Re-mine this block</button>';
+    const ta=el.querySelector('textarea');ta.value=b.data;
+    ta.addEventListener('input',()=>{b.data=ta.value;paintChain();$('chainMsg').textContent='Block '+(i+1)+' changed. Every block from here on is now invalid.';});
+    el.querySelector('button').addEventListener('click',()=>{let prev=GENESIS;for(let j=0;j<i;j++)prev=blockHash(j,prev,blocks[j]);mineBlock(i,prev);paintChain();
+      $('chainMsg').textContent='Block '+(i+1)+' re-mined after '+b.nonce+' guesses. Its hash changed, so check the next block.';});
+    box.appendChild(el);
+  });
+  paintChain();
+}
+const short=h=>h.slice(0,10)+'…'+h.slice(-6);
+function paintChain(){
+  let prev=GENESIS,broken=false;
+  blocks.forEach((b,i)=>{
+    const h=blockHash(i,prev,b),el=$('blk'+i);
+    if(!h.startsWith(PREFIX))broken=true;
+    el.classList.toggle('badb',broken);
+    el.querySelector('.st').textContent=broken?'Invalid':'Valid';
+    el.querySelector('.nn').textContent=b.nonce;
+    el.querySelector('.pv').textContent=short(prev);
+    el.querySelector('.hs').textContent=short(h);
+    prev=h;
+  });
+}
+$('remineAll').addEventListener('click',()=>{mineAll();paintChain();$('chainMsg').textContent='All four blocks re-mined. On a real network you would have to do this faster than everyone else combined.';});
+$('resetChain').addEventListener('click',resetChain);
+resetChain();
+
+// 3. mining demo
+const mineBtn=$('mineBtn'),mineOut=$('mineOut');
+mineBtn.addEventListener('click',()=>{
+  const zeros=+$('diff').value,target='0'.repeat(zeros),data='Block 7: Asha pays Ravi 200 | nonce ';
+  let nonce=0;const t0=performance.now();mineBtn.disabled=true;
+  (function step(){
+    const end=nonce+4000;
+    for(;nonce<end;nonce++){const h=sha256(data+nonce);
+      if(h.startsWith(target)){const ms=Math.max(1,Math.round(performance.now()-t0));
+        mineOut.textContent='Found after '+(nonce+1).toLocaleString()+' guesses in '+ms+' ms. Nonce '+nonce+' gives '+h;mineBtn.disabled=false;return;}}
+    mineOut.textContent='Trying… '+nonce.toLocaleString()+' guesses so far';
+    setTimeout(step,0);
+  })();
+});
+
+// 3b. token simulator
+/*SIM-START*/
+function tokNew(){return {bal:{Asha:1000,Ravi:0,Meera:0},allow:{},log:[{t:'Asha deploys SimpleToken(1000)  →  ok, event Transfer(0x0 → Asha, 1000)'}]};}
+function tokCall(tok,me,fn,from,to,raw){
+  raw=String(raw).trim();const amt=Number(raw);let err,ev;
+  const call=fn==='transferFrom'?'transferFrom('+from+', '+to+', '+raw+')':fn+'('+to+', '+raw+')';
+  if(!/^\d+$/.test(raw))err='the amount must be a whole number, because the EVM has no decimals';
+  else if(fn==='transfer'){if(tok.bal[me]<amt)err=me+' holds only '+tok.bal[me];else{tok.bal[me]-=amt;tok.bal[to]+=amt;ev='Transfer('+me+' → '+to+', '+amt+')';}}
+  else if(fn==='approve'){tok.allow[me+' → '+to]=amt;ev='Approval('+me+' lets '+to+' spend '+amt+')';}
+  else{const k=from+' → '+me,a=tok.allow[k]||0;
+    if(a<amt)err=me+' is allowed to spend only '+a+' of '+from+'’s tokens';
+    else if(tok.bal[from]<amt)err=from+' holds only '+tok.bal[from];
+    else{tok.allow[k]=a-amt;tok.bal[from]-=amt;tok.bal[to]+=amt;ev='Transfer('+from+' → '+to+', '+amt+')';}}
+  tok.log.push({t:me+' calls '+call+'  →  '+(err?'REVERTED: '+err+'. Nothing changed, gas still spent.':'ok, event '+ev),rv:!!err});
+  return !err;
+}
+function attackTrace(fixed){
+  let bank=11,rec=1,att=0,depth=0;const L=['Start: bank holds 11 ETH (10 from other users, 1 from the attacker).','       Bank record for the attacker: 1 ETH.',''];
+  (function withdraw(){
+    const pad='  '.repeat(depth),amount=rec;
+    L.push(pad+'withdraw()   record says attacker is owed '+amount);
+    if(fixed){rec=0;L.push(pad+'  record set to 0');}
+    if(amount===0){L.push(pad+'  nothing owed, nothing sent');return;}
+    bank-=amount;att+=amount;
+    L.push(pad+'  bank sends '+amount+' ETH   (bank '+bank+', attacker '+att+')');
+    if(bank>=1){L.push(pad+'  attacker’s receive() calls withdraw again');depth++;withdraw();depth--;}
+    else L.push(pad+'  bank is empty, attacker stops');
+    if(!fixed){rec=0;L.push(pad+'  record set to 0   (too late)');}
+  })();
+  L.push('','Result: the attacker deposited 1 ETH and left with '+att+'. The bank holds '+bank+'.');
+  return {lines:L,att:att,bank:bank};
+}
+/*SIM-END*/
+let tok;
+function tokPaint(){
+  const row=(a,b)=>{const tr=document.createElement('tr'),x=document.createElement('td'),y=document.createElement('td');x.textContent=a;y.textContent=b;y.className='n';tr.append(x,y);return tr;};
+  const bal=$('tkBal'),al=$('tkAllow'),lg=$('tkLog');bal.textContent='';al.textContent='';lg.textContent='';
+  Object.keys(tok.bal).forEach(k=>bal.appendChild(row(k,tok.bal[k].toLocaleString())));
+  const ks=Object.keys(tok.allow);
+  if(!ks.length)al.appendChild(row('No approvals yet','0'));
+  ks.forEach(k=>al.appendChild(row(k,tok.allow[k].toLocaleString())));
+  tok.log.slice(-6).forEach(e=>{const d=document.createElement('div');d.textContent=e.t;if(e.rv)d.className='rv';lg.appendChild(d);});
+}
+function tokForm(){const tf=$('tkFn').value==='transferFrom';$('tkFromWrap').hidden=!tf;$('tkToLbl').textContent=$('tkFn').value==='approve'?'Spender':'To';}
+$('tkFn').addEventListener('change',tokForm);
+$('tkSend').addEventListener('click',()=>{tokCall(tok,$('tkActor').value,$('tkFn').value,$('tkFrom').value,$('tkTo').value,$('tkAmt').value);tokPaint();});
+$('tkReset').addEventListener('click',()=>{tok=tokNew();tokPaint();});
+tok=tokNew();tokForm();tokPaint();
+$('reRun').addEventListener('click',()=>{$('reOut').textContent=attackTrace($('reMode').value==='fixed').lines.join('\n');});
+
+// 3c. dApp demos
+/*TX-START*/
+function ethToWei(str){
+  const m=/^(\d+)(?:\.(\d{1,18}))?$/.exec(String(str).trim());
+  if(!m)return null;
+  return BigInt(m[1])*(10n**18n)+BigInt((m[2]||'').padEnd(18,'0')||'0');
+}
+function fmtUnits(wei,dec){
+  const base=10n**BigInt(dec),whole=wei/base,frac=(wei%base).toString().padStart(dec,'0').replace(/0+$/,'');
+  return whole.toLocaleString('en-US')+(frac?'.'+frac:'');
+}
+function txScenario(kind){
+  const S=[];const add=(s,d,ui,end)=>S.push({s:s,d:d,ui:ui,end:end});
+  if(kind==='wrongnet'){add('Check network','The wallet is on Ethereum mainnet. The contract is on Sepolia.','Show a "Switch to Sepolia" button. Do not open a transaction prompt.','bad');return {steps:S,gas:false};}
+  add('Check network','The wallet is on Sepolia, same as the contract.','Nothing to show.');
+  if(kind==='nofunds'){add('Simulate','The node reports insufficient funds for 0.1 ETH plus gas.','Say how much more ETH is needed. Nothing was sent.','bad');return {steps:S,gas:false};}
+  if(kind==='ended'){add('Simulate','The dry run reverts with the custom error TooLate.','Show "This campaign has ended." Nothing was sent.','bad');return {steps:S,gas:false};}
+  add('Simulate','The dry run passes and returns a gas estimate.','Show the amount and the estimated fee.');
+  if(kind==='reject'){add('Wallet prompt','The user taps Reject. The provider returns error code 4001.','Return to the form quietly. No error banner.','bad');return {steps:S,gas:false};}
+  add('Wallet prompt','The user confirms. The wallet signs and broadcasts.','Tell the user to confirm in the wallet.');
+  add('Pending','The wallet returns a transaction hash.','Disable the button, show a spinner and an explorer link, and save the hash.');
+  if(kind==='late'){add('Mined','Receipt status is reverted. The deadline passed while it waited, so the contract raised TooLate.','Say the pledge failed. The 0.1 ETH never left the wallet. Only the network fee was spent.','bad');return {steps:S,gas:true};}
+  add('Mined','Receipt status is success, with one Pledged event.','Update the amount raised and add the row to the list from the receipt.');
+  add('Confirmed','More blocks have been built on top.','Mark the pledge as final.','ok');
+  return {steps:S,gas:true};
+}
+/*TX-END*/
+const ethIn=$('ethIn'),ethOut=$('ethOut');
+function showWei(){const w=ethToWei(ethIn.value);
+  ethOut.textContent=w===null?'Enter a plain number such as 0.1, with at most 18 decimal places. One wei is the smallest unit, so a 19th place cannot exist.':w.toLocaleString('en-US')+' wei  =  '+fmtUnits(w,9)+' gwei  =  '+fmtUnits(w,18)+' ETH';}
+ethIn.addEventListener('input',showWei);showWei();
+let txRunId=0;
+$('txRun').addEventListener('click',()=>{
+  const id=++txRunId,out=$('txOut'),r=txScenario($('txScn').value);out.textContent='';
+  const gap=matchMedia('(prefers-reduced-motion: reduce)').matches?0:650;
+  const line=(st)=>{const d=document.createElement('div'),b=document.createElement('b');b.textContent=st.s+'. ';d.append(b,st.d+' Screen: '+st.ui);if(st.end)d.className=st.end==='ok'?'ok':'rv';out.appendChild(d);};
+  r.steps.forEach((st,i)=>setTimeout(()=>{if(id!==txRunId)return;line(st);
+    if(i===r.steps.length-1){const d=document.createElement('div');d.textContent=r.gas?'Gas was spent, because the transaction reached a block.':'No gas was spent, because nothing reached the chain.';out.appendChild(d);}},i*gap));
+});
+
+// 4. quiz
+const QUIZ=[
+ ['What links one block to the block before it?',['The time it was created','The previous block’s hash stored in its header','A list of all node addresses'],1,'Each header carries the previous block’s hash. Change an old block and that link breaks.'],
+ ['You change one letter of the input to SHA-256. What happens to the hash?',['One character of it changes','It gets one character longer','It changes completely and unpredictably'],2,'That is the avalanche effect. The length stays at 64 hex characters.'],
+ ['What does a digital signature prove?',['That the sender holds the private key for the address, and the message was not altered','That the sender’s real name is known','That the transaction fee was paid'],0,'It proves key ownership and message integrity. It says nothing about real-world identity.'],
+ ['Where does a transaction wait before it gets into a block?',['In the Merkle tree','In the mempool','In the wallet'],1,'The mempool is the waiting room. Block producers pick from it, usually highest fee first.'],
+ ['Why is rewriting an old Bitcoin block impractical?',['Old blocks are encrypted','Only the original miner has permission','You would have to redo the work for that block and every later one, faster than the whole network'],2,'The chained hashes plus Proof of Work make history expensive to redo.'],
+ ['In Proof of Stake, what discourages a validator from cheating?',['Their locked deposit can be partly destroyed','Their electricity bill','A central administrator bans them'],0,'This is slashing. The stake is the security deposit.'],
+ ['A simple ETH transfer uses 21,000 gas at 10 gwei. What is the fee?',['0.21 ETH','0.00021 ETH','21,000 ETH'],1,'21,000 × 10 = 210,000 gwei, and a gwei is a billionth of an ETH.'],
+ ['Why can a smart contract not fetch a share price from a website by itself?',['Every node must get the same result, and outside data can differ from moment to moment','Solidity has no networking library because of licensing','Websites block blockchain traffic'],0,'Execution has to be deterministic. Oracles write outside data onto the chain first.'],
+ ['What did the reentrancy bug in The DAO come down to?',['A weak hash function','A leaked private key','The contract paid out before updating its own balance records'],2,'The fix is to update state first and make external calls last.'],
+ ['How does an optimistic rollup convince Layer 1 that a batch is correct?',['It sends a zero-knowledge proof with every batch','It assumes the batch is valid and allows a window for anyone to challenge it','Layer 1 re-executes every transaction'],1,'That challenge window is why withdrawals take about a week. ZK rollups send a proof instead.'],
+ ['Your app sends a transaction that calls a function returning a number. How does the app get that number?',['It is in the transaction’s return value','From an event the function emitted, or a follow-up read call','From the mempool'],1,'Writes return a receipt, not a value. Emit an event for anything the app needs.'],
+ ['Which of these is the most expensive in gas?',['Adding two numbers','Emitting an event','Writing a value into a storage slot that was empty'],2,'A new storage slot costs about 22,100 gas because every node keeps it forever.'],
+ ['Ravi calls transferFrom(Asha, Ravi, 50) but Asha never called approve. What happens?',['The transaction reverts and nothing changes','Ravi receives 50 tokens','The tokens are locked in the contract'],0,'The allowance is zero, the subtraction fails, and the whole transaction is undone.'],
+ ['In a proxy upgrade pattern, where does the user data live?',['In the logic contract','In the proxy','In the admin’s wallet'],1,'The proxy keeps the storage and borrows code through delegatecall. That is why the data survives an upgrade.'],
+ ['Why are flash loans relevant to contract security?',['They make transactions faster','They let anyone command a huge sum for one transaction, so an attacker does not need to be rich','They hide the attacker’s address'],1,'A design that is only safe if nobody has enough capital is not safe.'],
+ ['In a dApp, where does the user’s private key stay?',['In the app’s local storage','On the app’s backend server','In the wallet, which signs on the app’s behalf'],2,'The app sends requests and the wallet signs. The app never sees the key.'],
+ ['What should the app do just before opening the wallet prompt for a write?',['Simulate the call on a node, to catch a revert or missing funds for free','Wait for six confirmations','Ask the user for their seed phrase'],0,'A simulation costs nothing and lets you show a clear reason instead of a failed transaction.'],
+ ['The user taps Reject in the wallet. How should the app treat it?',['As a network failure, with a retry loop','As a cancel. Return to the form without an error banner','As a reverted transaction'],1,'Rejecting is a choice. Nothing was sent and nothing was charged.'],
+ ['The screen must list the latest 20 pledges from all backers. Where should that come from?',['A loop over the contract’s mapping','The mempool','An indexer built from the contract’s Pledged events'],2,'A mapping cannot be listed. Events hold the history, and an indexer makes it queryable.'],
+ ['Why does a sign-in message include a nonce from the server?',['So an old signature cannot be replayed','To pay the gas fee','To encrypt the message'],0,'The server accepts each nonce once, so a captured signature is useless later.']
+];
+let answered=0,correct=0;
+const quizBox=$('quizBox');
+QUIZ.forEach((q,qi)=>{
+  const el=document.createElement('div');el.className='q';
+  const h=document.createElement('h4');h.textContent=(qi+1)+'. '+q[0];el.appendChild(h);
+  const opts=document.createElement('div');opts.className='opts';
+  const why=document.createElement('p');why.className='why';why.setAttribute('aria-live','polite');
+  q[1].forEach((o,oi)=>{
+    const b=document.createElement('button');b.type='button';b.textContent=o;
+    b.addEventListener('click',()=>{
+      if(el.dataset.done)return;el.dataset.done='1';answered++;
+      if(oi===q[2])correct++;else b.classList.add('wrong');
+      opts.children[q[2]].classList.add('right');
+      why.textContent=(oi===q[2]?'Correct. ':'Not quite. ')+q[3];
+      const N=QUIZ.length;
+      $('score').textContent=correct+' / '+N+(answered===N?(correct>=N*0.8?' · solid':correct>=N*0.5?' · re-read the parts you missed':' · go through Part 1 again'):'');
+    });
+    opts.appendChild(b);
+  });
+  el.appendChild(opts);el.appendChild(why);quizBox.appendChild(el);
+});
+</script>
+
+</body></html>

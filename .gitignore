@@ -1,0 +1,13 @@
+.DS_Store
+__pycache__/
+*.pyc
+.pytest_cache/
+.env
+backend/academy-dev.db
+xcuserdata/
+DerivedData/
+*.xcuserstate
+
+# Scratch files used while building with Claude
+.transfer/
+*.tgz
